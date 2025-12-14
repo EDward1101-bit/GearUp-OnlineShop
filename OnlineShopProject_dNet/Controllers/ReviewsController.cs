@@ -8,7 +8,7 @@ namespace OnlineShopProject_dNet.Controllers
     {
         private readonly ApplicationDbContext db = context;
         
-        //Adaugarea unui comentariu asociat unui produs in baza de date
+        //Adaugarea unui review asociat unui produs in baza de date
         [HttpPost]
         public IActionResult New(Review rev)
         {
@@ -26,7 +26,7 @@ namespace OnlineShopProject_dNet.Controllers
             }
         }
 
-        //Stergerea unui comentariu din baza de date(asociat unui produs)
+        //Stergerea unui review din baza de date(asociat unui produs)
         [HttpPost]
         public IActionResult Delete(int id)
         {
@@ -36,7 +36,7 @@ namespace OnlineShopProject_dNet.Controllers
             return Redirect("/Product/Show/" + rev.ProductId);
         }
 
-        // se editeaza un comentariu existent
+        // se editeaza un review existent
         [HttpPost]
         public IActionResult Edit(int id, Review requestReview)
         {
@@ -44,7 +44,9 @@ namespace OnlineShopProject_dNet.Controllers
             try
             {
                 rev.Text = requestReview.Text;
+
                 db.SaveChanges();
+
                 return Redirect("/Product/Show/" + rev.ProductId);
             }
             catch (Exception)
@@ -52,5 +54,9 @@ namespace OnlineShopProject_dNet.Controllers
                 return Redirect("/Product/Show/" + rev.ProductId);
             }
         }
+
+        //TODO: Update rating al unui review
+        //[HttpPost]
+
     }
 }
