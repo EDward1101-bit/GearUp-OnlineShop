@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using OnlineShopProject_dNet.Models;
 
 namespace OnlineShopProject_dNet.Data
 {
@@ -9,5 +10,8 @@ namespace OnlineShopProject_dNet.Data
             : base(options)
         {
         }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Review> Reviews { get; set; }
     }
 }
