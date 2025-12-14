@@ -10,13 +10,15 @@ namespace OnlineShopProject_dNet.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Title required")]
+        [StringLength(150, ErrorMessage = "Title cannot exceed 150 characters.")]
         public string Title { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Description required")]
         public string Description { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Price required")]
-        public int Price { get; set; }
+        [Range(0.01, 1000000.00, ErrorMessage = "Price must be greater than 0.")]
+        public float Price { get; set; }
 
         [Required(ErrorMessage = "Stock required")]
         public int Stock { get; set; }
