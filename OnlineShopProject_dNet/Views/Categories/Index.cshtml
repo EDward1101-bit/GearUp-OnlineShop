@@ -1,1 +1,24 @@
-﻿
+﻿@{
+    ViewBag.Title = "List of Categories"
+}
+
+<h2>@ViewBag.Title</h2>
+<br />
+
+<a href="/Products/Index">Inapoi la produse</a>
+<br />
+<br />
+
+
+@foreach (var category in ViewBag.Categories)
+{
+    <p>@category.CategoryName</p>
+    <a class="btn alert-success" href="/Categories/Show/@category.Id">Afisare categorie</a>
+    <a class="btn alert-success" href="/Categories/Edit/@category.Id">Editare categorie</a>
+    <br />
+    <hr />
+    <br />
+}
+<br />
+<a class="btn btn-success" href="/Categories/New">Adauga o noua categorie</a>
+<br />
