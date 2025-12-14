@@ -30,8 +30,8 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            Review rev = db.Comments.Find(id);
-            db.Comments.Remove(rev);
+            Review rev = db.Reviews.Find(id);
+            db.Reviews.Remove(rev);
             db.SaveChanges();
             return Redirect("/Product/Show/" + rev.ProductId);
         }
@@ -41,7 +41,7 @@ namespace OnlineShopProject_dNet.Controllers
         // [HttpGet] implicit
         public IActionResult Edit(int id)
         {
-            Review rev = db.Comments.Find(id);
+            Review rev = db.Reviews.Find(id);
             ViewBag.Review = rev;
             return View();
         }

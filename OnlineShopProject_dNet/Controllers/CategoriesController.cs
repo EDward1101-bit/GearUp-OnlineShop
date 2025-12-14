@@ -11,7 +11,7 @@ namespace OnlineShopProject_dNet.Controllers
         public ActionResult Index()
         {
             var categories = from category in db.Categories
-                             orderby category.CategoryName
+                             orderby category.Name
                              select category;
             ViewBag.Categories = categories;
             return View();
@@ -38,7 +38,7 @@ namespace OnlineShopProject_dNet.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return View();
             }
@@ -59,13 +59,13 @@ namespace OnlineShopProject_dNet.Controllers
                 Category category = db.Categories.Find(id);
 
                 {
-                    category.CategoryName = requestCategory.CategoryName;
+                    category.Name = requestCategory.Name;
                     db.SaveChanges();
                 }
 
                 return RedirectToAction("Index");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 ViewBag.Category = requestCategory;
                 return View();
