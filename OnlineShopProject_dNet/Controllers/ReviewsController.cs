@@ -36,7 +36,16 @@ namespace OnlineShopProject_dNet.Controllers
             return Redirect("/Product/Show/" + rev.ProductId);
         }
 
-        // se editeaza un review existent
+        // In acest moment vom implementa editarea intr-o pagina View separata
+        // Se editeaza un comentariu existent
+        // [HttpGet] implicit
+        public IActionResult Edit(int id)
+        {
+            Review rev = db.Comments.Find(id);
+            ViewBag.Review = rev;
+            return View();
+        }
+
         [HttpPost]
         public IActionResult Edit(int id, Review requestReview)
         {
