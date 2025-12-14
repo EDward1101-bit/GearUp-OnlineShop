@@ -1,0 +1,58 @@
+﻿@using OnlineShopProject_dNet.Models
+@{
+    ViewBag.Title = "Adaugă Produs Nou";
+}
+
+<h2 class="text-center mb-4"> Adăugare Produs</h2>
+<hr />
+
+<form method="post" action="/Products/New">
+
+    <div class="mb-3">
+        <label for="Title" class="form-label">Titlu Produs</label>
+        <input type="text" name="Title" id="Title" class="form-control" value="@(Model?.Title)" />
+
+        @Html.ValidationMessage("Title", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="Description" class="form-label">Descriere Produs</label>
+        <textarea name="Description" id="Description" class="form-control" rows="5">@(Model?.Description)</textarea>
+
+        @Html.ValidationMessage("Description", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="Price" class="form-label">Preț (RON)</label>
+        <input type="number" name="Price" id="Price" class="form-control" step="0.01" value="@(Model?.Price)" />
+
+        @Html.ValidationMessage("Price", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="Stock" class="form-label">Stoc (Bucăți)</label>
+        <input type="number" name="Stock" id="Stock" class="form-control" step="1" value="@(Model?.Stock)" />
+
+        @Html.ValidationMessage("Stock", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="CategoryId" class="form-label">Selectați Categoria</label>
+
+        <select name="CategoryId" id="CategoryId" class="form-select">
+            <option value="">--- Selectează Categoria ---</option>
+
+            @foreach (var item in ViewBag.Categories)
+            {
+                <option value="@item.Id" selected="@(Model?.CategoryId == item.Id ? "selected" : null)">
+                    @item.Name
+                </option>
+            }
+        </select>
+
+        @Html.ValidationMessage("CategoryId", new { @class = "text-danger" })
+    </div>
+
+    <button class="btn btn-success mt-3" type="submit">Adaugă Produsul</button>
+
+</form>

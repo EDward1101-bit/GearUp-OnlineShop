@@ -1,0 +1,72 @@
+﻿@using OnlineShopProject_dNet.Models
+@model Product 
+
+@{
+    ViewBag.Title = "Editează Produs";
+    
+    // COMENTARIU: Definirea variabilelor pentru a evita repetarea logicii Model vs ViewBag
+    // Daca Model nu este null (adica a existat un POST esuat), folosim datele din Model.
+    // Altfel, folosim datele din ViewBag (pentru prima afisare GET).
+    Product displayProduct = Model ?? ViewBag.Product;
+    int selectedCategoryId = displayProduct.CategoryId;
+}
+
+<h2 class="text-center mb-4"> Editează Produsul: @displayProduct.Title</h2>
+<hr />
+
+<form method="post" action="/Products/Edit/@displayProduct.Id">
+    
+    <div class="mb-3">
+        <label for="Title" class="form-label">Titlu Produs</label>
+        <input type="text" name="Title" id="Title" class="form-control" value="@displayProduct.Title" />
+
+        @Html.ValidationMessage("Title", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="Description" class="form-label">Descriere Produs</label>
+        <textarea name="Description" id="Description" class="form-control" rows="5">@displayProduct.Description</textarea>
+
+        @Html.ValidationMessage("Description", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="Price" class="form-label">Preț (RON)</label>
+        <input type="number" name="Price" id="Price" class="form-control" step="0.01" value="@displayProduct.Price" />
+
+        @Html.ValidationMessage("Price", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="Stock" class="form-label">Stoc (Bucăți)</label>
+        <input type="number" name="Stock" id="Stock" class="form-control" step="1" value="@displayProduct.Stock" />
+
+        @Html.ValidationMessage("Stock", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        <label for="CategoryId" class="form-label">Selectați Categoria</label>
+
+        @* Folosim selectedCategoryId pentru a mentine selectia curenta  *@
+        <select name="CategoryId" id="CategoryId" class="form-select">
+
+            @foreach (var category in ViewBag.Categories)
+            {
+                if (category.Id == selectedCategoryId)
+                {
+                    <option selected="selected" value="@category.Id">@category.Name</option>
+                }
+                else
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            }
+        </select>
+
+        @Html.ValidationMessage("CategoryId", new { @class = "text-danger" })
+    </div>
+
+    <br />
+    <button class="btn btn-success" type="submit">Modifică Produsul</button>
+
+</form>

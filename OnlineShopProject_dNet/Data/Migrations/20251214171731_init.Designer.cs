@@ -13,7 +13,7 @@ namespace OnlineShopProject_dNet.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20251214171731_init")]
-    partial class init
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
