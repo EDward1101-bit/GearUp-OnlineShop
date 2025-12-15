@@ -18,7 +18,7 @@ namespace OnlineShopProject_dNet.Models
 
         [Required(ErrorMessage = "Price required")]
         [Range(0, 1000000, ErrorMessage = "Price cannot be nagative.")]
-        public float Price { get; set; }
+        public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Stock required")]
         [Range(0, 1000000, ErrorMessage = "Stock cannot be negative.")]
@@ -32,7 +32,7 @@ namespace OnlineShopProject_dNet.Models
         // relatie configuranta folosind conventiile de nume din EF
         [Required(ErrorMessage = "Product category required")]
         public int CategoryId { get; set; }
-        public virtual Category Category { get; set; } = null!;
+        public virtual Category? Category { get; set; }
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
         // propserId to link to the user who added the product
