@@ -1,0 +1,69 @@
+﻿@model OnlineShopProject_dNet.Models.Product 
+@*pt intelisense* si ult if*@
+
+@{
+    ViewBag.Title = "Lista Produse";
+}
+
+<h2 class="text-center mb-4"> Afișare Produse</h2>
+
+
+<div class="d-flex justify-content-center mb-4 gap-3">
+    <a class="btn btn-outline-info" href="/Categories/Index/">Afisare categorii</a>
+    <a class="btn btn-outline-success" href="/Products/New">Adauga produs nou</a>
+</div>
+
+<hr />
+
+@foreach (var product in ViewBag.Products)
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h3 class="card-title text-primary">@product.Title</h3>
+
+            <hr class="my-2" />
+
+            <p class="card-text mb-3">
+                @product.Description
+            </p>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+                <span class="fs-4 fw-bold text-danger me-3">
+                    @product.Price RON
+                </span>
+
+                <div class="text-secondary me-3">
+                    <i class="bi bi-box-seam"></i> Stoc:
+                    @if (product.Stock > 0)
+                    {
+                        <span class="badge bg-success">În Stoc (@product.Stock buc.)</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Stoc Epuizat</span>
+                    }
+                </div>
+
+                @* Afisarea categoriei *@
+                <div>
+                    <i class="bi bi-tag-fill"></i> Categorie: **@product.Category.Name**
+                </div>
+
+                <a class="btn btn-primary mt-2 mt-md-0" href="/products/Show/@product.Id">
+                    <i class="bi bi-eye"></i> Detalii Produs
+                </a>
+
+            </div>
+        </div>
+    </div>
+}
+@* afisare optionala daca nu sunt produse
+@if (ViewBag.Products == null || ((IEnumerable<OnlineShopProject_dNet.Models.Product>)ViewBag.Products).Count() == 0)
+{
+    <div class="alert alert-warning text-center" role="alert">
+        Nu există produse de afișat.
+    </div>
+}
+*@

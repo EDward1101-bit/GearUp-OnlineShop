@@ -1,0 +1,80 @@
+﻿@using OnlineShopProject_dNet.Models
+@{
+    ViewBag.Title = "Afisare produs";
+}
+
+<h2 class="text-center mb-4">Detalii Produs: @ViewBag.Product.Title</h2>
+<hr />
+
+@* Navigare catre lista de produse *@
+<div class="d-flex justify-content-center mb-4 gap-3">
+    <a class="btn btn-outline-info" href="/Products/Index/">Afișare Produse</a>
+    <a class="btn btn-outline-success" href="/Products/New">Adaugă Produs Nou</a>
+</div>
+
+
+<div class="card shadow-lg">
+
+    <div class="card-body">
+
+        @* Detaliile Produsului *@
+        <h3 class="card-title text-primary py-2">@ViewBag.Product.Title</h3>
+
+        <div class="card-text border p-3 rounded mb-4">@ViewBag.Product.Description</div>
+
+        <div class="d-flex justify-content-between flex-row mt-3 flex-wrap align-items-center">
+
+            @* Afisarea Prețului și Stocului *@
+            <div class="fs-4 fw-bold text-danger me-4">
+                Preț: @ViewBag.Product.Price RON
+            </div>
+
+            <div class="me-4">
+                <i class="bi bi-box-seam"></i> Stoc:
+                @if (ViewBag.Product.Stock > 0)
+                {
+                    <span class="badge bg-success">În Stoc (@ViewBag.Product.Stock buc.)</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Stoc Epuizat</span>
+                }
+            </div>
+
+            @* Afisarea categoriei *@
+            <div><i class="bi bi-tag-fill"></i> Categorie: <span class="fw-bold">@ViewBag.Category.Name</span></div>
+
+        </div>
+
+    </div>
+
+    <hr />
+
+    @* Butoane de Editare si Stergere Produs *@
+    <div class="card-footer d-flex flex-row justify-content-between">
+
+        <a class="btn btn-warning" href="/Products/Edit/@ViewBag.Product.Id">
+            <i class="bi bi-pencil-square"></i> Editează Produs
+        </a>
+
+        <form method="post" action="/Products/Delete/@ViewBag.Product.Id">
+            <button class="btn btn-danger" type="submit"
+                    onclick="return confirm('Ești sigur că vrei să ștergi produsul?');">
+                <i class="bi bi-trash"></i> Șterge Produs
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
+<br />
+
+@* ========================================================================= *@
+@* TODO: Implementare Recenzii *@
+@* ========================================================================= *@
+<div class="alert alert-secondary mt-5 mb-5 p-4 text-center">
+    <h4>🏗️ TODO: Secțiunea Recenzii</h4>
+    <p>Aici vor fi incluse Partial Views-urile (sau View Components) pentru afișarea listei de recenzii și formularul de adăugare a unei noi recenzii. 
+</div>
+@* ========================================================================= *@
