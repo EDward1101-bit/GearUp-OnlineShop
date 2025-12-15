@@ -32,14 +32,14 @@
 
     <div class="mb-3">
         <label for="Price" class="form-label">Preț (RON)</label>
-        <input type="number" name="Price" id="Price" class="form-control" step="0.01" value="@displayProduct.Price" />
+        <input type="number" name="Price" id="Price" class="form-control" step="1" value="@displayProduct.Price" min="0"/>
 
         @Html.ValidationMessage("Price", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
         <label for="Stock" class="form-label">Stoc (Bucăți)</label>
-        <input type="number" name="Stock" id="Stock" class="form-control" step="1" value="@displayProduct.Stock" />
+        <input type="number" name="Stock" id="Stock" class="form-control" step="1" value="@displayProduct.Stock" min="0"/>
 
         @Html.ValidationMessage("Stock", new { @class = "text-danger" })
     </div>

@@ -17,10 +17,11 @@ namespace OnlineShopProject_dNet.Models
         public string Description { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Price required")]
-        [Range(0.01, 1000000.00, ErrorMessage = "Price must be greater than 0.")]
+        [Range(0, 1000000, ErrorMessage = "Price cannot be nagative.")]
         public float Price { get; set; }
 
         [Required(ErrorMessage = "Stock required")]
+        [Range(0, 1000000, ErrorMessage = "Stock cannot be negative.")]
         public int Stock { get; set; }
 
         public bool Status { get; set; } = false; // Will be based on stock
