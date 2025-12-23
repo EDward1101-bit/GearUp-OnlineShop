@@ -62,18 +62,17 @@ namespace OnlineShopProject_dNet.Controllers
             return View();
         }
 
-        
+
         // Se adauga produsul in baza de date
         [HttpPost]
         public async Task<IActionResult> New(Product product, IFormFile? Image)
         {
-            // Calculam statusul in functie de stoc
             product.Status = product.Stock > 0;
 
-            // Logica de incarcare imagine 
+            //  Daca utilizatorul a incarcat o imagine
             if (Image != null && Image.Length > 0)
             {
-                // 1. Verificam extensia (Tipul fisierului)
+                // Verificari extensie si dimensiune
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
                 var fileExtension = Path.GetExtension(Image.FileName).ToLower();
 
@@ -84,7 +83,6 @@ namespace OnlineShopProject_dNet.Controllers
                     return View(product);
                 }
 
-                //  Verificam dimensiunea (Maxim 5MB - Cerinta proiect) 
                 if (Image.Length > 5 * 1024 * 1024)
                 {
                     ModelState.AddModelError("Image", "Imaginea nu poate fi mai mare de 5MB.");
@@ -92,26 +90,27 @@ namespace OnlineShopProject_dNet.Controllers
                     return View(product);
                 }
 
-                //  Construim calea de stocare
-                
+                // Salvare fizica
                 var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
                 var databaseFileName = "/images/" + Image.FileName;
 
-                //  Salvarea fizica a fisierului 
                 using (var fileStream = new FileStream(storagePath, FileMode.Create))
                 {
                     await Image.CopyToAsync(fileStream);
                 }
 
-                //  Setam calea in model
+                // Setam calea imaginii incarcate
                 product.Image = databaseFileName;
-
-                // Eliminam eroarea de validare pentru Image din ModelState
-                // Deoarece campul a fost null la binding, dar acum are valoare
-                ModelState.Remove(nameof(product.Image));
+            }
+            else
+            {
+                // Daca NU a incarcat imagine, folosim placeholder-ul
+                product.Image = "/images/default-product.jpeg";
             }
 
-            // Verificam validitatea modelului (TryValidateModel revalideaza cu noua valoare Image) 
+            
+            ModelState.Remove(nameof(product.Image));
+
             if (TryValidateModel(product))
             {
                 db.Products.Add(product);
@@ -119,11 +118,7 @@ namespace OnlineShopProject_dNet.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Daca validarea esueaza, reincarcam categoriile
-            var categories = from categ in db.Categories
-                             select categ;
-            ViewBag.Categories = categories;
-
+            ViewBag.Categories = db.Categories;
             return View(product);
         }
 
