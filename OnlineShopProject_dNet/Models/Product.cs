@@ -1,40 +1,46 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineShopProject_dNet.Models
 {
     public class Product
     {
-
-        // Atribute pentru validare
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Title required")]
-        [StringLength(150, ErrorMessage = "Title cannot exceed 150 characters.")]
-        public string Title { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Titlul este obligatoriu")]
+        [StringLength(100, ErrorMessage = "Titlul nu poate avea mai mult de 100 de caractere")]
+        [MinLength(3, ErrorMessage = "Titlul trebuie sa aiba mai mult de 3 caractere")]
+        public string Title { get; set; }
 
-        [Required(ErrorMessage = "Description required")]
-        public string Description { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Descrierea este obligatorie")]
+        public string Description { get; set; } 
 
-        [Required(ErrorMessage = "Price required")]
-        [Range(0, 1000000, ErrorMessage = "Price cannot be nagative.")]
+        [Required(ErrorMessage = "Imaginea este obligatorie")]
+        public string Image { get; set; }
+
+        [Required(ErrorMessage = "Pretul este obligatoriu")]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; }
 
-        [Required(ErrorMessage = "Stock required")]
-        [Range(0, 1000000, ErrorMessage = "Stock cannot be negative.")]
+        [Required(ErrorMessage = "Stocul este obligatoriu")]
         public int Stock { get; set; }
 
-        public bool Status { get; set; } = false; // Will be based on stock
+        // Rating-ul mediu
+        public float? Rating { get; set; }
 
+        // Status: "Pending", "Approved", "Rejected"
+        public string? Status { get; set; }
 
-
-        // Daca se sterge o categorie, se sterg si produsele din acea categorie
-        // relatie configuranta folosind conventiile de nume din EF
-        [Required(ErrorMessage = "Product category required")]
+        // Relația cu Categoria
+        [Required(ErrorMessage = "Categoria este obligatorie")]
         public int? CategoryId { get; set; }
         public virtual Category? Category { get; set; }
-        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-        // propserId to link to the user who added the product
+        // Relația cu Userul (Proposer)
+        public string? UserId { get; set; }
+        public virtual ApplicationUser? User { get; set; }
+
+        public virtual ICollection<Review>? Reviews { get; set; }
     }
 }

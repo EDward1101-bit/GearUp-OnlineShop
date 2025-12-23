@@ -4,17 +4,23 @@ namespace OnlineShopProject_dNet.Models
 {
     public class Review
     {
-        // Atribute pentru validare
         [Key]
         public int Id { get; set; }
-        public int Rating { get; set; }
-        public string Text { get; set; } = string.Empty;
+
+        // Păstrat "Content" conform diagramei
+        public string? Content { get; set; }
+
+        [Range(1, 5, ErrorMessage = "Rating-ul trebuie sa fie intre 1 si 5")]
+        public int? Rating { get; set; }
+
         public DateTime Date { get; set; }
 
+        // FK către Produs
+        public int? ProductId { get; set; }
+        public virtual Product? Product { get; set; }
 
-        public int ProductId { get; set; }
-        public virtual Product Product { get; set; } = null!;
-
-        // UserId to link to the user who made the review
+        // FK către User
+        public string? UserId { get; set; }
+        public virtual ApplicationUser? User { get; set; }
     }
 }
