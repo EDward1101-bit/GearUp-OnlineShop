@@ -4,13 +4,13 @@ namespace OnlineShopProject_dNet.Models
 {
     public class Category
     {
-        // Atribute pentru validare
         [Key]
         public int Id { get; set; }
-        [Required(ErrorMessage = "Category name required")]
-        public string Name { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Numele categoriei este obligatoriu")]
+        public string Name { get; set; } = null!;
 
-        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+        // Relatia cu produsele (Un produs apartine unei categorii, o categorie are mai multe produse)
+        public virtual ICollection<Product>? Products { get; set; }
     }
 }

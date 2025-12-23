@@ -52,7 +52,7 @@ namespace OnlineShopProject_dNet.Controllers
             Review rev = db.Reviews.Find(id);
             try
             {
-                rev.Text = requestReview.Text;
+                rev.Content = requestReview.Content;
 
                 db.SaveChanges();
 
