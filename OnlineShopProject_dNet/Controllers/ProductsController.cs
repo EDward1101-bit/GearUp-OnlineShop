@@ -2,13 +2,22 @@
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using Microsoft.AspNetCore.Hosting; // Necesar pentru IWebHostEnvironment
+using System.IO;
 
 namespace OnlineShopProject_dNet.Controllers
 {
-    public class ProductsController(ApplicationDbContext context) : Controller
+    public class ProductsController : Controller
     {
-        private readonly ApplicationDbContext db = context;
+        private readonly ApplicationDbContext db;
+        private readonly IWebHostEnvironment _env;
 
+
+        public ProductsController(ApplicationDbContext context, IWebHostEnvironment env)
+        {
+            db = context;
+            _env = env;
+        }
         // Se afiseaza lista tuturor produselor impreuna cu categoria din care fac parte
         // HttpGet implicit
         public IActionResult Index()
