@@ -31,7 +31,7 @@ namespace OnlineShopProject_dNet.Models
         // Daca se sterge o categorie, se sterg si produsele din acea categorie
         // relatie configuranta folosind conventiile de nume din EF
         [Required(ErrorMessage = "Product category required")]
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public virtual Category? Category { get; set; }
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
