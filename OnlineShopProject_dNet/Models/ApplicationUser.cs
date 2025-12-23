@@ -5,10 +5,10 @@ namespace OnlineShopProject_dNet.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        // Atribute suplimentare
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
 
+      
         // Un user (Proposer) propune produse
         public virtual ICollection<Product>? Products { get; set; }
 

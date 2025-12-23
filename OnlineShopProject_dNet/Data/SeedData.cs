@@ -80,12 +80,12 @@ namespace OnlineShopProject_dNet.Data
 
                 context.Users.AddRange(adminUser, proposerUser, normalUser);
 
-                
+
                 // Legăm ID-ul userului de ID-ul rolului
-                context.UserRoles.AddRange(
-                    new IdentityUserRole<string> { RoleId = ADMIN_ROLE_ID, UserId = ADMIN_USER_ID },
-                    new IdentityUserRole<string> { RoleId = PROPOSER_ROLE_ID, UserId = PROPOSER_USER_ID },
-                    new IdentityUserRole<string> { RoleId = USER_ROLE_ID, UserId = NORMAL_USER_ID }
+                context.Set<IdentityUserRole<string>>().AddRange(
+                new IdentityUserRole<string> { RoleId = ADMIN_ROLE_ID, UserId = ADMIN_USER_ID },
+                new IdentityUserRole<string> { RoleId = PROPOSER_ROLE_ID, UserId = PROPOSER_USER_ID },
+                new IdentityUserRole<string> { RoleId = USER_ROLE_ID, UserId = NORMAL_USER_ID }
                 );
 
                 await context.SaveChangesAsync();
