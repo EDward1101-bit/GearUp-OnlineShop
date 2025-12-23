@@ -2,6 +2,10 @@
 
 @{
     ViewBag.Title = "Lista Produse";
+
+    // Transformăm ViewBag-ul într-o listă sigură
+    // Dacă ViewBag.Products e null, variabila 'products' va fi null, dar nu dă eroare aici.
+    var productsList = ViewBag.Products as IEnumerable<OnlineShopProject_dNet.Models.Product>;
 }
 
 <h2 class="text-center mb-4">Afișare Produse</h2>
@@ -13,8 +17,9 @@
 
 <hr />
 
-@* Mesaj dacă nu există produse *@
-@if (ViewBag.Products == null || ((IEnumerable<dynamic>)ViewBag.Products).Count() == 0)
+
+@* Folosim .Any() care este mai rapid și mai sigur decât .Count() == 0 *@
+@if (productsList == null || !productsList.Any())
 {
     <div class="alert alert-warning text-center" role="alert">
         Nu există produse de afișat.
@@ -22,25 +27,22 @@
 }
 else
 {
-    @* Containerul ROW pentru Grid (Randul principal) *@
     <div class="row row-cols-1 row-cols-md-3 g-4">
 
-        @foreach (var product in ViewBag.Products)
+        @*  Iterăm prin lista *@
+        @foreach (var product in productsList)
         {
-            @*  3 produse pe rand pe desktop *@
             <div class="col">
                 <div class="card h-100 shadow-sm">
 
-                    @* ZONA IMAGINE - Stil fixat pentru incadrare perfecta *@
+                    @* ZONA IMAGINE *@
                     <div style="height: 250px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                         @if (!string.IsNullOrEmpty(product.Image))
                         {
-                            @* Folosim object-fit: contain pentru a vedea TOATA imaginea, netaiata *@
                             <img src="@product.Image" class="card-img-top" alt="@product.Title" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
                         }
                         else
                         {
-                            @* Imagine placeholder *@
                             <img src="/images/default-product.jpeg" class="card-img-top" alt="Fara imagine" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
                         }
                     </div>
@@ -68,7 +70,8 @@ else
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <small class="text-muted">
-                                    <i class="bi bi-tag"></i> @product.Category?.Name
+                                    @* Folosim ?. pentru a evita erorile daca Categoria e null *@
+                                    <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără Categorie")
                                 </small>
                                 <a href="/Products/Show/@product.Id" class="btn btn-sm btn-primary">
                                     Detalii

@@ -1,23 +1,36 @@
-﻿@{
-    ViewBag.Title = "Afisare categorie";
+﻿@model OnlineShopProject_dNet.Models.Category
+
+@{
+    ViewBag.Title = "Afișare categorie";
 }
 
-
 <h2>@ViewBag.Title</h2>
-
-<br />
-
-
-<p>@ViewBag.Category.Name</p>
-
-<form method="post" action="/Categories/Delete/@ViewBag.Category.Id">
-
-    <button class="btn btn-danger" type="submit">Sterge categoria</button>
-
-</form>
-<br />
-<a class="btn alert-success" href="/Categories/Index/">Afisare lista categorii</a>
-
-<br />
 <hr />
+
+<div class="card shadow-sm p-4 mb-4">
+    <h4>Detalii Categorie</h4>
+    <br />
+
+    <p><strong>Nume:</strong> @Model.Name</p>
+</div>
+
+<div class="d-flex gap-2">
+
+    @* Buton Editare *@
+    <a href="/Categories/Edit/@Model.Id" class="btn btn-warning">
+        <i class="bi bi-pencil"></i> Editează
+    </a>
+
+    @* Formular Stergere *@
+    <form method="post" action="/Categories/Delete/@Model.Id">
+        <button class="btn btn-danger" type="submit" onclick="return confirm('Ești sigur că vrei să ștergi categoria? Vor fi șterse și toate produsele ei!');">
+            <i class="bi bi-trash"></i> Șterge categoria
+        </button>
+    </form>
+
+</div>
+
 <br />
+<a class="btn btn-outline-success" href="/Categories/Index/">
+    <i class="bi bi-list-ul"></i> Afișare listă categorii
+</a>

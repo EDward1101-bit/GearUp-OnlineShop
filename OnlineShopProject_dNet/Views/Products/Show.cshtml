@@ -1,80 +1,90 @@
-﻿@using OnlineShopProject_dNet.Models
+﻿@model OnlineShopProject_dNet.Models.Product
+
 @{
-    ViewBag.Title = "Afisare produs";
+    ViewBag.Title = "Detalii Produs";
 }
 
-<h2 class="text-center mb-4">Detalii Produs: @ViewBag.Product.Title</h2>
-<hr />
+@if (Model == null)
+{
+    @* Protectie in cazul extrem in care modelul e null *@
+    <div class="alert alert-danger">Produsul nu a fost găsit sau a apărut o eroare la încărcare.</div>
+}
+else
+{
+    <div class="container my-5">
+        <div class="card shadow-lg border-0">
+            <div class="row g-0">
 
-@* Navigare catre lista de produse *@
-<div class="d-flex justify-content-center mb-4 gap-3">
-    <a class="btn btn-outline-info" href="/Products/Index/">Afișare Produse</a>
-    <a class="btn btn-outline-success" href="/Products/New">Adaugă Produs Nou</a>
-</div>
+                @* IMAGINEA *@
+                <div class="col-md-6 d-flex align-items-center justify-content-center bg-light" style="min-height: 400px;">
+                    @if (!string.IsNullOrEmpty(Model.Image))
+                    {
+                        <img src="@Model.Image"
+                             alt="@Model.Title"
+                             class="img-fluid rounded-start"
+                             style="max-height: 500px; width: auto; object-fit: contain;" />
+                    }
+                    else
+                    {
+                        @* Fallback *@
+                        <img src="/images/default-product.jpeg"
+                             alt="Imagine indisponibilă"
+                             class="img-fluid rounded-start"
+                             style="max-height: 500px; width: auto; object-fit: contain;" />
+                    }
+                </div>
 
+                @* DETALIILE *@
+                <div class="col-md-6">
+                    <div class="card-body p-5 h-100 d-flex flex-column">
 
-<div class="card shadow-lg">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-info text-dark fs-6">
+                                @* Folosim ?. pentru a evita crash daca Category e null *@
+                                <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fără Categorie")
+                            </span>
 
-    <div class="card-body">
+                            @if (Model.Stock > 0)
+                            {
+                                <span class="badge bg-success fs-6">În Stoc</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger fs-6">Stoc Epuizat</span>
+                            }
+                        </div>
 
-        @* Detaliile Produsului *@
-        <h3 class="card-title text-primary py-2">@ViewBag.Product.Title</h3>
+                        <h1 class="card-title fw-bold text-primary mb-3">@Model.Title</h1>
+                        <h2 class="text-danger fw-bold mb-4">@Model.Price RON</h2>
 
-        <div class="card-text border p-3 rounded mb-4">@ViewBag.Product.Description</div>
+                        <h5 class="text-muted mb-2">Descriere:</h5>
+                        <p class="card-text fs-5 text-secondary flex-grow-1">
+                            @Model.Description
+                        </p>
 
-        <div class="d-flex justify-content-between flex-row mt-3 flex-wrap align-items-center">
+                        <p class="text-muted"><small>Stoc disponibil: @Model.Stock bucăți</small></p>
 
-            @* Afisarea Prețului și Stocului *@
-            <div class="fs-4 fw-bold text-danger me-4">
-                Preț: @ViewBag.Product.Price RON
+                        <hr />
+
+                        <div class="d-flex gap-2 flex-wrap mt-3">
+                            <a href="/Products/Edit/@Model.Id" class="btn btn-warning px-4">
+                                Editează
+                            </a>
+
+                            <form method="post" action="/Products/Delete/@Model.Id">
+                                <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur stergi?');">
+                                    Șterge
+                                </button>
+                            </form>
+
+                            <a href="/Products/Index" class="btn btn-outline-secondary px-4 ms-auto">
+                                Înapoi
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
             </div>
-
-            <div class="me-4">
-                <i class="bi bi-box-seam"></i> Stoc:
-                @if (ViewBag.Product.Stock > 0)
-                {
-                    <span class="badge bg-success">În Stoc (@ViewBag.Product.Stock buc.)</span>
-                }
-                else
-                {
-                    <span class="badge bg-danger">Stoc Epuizat</span>
-                }
-            </div>
-
-            @* Afisarea categoriei *@
-            <div><i class="bi bi-tag-fill"></i> Categorie: <span class="fw-bold">@ViewBag.Category.Name</span></div>
-
         </div>
-
     </div>
-
-    <hr />
-
-    @* Butoane de Editare si Stergere Produs *@
-    <div class="card-footer d-flex flex-row justify-content-between">
-
-        <a class="btn btn-warning" href="/Products/Edit/@ViewBag.Product.Id">
-            <i class="bi bi-pencil-square"></i> Editează Produs
-        </a>
-
-        <form method="post" action="/Products/Delete/@ViewBag.Product.Id">
-            <button class="btn btn-danger" type="submit"
-                    onclick="return confirm('Ești sigur că vrei să ștergi produsul?');">
-                <i class="bi bi-trash"></i> Șterge Produs
-            </button>
-        </form>
-
-    </div>
-
-</div>
-
-<br />
-
-@* ========================================================================= *@
-@* TODO: Implementare Recenzii *@
-@* ========================================================================= *@
-<div class="alert alert-secondary mt-5 mb-5 p-4 text-center">
-    <h4>🏗️ TODO: Secțiunea Recenzii</h4>
-    <p>Aici vor fi incluse Partial Views-urile (sau View Components) pentru afișarea listei de recenzii și formularul de adăugare a unei noi recenzii. 
-</div>
-@* ========================================================================= *@
+}
