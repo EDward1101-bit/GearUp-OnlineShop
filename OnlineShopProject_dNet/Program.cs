@@ -34,7 +34,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-// --- SEEDING ---
+// --- ZONA DE SEEDING ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -48,8 +48,9 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "A aparut o eroare la Seeding.");
     }
 }
+// --- FINAL ZONA SEEDING ---
 
-
+// Maparile de rute
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
