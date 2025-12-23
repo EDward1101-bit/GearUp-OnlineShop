@@ -11,10 +11,10 @@ namespace OnlineShopProject_dNet.Models
         [Required(ErrorMessage = "Titlul este obligatoriu")]
         [StringLength(100, ErrorMessage = "Titlul nu poate avea mai mult de 100 de caractere")]
         [MinLength(3, ErrorMessage = "Titlul trebuie sa aiba mai mult de 3 caractere")]
-        public string Title { get; set; }
+        public string Title { get; set; } = null!;
 
         [Required(ErrorMessage = "Descrierea este obligatorie")]
-        public string Description { get; set; } 
+        public string Description { get; set; } = null!;
 
         [Required(ErrorMessage = "Imaginea este obligatorie")]
         public string Image { get; set; }
@@ -29,8 +29,9 @@ namespace OnlineShopProject_dNet.Models
         // Rating-ul mediu
         public float? Rating { get; set; }
 
+        //TODO: Schimba tipul in string
         // Status: "Pending", "Approved", "Rejected"
-        public string? Status { get; set; }
+        public bool Status { get; set; }
 
         // Relația cu Categoria
         [Required(ErrorMessage = "Categoria este obligatorie")]
