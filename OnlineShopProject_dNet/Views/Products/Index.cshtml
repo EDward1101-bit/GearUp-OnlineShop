@@ -7,74 +7,77 @@
 <h2 class="text-center mb-4">Afișare Produse</h2>
 
 <div class="d-flex justify-content-center mb-4 gap-3">
-    <a class="btn btn-outline-info" href="/Categories/Index/">Afisare categorii</a>
-    <a class="btn btn-outline-success" href="/Products/New">Adauga produs nou</a>
+    <a class="btn btn-outline-info" href="/Categories/Index/">Afișare categorii</a>
+    <a class="btn btn-outline-success" href="/Products/New">Adaugă produs nou</a>
 </div>
 
 <hr />
 
-@foreach (var product in ViewBag.Products)
-{
-    @* Adaugam overflow:hidden pentru ca imaginea sa respecte colturile rotunjite ale cardului *@
-    <div class="card shadow-sm mb-4" style="overflow: hidden;">
-
-        @if (!string.IsNullOrEmpty(product.Image))
-        {
-            <img src="@product.Image" class="card-img-top" alt="@product.Title" style="width: 100%; height: 300px; object-fit: cover;" />
-        }
-        else
-        {
-            @* Imagine placeholder *@
-            <img src="/images/default-product.jpeg" class="card-img-top" alt="Fara imagine" style="width: 100%; height: 300px; object-fit: cover;" />
-        }
-
-        <div class="card-body">
-
-            <h3 class="card-title text-primary">@product.Title</h3>
-
-            <hr class="my-2" />
-
-            <p class="card-text mb-3">
-                @product.Description
-            </p>
-
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-                <span class="fs-4 fw-bold text-danger me-3">
-                    @product.Price RON
-                </span>
-
-                <div class="text-secondary me-3">
-                    <i class="bi bi-box-seam"></i> Stoc:
-                    @if (product.Stock > 0)
-                    {
-                        <span class="badge bg-success">În Stoc (@product.Stock buc.)</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger">Stoc Epuizat</span>
-                    }
-                </div>
-
-                @* Afisarea categoriei *@
-                <div>
-                    @* Folosim ?. pentru a evita erorile daca Categorie e null *@
-                    <i class="bi bi-tag-fill"></i> Categorie: <strong>@product.Category?.Name</strong>
-                </div>
-
-                <a class="btn btn-primary mt-2 mt-md-0" href="/Products/Show/@product.Id">
-                    <i class="bi bi-eye"></i> Detalii Produs
-                </a>
-
-            </div>
-        </div>
-    </div>
-}
-
-@* Afisare mesaj daca nu exista produse *@
+@* Mesaj dacă nu există produse *@
 @if (ViewBag.Products == null || ((IEnumerable<dynamic>)ViewBag.Products).Count() == 0)
 {
     <div class="alert alert-warning text-center" role="alert">
         Nu există produse de afișat.
+    </div>
+}
+else
+{
+    @* Containerul ROW pentru Grid (Randul principal) *@
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        @foreach (var product in ViewBag.Products)
+        {
+            @*  3 produse pe rand pe desktop *@
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+
+                    @* ZONA IMAGINE - Stil fixat pentru incadrare perfecta *@
+                    <div style="height: 250px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        @if (!string.IsNullOrEmpty(product.Image))
+                        {
+                            @* Folosim object-fit: contain pentru a vedea TOATA imaginea, netaiata *@
+                            <img src="@product.Image" class="card-img-top" alt="@product.Title" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                        }
+                        else
+                        {
+                            @* Imagine placeholder *@
+                            <img src="/images/default-product.jpeg" class="card-img-top" alt="Fara imagine" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                        }
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-primary text-truncate">@product.Title</h5>
+
+                        <p class="card-text text-muted" style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                            @product.Description
+                        </p>
+
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fs-5 fw-bold text-danger">@product.Price RON</span>
+
+                                @if (product.Stock > 0)
+                                {
+                                    <span class="badge bg-success rounded-pill">In Stoc</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary rounded-pill">Stoc Epuizat</span>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-tag"></i> @product.Category?.Name
+                                </small>
+                                <a href="/Products/Show/@product.Id" class="btn btn-sm btn-primary">
+                                    Detalii
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }
