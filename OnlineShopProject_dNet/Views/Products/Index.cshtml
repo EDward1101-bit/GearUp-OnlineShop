@@ -1,12 +1,10 @@
-﻿@model OnlineShopProject_dNet.Models.Product 
-@*pt intelisense* si ult if*@
+﻿@model OnlineShopProject_dNet.Models.Product
 
 @{
     ViewBag.Title = "Lista Produse";
 }
 
-<h2 class="text-center mb-4"> Afișare Produse</h2>
-
+<h2 class="text-center mb-4">Afișare Produse</h2>
 
 <div class="d-flex justify-content-center mb-4 gap-3">
     <a class="btn btn-outline-info" href="/Categories/Index/">Afisare categorii</a>
@@ -17,7 +15,19 @@
 
 @foreach (var product in ViewBag.Products)
 {
-    <div class="card shadow-sm mb-4">
+    @* Adaugam overflow:hidden pentru ca imaginea sa respecte colturile rotunjite ale cardului *@
+    <div class="card shadow-sm mb-4" style="overflow: hidden;">
+
+        @if (!string.IsNullOrEmpty(product.Image))
+        {
+            <img src="@product.Image" class="card-img-top" alt="@product.Title" style="width: 100%; height: 300px; object-fit: cover;" />
+        }
+        else
+        {
+            @* Imagine placeholder *@
+            <img src="/images/default-product.jpeg" class="card-img-top" alt="Fara imagine" style="width: 100%; height: 300px; object-fit: cover;" />
+        }
+
         <div class="card-body">
 
             <h3 class="card-title text-primary">@product.Title</h3>
@@ -48,10 +58,11 @@
 
                 @* Afisarea categoriei *@
                 <div>
-                    <i class="bi bi-tag-fill"></i> Categorie: <strong>@product.Category.Name</strong>
+                    @* Folosim ?. pentru a evita erorile daca Categorie e null *@
+                    <i class="bi bi-tag-fill"></i> Categorie: <strong>@product.Category?.Name</strong>
                 </div>
 
-                <a class="btn btn-primary mt-2 mt-md-0" href="/products/Show/@product.Id">
+                <a class="btn btn-primary mt-2 mt-md-0" href="/Products/Show/@product.Id">
                     <i class="bi bi-eye"></i> Detalii Produs
                 </a>
 
@@ -59,11 +70,11 @@
         </div>
     </div>
 }
-@* afisare optionala daca nu sunt produse
-@if (ViewBag.Products == null || ((IEnumerable<OnlineShopProject_dNet.Models.Product>)ViewBag.Products).Count() == 0)
+
+@* Afisare mesaj daca nu exista produse *@
+@if (ViewBag.Products == null || ((IEnumerable<dynamic>)ViewBag.Products).Count() == 0)
 {
     <div class="alert alert-warning text-center" role="alert">
         Nu există produse de afișat.
     </div>
 }
-*@
