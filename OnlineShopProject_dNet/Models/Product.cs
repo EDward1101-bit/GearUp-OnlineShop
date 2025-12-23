@@ -16,8 +16,7 @@ namespace OnlineShopProject_dNet.Models
         [Required(ErrorMessage = "Descrierea este obligatorie")]
         public string Description { get; set; } = null!;
 
-        [Required(ErrorMessage = "Imaginea este obligatorie")]
-        public string Image { get; set; }
+        public string? Image { get; set; }
 
         [Required(ErrorMessage = "Pretul este obligatoriu")]
         [Column(TypeName = "decimal(18, 2)")]
