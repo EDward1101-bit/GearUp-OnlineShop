@@ -1,57 +1,60 @@
 ﻿@using OnlineShopProject_dNet.Models
-@model Product 
-
+@model Product
 
 @{
     ViewBag.Title = "Editează Produs";
-    
-    // COMENTARIU: Definirea variabilelor pentru a evita repetarea logicii Model vs ViewBag
-    // Daca Model nu este null (adica a existat un POST esuat), folosim datele din Model.
-    // Altfel, folosim datele din ViewBag (pentru prima afisare GET).
     Product displayProduct = Model ?? ViewBag.Product;
-    //TODO: TREBUIE REVIZUITA LOGICA ASTA PENTRU CAND ID E NULL
     int selectedCategoryId = displayProduct.CategoryId ?? 0;
 }
 
 <h2 class="text-center mb-4"> Editează Produsul: @displayProduct.Title</h2>
 <hr />
 
-<form method="post" action="/Products/Edit/@displayProduct.Id">
-    
+@* Adaugam enctype  *@
+<form method="post" action="/Products/Edit/@displayProduct.Id" enctype="multipart/form-data">
+
     <div class="mb-3">
         <label for="Title" class="form-label">Titlu Produs</label>
         <input type="text" name="Title" id="Title" class="form-control" value="@displayProduct.Title" />
-
         @Html.ValidationMessage("Title", new { @class = "text-danger" })
+    </div>
+
+    @* Afisare imagine curenta + Input editare *@
+    <div class="mb-3">
+        <label class="form-label">Imagine Curentă</label> <br />
+        @if (!string.IsNullOrEmpty(displayProduct.Image))
+        {
+            <img src="@displayProduct.Image" style="width: 150px; height: 150px; object-fit: cover; border: 1px solid #ccc;" />
+        }
+    </div>
+
+    <div class="mb-3">
+        <label for="Image" class="form-label">Schimbă Imaginea (Opțional)</label>
+        <input type="file" name="Image" class="form-control" />
+        @Html.ValidationMessage("Image", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
         <label for="Description" class="form-label">Descriere Produs</label>
         <textarea name="Description" id="Description" class="form-control" rows="5">@displayProduct.Description</textarea>
-
         @Html.ValidationMessage("Description", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
         <label for="Price" class="form-label">Preț (RON)</label>
-        <input type="number" name="Price" id="Price" class="form-control" step="1" value="@displayProduct.Price" min="0"/>
-
+        <input type="number" name="Price" id="Price" class="form-control" step="1" value="@displayProduct.Price" min="0" />
         @Html.ValidationMessage("Price", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
         <label for="Stock" class="form-label">Stoc (Bucăți)</label>
-        <input type="number" name="Stock" id="Stock" class="form-control" step="1" value="@displayProduct.Stock" min="0"/>
-
+        <input type="number" name="Stock" id="Stock" class="form-control" step="1" value="@displayProduct.Stock" min="0" />
         @Html.ValidationMessage("Stock", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
         <label for="CategoryId" class="form-label">Selectați Categoria</label>
-
-        @* Folosim selectedCategoryId pentru a mentine selectia curenta  *@
         <select name="CategoryId" id="CategoryId" class="form-select">
-
             @foreach (var category in ViewBag.Categories)
             {
                 if (category.Id == selectedCategoryId)
@@ -64,11 +67,9 @@
                 }
             }
         </select>
-
         @Html.ValidationMessage("CategoryId", new { @class = "text-danger" })
     </div>
 
     <br />
     <button class="btn btn-success" type="submit">Modifică Produsul</button>
-
 </form>

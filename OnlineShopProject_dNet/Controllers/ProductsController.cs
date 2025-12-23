@@ -2,13 +2,22 @@
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using Microsoft.AspNetCore.Hosting; // Necesar pentru IWebHostEnvironment
+using System.IO;
 
 namespace OnlineShopProject_dNet.Controllers
 {
-    public class ProductsController(ApplicationDbContext context) : Controller
+    public class ProductsController : Controller
     {
-        private readonly ApplicationDbContext db = context;
+        private readonly ApplicationDbContext db;
+        private readonly IWebHostEnvironment _env;
 
+
+        public ProductsController(ApplicationDbContext context, IWebHostEnvironment env)
+        {
+            db = context;
+            _env = env;
+        }
         // Se afiseaza lista tuturor produselor impreuna cu categoria din care fac parte
         // HttpGet implicit
         public IActionResult Index()
@@ -53,38 +62,67 @@ namespace OnlineShopProject_dNet.Controllers
             return View();
         }
 
+        
         // Se adauga produsul in baza de date
         [HttpPost]
-        public IActionResult New(Product product)
+        public async Task<IActionResult> New(Product product, IFormFile? Image)
         {
-            if (ModelState.IsValid)
+            // Calculam statusul in functie de stoc
+            product.Status = product.Stock > 0;
+
+            // Logica de incarcare imagine 
+            if (Image != null && Image.Length > 0)
             {
-                product.Status = product.Stock > 0;
+                // 1. Verificam extensia (Tipul fisierului)
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var fileExtension = Path.GetExtension(Image.FileName).ToLower();
 
-                try
+                if (!allowedExtensions.Contains(fileExtension))
                 {
-                    db.Products.Add(product);
-                    db.SaveChanges();
-                    return RedirectToAction("Index");
-                }
-
-                catch (Exception)
-                {
-                    // In caz de eroare la salvare (e.g. eroare DB), se reincarca categoriile.
-                    var categories = from categ in db.Categories
-                                     select categ;
-                    ViewBag.Categories = categories;
-
-                    // return View(product) este esential pentru a afisa datele introduse de utilizator
-                    // si pentru a reține CategoryId in formular dupa eroare.
+                    ModelState.AddModelError("Image", "Fișierul trebuie să fie o imagine (jpg, jpeg, png, gif).");
+                    ViewBag.Categories = db.Categories;
                     return View(product);
                 }
+
+                //  Verificam dimensiunea (Maxim 5MB - Cerinta proiect) 
+                if (Image.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("Image", "Imaginea nu poate fi mai mare de 5MB.");
+                    ViewBag.Categories = db.Categories;
+                    return View(product);
+                }
+
+                //  Construim calea de stocare
+                
+                var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
+                var databaseFileName = "/images/" + Image.FileName;
+
+                //  Salvarea fizica a fisierului 
+                using (var fileStream = new FileStream(storagePath, FileMode.Create))
+                {
+                    await Image.CopyToAsync(fileStream);
+                }
+
+                //  Setam calea in model
+                product.Image = databaseFileName;
+
+                // Eliminam eroarea de validare pentru Image din ModelState
+                // Deoarece campul a fost null la binding, dar acum are valoare
+                ModelState.Remove(nameof(product.Image));
             }
-            // Daca modelul NU este valid (ModelState.IsValid == false), se reincarca categoriile
-            // si se returneaza View(product) pentru a afisa erorile de validare (Title required, etc.).
-            var categoriesList = from categ in db.Categories
-                                 select categ;
-            ViewBag.Categories = categoriesList;
+
+            // Verificam validitatea modelului (TryValidateModel revalideaza cu noua valoare Image) 
+            if (TryValidateModel(product))
+            {
+                db.Products.Add(product);
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+
+            // Daca validarea esueaza, reincarcam categoriile
+            var categories = from categ in db.Categories
+                             select categ;
+            ViewBag.Categories = categories;
 
             return View(product);
         }
@@ -113,49 +151,78 @@ namespace OnlineShopProject_dNet.Controllers
 
         // Se adauga produsul modificat in baza de date
         [HttpPost]
-        public IActionResult Edit(int id, Product requestProduct)
+        public async Task<IActionResult> Edit(int id, Product requestProduct, IFormFile? Image)
         {
-            Product? product = db.Products.Find(id);
-
+            // Gasim produsul existent in baza de date
+            Product? product = await db.Products.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            // Actualizam datele text
+            product.Title = requestProduct.Title;
+            product.Description = requestProduct.Description;
+            product.Price = requestProduct.Price;
+            product.Stock = requestProduct.Stock;
+            product.Status = product.Stock > 0;
+            product.CategoryId = requestProduct.CategoryId;
+
+            // Logica pentru imagine la editare
+            if (Image != null && Image.Length > 0)
             {
-                try
+                //  Validari (Tip si Dimensiune)
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var fileExtension = Path.GetExtension(Image.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
                 {
-                    product.Title = requestProduct.Title;
-                    product.Description = requestProduct.Description;
-
-                    product.Price = requestProduct.Price;
-                    product.Stock = requestProduct.Stock;
-                    product.Status = product.Stock > 0;
-
-                    product.CategoryId = requestProduct.CategoryId;
-
-                    db.SaveChanges();
-                    return RedirectToAction("Index");
-                }
-                catch (Exception)
-                {
-                    var categories = from categ in db.Categories
-                                     select categ;
-                    ViewBag.Categories = categories;
-
-                    // In caz de eroare, reincarcam View-ul cu datele trimise (requestProduct)
-                    // pentru a afisa erorile in formular.
+                    ModelState.AddModelError("Image", "Fișierul trebuie să fie o imagine.");
+                    ViewBag.Categories = db.Categories;
                     return View(requestProduct);
                 }
+                if (Image.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("Image", "Imaginea nu poate fi mai mare de 5MB.");
+                    ViewBag.Categories = db.Categories;
+                    return View(requestProduct);
+                }
+
+                //  Stergerea imaginii vechi (Daca exista)
+                if (!string.IsNullOrEmpty(product.Image))
+                {
+                    var oldPath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
+                    if (System.IO.File.Exists(oldPath))
+                    {
+                        System.IO.File.Delete(oldPath);
+                    }
+                }
+
+                //  Salvarea imaginii noi
+                var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
+                var databaseFileName = "/images/" + Image.FileName;
+
+                using (var fileStream = new FileStream(storagePath, FileMode.Create))
+                {
+                    await Image.CopyToAsync(fileStream);
+                }
+
+                product.Image = databaseFileName;
             }
 
-            // Daca validarea esueaza, reincarcam View-ul cu datele trimise (requestProduct)
-            // pentru a afisa erorile.
-            var categoriesList = from categ in db.Categories
-                                 select categ;
-            ViewBag.Categories = categoriesList;
+            // Eliminam validarea pentru Image deoarece:
+            // a) Fie am pus una noua si e ok
+            // b) Fie am pastrat-o pe cea veche (deci e deja in 'product', dar 'requestProduct.Image' e null)
+            ModelState.Remove("Image");
+            ModelState.Remove("requestProduct.Image"); // Pentru siguranta
 
+            if (TryValidateModel(product))
+            {
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Categories = db.Categories;
             return View(requestProduct);
         }
 
@@ -168,6 +235,17 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 return NotFound();
             }
+
+            // Stergem fisierul fizic asociat
+            if (!string.IsNullOrEmpty(product.Image))
+            {
+                var imagePath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
+            }
+
             db.Products.Remove(product);
             db.SaveChanges();
             return RedirectToAction("Index");

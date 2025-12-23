@@ -1,14 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using Microsoft.AspNetCore.Hosting; 
+using System.IO; 
+using Microsoft.EntityFrameworkCore; 
 
 namespace OnlineShopProject_dNet.Controllers
 {
-    public class CategoriesController(ApplicationDbContext context) : Controller
+    public class CategoriesController : Controller
     {
-        private readonly ApplicationDbContext db = context;
+        private readonly ApplicationDbContext db;
+        private readonly IWebHostEnvironment _env;
 
-        public ActionResult Index()
+        public CategoriesController(ApplicationDbContext context, IWebHostEnvironment env)
+        {
+            db = context;
+            _env = env;
+        }
+
+        public IActionResult Index()
         {
             var categories = from category in db.Categories
                              orderby category.Name
@@ -17,67 +27,82 @@ namespace OnlineShopProject_dNet.Controllers
             return View();
         }
 
-        public ActionResult Show(int id)
+        public IActionResult Show(int id)
         {
             Category category = db.Categories.Find(id);
-            ViewBag.Category = category;
-            return View();
+            return View(category);
         }
 
-        public ActionResult New()
+        public IActionResult New()
         {
             return View();
         }
 
         [HttpPost]
-        public ActionResult New(Category cat)
+        public IActionResult New(Category cat)
         {
-            try
+            if (ModelState.IsValid)
             {
                 db.Categories.Add(cat);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            catch (Exception)
-            {
-                return View();
-            }
+            return View(cat);
         }
 
-        public ActionResult Edit(int id)
+        public IActionResult Edit(int id)
         {
             Category category = db.Categories.Find(id);
-            ViewBag.Category = category;
-            return View();
+            return View(category);
         }
 
         [HttpPost]
-        public ActionResult Edit(int id, Category requestCategory)
+        public IActionResult Edit(int id, Category requestCategory)
         {
-            try
+            Category category = db.Categories.Find(id);
+            if (ModelState.IsValid)
             {
-                Category category = db.Categories.Find(id);
-
-                {
-                    category.Name = requestCategory.Name;
-                    db.SaveChanges();
-                }
-
+                category.Name = requestCategory.Name;
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            catch (Exception)
-            {
-                ViewBag.Category = requestCategory;
-                return View();
-            }
+            return View(requestCategory);
         }
 
+       
         [HttpPost]
         public ActionResult Delete(int id)
         {
-            Category category = db.Categories.Find(id);
+            Category? category = db.Categories.Find(id);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            
+            // Putem interoga direct tabelul Products
+            var associatedProducts = db.Products.Where(p => p.CategoryId == id).ToList();
+
+            // 2. Iteram prin produse si stergem imaginile fizice
+            foreach (var product in associatedProducts)
+            {
+                if (!string.IsNullOrEmpty(product.Image))
+                {
+                    // Construim calea completa
+                    var imagePath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
+
+                    // Stergem fisierul daca exista
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+            }
+
             db.Categories.Remove(category);
             db.SaveChanges();
+
             return RedirectToAction("Index");
         }
     }
