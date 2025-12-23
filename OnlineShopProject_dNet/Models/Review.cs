@@ -7,7 +7,6 @@ namespace OnlineShopProject_dNet.Models
         [Key]
         public int Id { get; set; }
 
-        // Păstrat "Content" conform diagramei
         public string? Content { get; set; }
 
         [Range(1, 5, ErrorMessage = "Rating-ul trebuie sa fie intre 1 si 5")]
