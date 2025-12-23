@@ -11,6 +11,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+
 // CONFIGURARE IDENTITY
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -20,7 +22,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Stores.MaxLengthForKeys = 128;
 })
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -55,6 +58,8 @@ using (var scope = app.Services.CreateScope())
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorPages();
+
 
 app.Run();
