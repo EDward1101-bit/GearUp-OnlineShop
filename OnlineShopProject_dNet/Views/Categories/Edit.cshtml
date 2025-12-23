@@ -1,15 +1,26 @@
-﻿@{
+﻿@model OnlineShopProject_dNet.Models.Category
+
+@{
     ViewBag.Title = "Editare categorie";
 }
 
 <h2>@ViewBag.Title</h2>
+<hr />
 
-<form method="post" action="/Categories/Edit/@ViewBag.Category.Id">
+<form method="post" action="/Categories/Edit/@Model.Id">
 
+    <div class="mb-3">
+        <label class="form-label">Nume categorie</label>
+        
+        <input type="text" name="Name" value="@Model.Name" class="form-control" />
 
-    <label>Nume categorie</label>
-    <br /> <input type="text" name="Name" value="@ViewBag.Category.Name" />
-    <br /><br />
+        @Html.ValidationMessage("Name", null, new { @class = "text-danger" })
+    </div>
 
-    <button class="btn btn-success" type="submit">Modifica categoria</button>
+    <button class="btn btn-success" type="submit">
+        <i class="bi bi-pencil-square"></i> Modifică categoria
+    </button>
+
+    <a href="/Categories/Index" class="btn btn-outline-secondary">Anulează</a>
+
 </form>

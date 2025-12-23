@@ -27,9 +27,16 @@ namespace OnlineShopProject_dNet.Controllers
             return View();
         }
 
+        [HttpGet]
         public IActionResult Show(int id)
         {
-            Category category = db.Categories.Find(id);
+
+            Category? category = db.Categories.Find(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
             return View(category);
         }
 
@@ -50,9 +57,16 @@ namespace OnlineShopProject_dNet.Controllers
             return View(cat);
         }
 
+        [HttpGet]
         public IActionResult Edit(int id)
         {
-            Category category = db.Categories.Find(id);
+            Category? category = db.Categories.Find(id);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
             return View(category);
         }
 
@@ -69,30 +83,23 @@ namespace OnlineShopProject_dNet.Controllers
             return View(requestCategory);
         }
 
-       
+
         [HttpPost]
         public ActionResult Delete(int id)
         {
-            Category? category = db.Categories.Find(id);
+            var category = db.Categories.Find(id);
+            if (category == null) return NotFound();
 
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            
-            // Putem interoga direct tabelul Products
+           
             var associatedProducts = db.Products.Where(p => p.CategoryId == id).ToList();
 
-            // 2. Iteram prin produse si stergem imaginile fizice
+           
             foreach (var product in associatedProducts)
             {
-                if (!string.IsNullOrEmpty(product.Image))
+                // Verificam sa nu fie null si sa NU fie imaginea default
+                if (!string.IsNullOrEmpty(product.Image) && product.Image != "/images/default-product.jpeg")
                 {
-                    // Construim calea completa
                     var imagePath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
-
-                    // Stergem fisierul daca exista
                     if (System.IO.File.Exists(imagePath))
                     {
                         System.IO.File.Delete(imagePath);
@@ -100,6 +107,7 @@ namespace OnlineShopProject_dNet.Controllers
                 }
             }
 
+            
             db.Categories.Remove(category);
             db.SaveChanges();
 
