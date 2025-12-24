@@ -7,14 +7,14 @@
 <h2>@ViewBag.Title</h2>
 <hr />
 
-<form method="post" action="/Categories/Edit/@Model.Id">
+<form method="post" asp-controller="Categories" asp-action="Edit" asp-route-id="@Model.Id">
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="mb-3">
-        <label class="form-label">Nume categorie</label>
-        
-        <input type="text" name="Name" value="@Model.Name" class="form-control" />
-
-        @Html.ValidationMessage("Name", null, new { @class = "text-danger" })
+        <label asp-for="Name" class="form-label">Nume categorie</label>
+        <input type="text" asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <button class="btn btn-success" type="submit">
