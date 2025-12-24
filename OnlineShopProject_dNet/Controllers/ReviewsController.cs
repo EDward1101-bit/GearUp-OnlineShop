@@ -1,47 +1,62 @@
-﻿using OnlineShopProject_dNet.Models;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
+using OnlineShopProject_dNet.Models;
 
 namespace OnlineShopProject_dNet.Controllers
 {
-    public class ReviewsController(ApplicationDbContext context) : Controller
+    public class ReviewsController : Controller
     {
-        private readonly ApplicationDbContext db = context;
-        
-        //Adaugarea unui review asociat unui produs in baza de date
+        private readonly ApplicationDbContext db;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public ReviewsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            db = context;
+            _userManager = userManager;
+        }
+
+        // POST: Adaugarea unui review
         [HttpPost]
         public IActionResult New(Review rev)
         {
             rev.Date = DateTime.Now;
+            rev.UserId = _userManager.GetUserId(User);
 
-            try
+            if (ModelState.IsValid)
             {
                 db.Reviews.Add(rev);
                 db.SaveChanges();
-                return Redirect("/Product/Show/" + rev.ProductId);
+
+                // Folosim .HasValue pentru a fi siguri ca nu e null
+                if (rev.ProductId.HasValue)
+                {
+                    SetProductRating(rev.ProductId.Value);
+                }
+
+                return Redirect("/Products/Show/" + rev.ProductId);
             }
-            catch (Exception)
-            {
-                return Redirect("/Product/Show/" + rev.ProductId);
-            }
+
+            return Redirect("/Products/Show/" + rev.ProductId);
         }
 
-        //Stergerea unui review din baza de date(asociat unui produs)
-        [HttpPost]
-        public IActionResult Delete(int id)
-        {
-            Review rev = db.Reviews.Find(id);
-            db.Reviews.Remove(rev);
-            db.SaveChanges();
-            return Redirect("/Product/Show/" + rev.ProductId);
-        }
-
-        // In acest moment vom implementa editarea intr-o pagina View separata
-        // Se editeaza un comentariu existent
-        // [HttpGet] implicit
+        // GET: Editare review
         public IActionResult Edit(int id)
         {
-            Review rev = db.Reviews.Find(id);
+            Review? rev = db.Reviews.Find(id);
+
+            if (rev == null)
+            {
+                return NotFound();
+            }
+
+            if (rev.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
+            {
+                TempData["message"] = "Nu aveți dreptul să editați acest review!";
+                return Redirect("/Products/Show/" + rev.ProductId);
+            }
+
             ViewBag.Review = rev;
             return View();
         }
@@ -49,23 +64,96 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public IActionResult Edit(int id, Review requestReview)
         {
-            Review rev = db.Reviews.Find(id);
+            Review? rev = db.Reviews.Find(id);
+
+            if (rev == null)
+            {
+                return NotFound();
+            }
+
+            if (rev.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
+            {
+                TempData["message"] = "Nu aveți dreptul să editați acest review!";
+                return Redirect("/Products/Show/" + rev.ProductId);
+            }
+
             try
             {
                 rev.Content = requestReview.Content;
+                rev.Rating = requestReview.Rating;
 
                 db.SaveChanges();
 
-                return Redirect("/Product/Show/" + rev.ProductId);
+                if (rev.ProductId.HasValue)
+                {
+                    SetProductRating(rev.ProductId.Value);
+                }
+
+                return Redirect("/Products/Show/" + rev.ProductId);
             }
             catch (Exception)
             {
-                return Redirect("/Product/Show/" + rev.ProductId);
+                return Redirect("/Products/Show/" + rev.ProductId);
             }
         }
 
-        //TODO: Update rating al unui review
-        //[HttpPost]
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            Review? rev = db.Reviews.Find(id);
 
+            if (rev == null)
+            {
+                return NotFound();
+            }
+
+            if (rev.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
+            {
+                TempData["message"] = "Nu aveți dreptul să ștergeți acest review!";
+                return Redirect("/Products/Show/" + rev.ProductId);
+            }
+
+            // Salvam ID-ul inainte sa stergem obiectul
+            int? productId = rev.ProductId;
+
+            db.Reviews.Remove(rev);
+            db.SaveChanges();
+
+            if (productId.HasValue)
+            {
+                SetProductRating(productId.Value);
+            }
+
+            return Redirect("/Products/Show/" + productId);
+        }
+
+        // METODA PRIVATA PENTRU CALCULUL MEDIEI
+        private void SetProductRating(int productId)
+        {
+            var product = db.Products.Include(p => p.Reviews).FirstOrDefault(p => p.Id == productId);
+
+            // Verificam explicit daca produsul si review-urile exista
+            if (product != null && product.Reviews.Any())
+            {
+                // Selectam rating-urile care au valoare (nu sunt null)
+                var validRatings = product.Reviews.Where(r => r.Rating.HasValue).Select(r => r.Rating!.Value);
+
+                if (validRatings.Any())
+                {
+                    float average = (float)validRatings.Average(r => (double)r);
+                    product.Rating = average;
+                }
+                else
+                {
+                    product.Rating = null;
+                }
+            }
+            else if (product != null)
+            {
+                product.Rating = null;
+            }
+
+            db.SaveChanges();
+        }
     }
 }
