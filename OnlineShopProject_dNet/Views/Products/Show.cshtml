@@ -4,6 +4,15 @@
     ViewBag.Title = "Detalii Produs";
 }
 
+@* --- Afisarea mesajului de eroare de la Securitate (TempData) --- *@
+@if (TempData["message"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 @if (Model == null)
 {
     @* Protectie in cazul extrem in care modelul e null *@
@@ -12,6 +21,8 @@
 else
 {
     <div class="container my-5">
+
+        @* --- ZONA 1: CARD PRODUS (Codul tău original) --- *@
         <div class="card shadow-lg border-0">
             <div class="row g-0">
 
@@ -64,6 +75,14 @@ else
 
                         <p class="text-muted"><small>Stoc disponibil: @Model.Stock bucăți</small></p>
 
+                        @* Aici am putea afisa si Rating-ul general al produsului, daca vrei pe viitor *@
+                        @if (Model.Rating.HasValue)
+                        {
+                            <div class="mb-3 text-warning fs-5">
+                                Rating Mediu: <strong>@Model.Rating.Value.ToString("0.0")</strong> <i class="bi bi-star-fill"></i>
+                            </div>
+                        }
+
                         <hr />
 
                         <div class="d-flex gap-2 flex-wrap mt-3">
@@ -72,7 +91,7 @@ else
                             </a>
 
                             <form method="post" action="/Products/Delete/@Model.Id">
-                                <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur stergi?');">
+                                <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur stergi produsul?');">
                                     Șterge
                                 </button>
                             </form>
@@ -86,5 +105,10 @@ else
                 </div>
             </div>
         </div>
+
+        @* --- ZONA 2: REVIEW-URI (Partial View Integrat) --- *@
+        @* Aici "lipim" codul din _ProductReviews.cshtml *@
+        <partial name="_ProductReviews" model="Model" />
+
     </div>
 }
