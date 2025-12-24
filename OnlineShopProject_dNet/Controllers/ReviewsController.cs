@@ -18,11 +18,11 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 db.Reviews.Add(rev);
                 db.SaveChanges();
-                return Redirect("/Product/Show" + rev.ProductId);
+                return Redirect("/Product/Show/" + rev.ProductId);
             }
             catch (Exception)
             {
-                return Redirect("/Product/Show" + rev.ProductId);
+                return Redirect("/Product/Show/" + rev.ProductId);
             }
         }
 
