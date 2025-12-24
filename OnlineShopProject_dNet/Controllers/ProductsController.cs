@@ -21,17 +21,18 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpGet]
         public IActionResult Show(int id)
         {
-            
+            // INCLUDE: Category, Reviews, si User-ul care a scris Review-ul
             var product = db.Products
                             .Include(p => p.Category)
+                            .Include(p => p.Reviews)
+                            .ThenInclude(r => r.User) // Aducem si datele userului care a scris (Nume, etc.)
                             .FirstOrDefault(p => p.Id == id);
 
             if (product == null)
             {
-                return NotFound(); // Returneaza pagina 404 standard daca id-ul nu exista
+                return NotFound();
             }
 
-            // Trimitem explicit modelul catre View
             return View(product);
         }
 
