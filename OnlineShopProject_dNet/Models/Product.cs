@@ -24,12 +24,7 @@ namespace OnlineShopProject_dNet.Models
 
         [Required(ErrorMessage = "Stocul este obligatoriu")]
         public int Stock { get; set; }
-
-        // Rating-ul mediu
         public float? Rating { get; set; }
-
-        //TODO: Schimba tipul in string
-        // Status: "Pending", "Approved", "Rejected"
         public string? Status { get; set; }
 
         // Relația cu Categoria
@@ -37,10 +32,19 @@ namespace OnlineShopProject_dNet.Models
         public int? CategoryId { get; set; }
         public virtual Category? Category { get; set; }
 
+
         // Relația cu Userul (Proposer)
         public string? UserId { get; set; }
         public virtual ApplicationUser? User { get; set; }
 
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+
+
+        // Relatia M-M cu Orders (prin OrderDetail)
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+        // Relatia M-M cu Users (prin Wishlist)
+        public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
     }
 }

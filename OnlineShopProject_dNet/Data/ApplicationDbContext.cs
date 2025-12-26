@@ -15,6 +15,11 @@ namespace OnlineShopProject_dNet.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Este OBLIGATORIU să apelăm metoda de bază pentru ca Identity (Useri, Roluri) să funcționeze
@@ -36,6 +41,42 @@ namespace OnlineShopProject_dNet.Data
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 1. ORDER_DETAIL (Cheie primara compusa)
+            modelBuilder.Entity<OrderDetail>()
+                .HasKey(od => new { od.OrderId, od.ProductId });
+
+            // Relatiile pentru OrderDetail
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Order)
+                .WithMany(o => o.OrderDetails)
+                .HasForeignKey(od => od.OrderId)
+                .OnDelete(DeleteBehavior.Cascade); 
+            // Daca sterg comanda, se sterg detaliile
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Product)
+                .WithMany(p => p.OrderDetails)
+                .HasForeignKey(od => od.ProductId)
+                .OnDelete(DeleteBehavior.Restrict); 
+            // Nu stergem produsul din magazin daca e intr-o comanda
+
+            // 2. WISHLIST (Cheie primara compusa)
+            modelBuilder.Entity<Wishlist>()
+                .HasKey(w => new { w.UserId, w.ProductId });
+
+            // Relatiile pentru Wishlist
+            modelBuilder.Entity<Wishlist>()
+                .HasOne(w => w.User)
+                .WithMany(u => u.Wishlists)
+                .HasForeignKey(w => w.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Wishlist>()
+                .HasOne(w => w.Product)
+                .WithMany(p => p.Wishlists)
+                .HasForeignKey(w => w.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
