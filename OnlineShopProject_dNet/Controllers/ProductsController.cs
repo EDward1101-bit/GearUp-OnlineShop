@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
 
 namespace OnlineShopProject_dNet.Controllers
 {
@@ -11,39 +11,64 @@ namespace OnlineShopProject_dNet.Controllers
     {
         private readonly ApplicationDbContext db;
         private readonly IWebHostEnvironment _env;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProductsController(ApplicationDbContext context, IWebHostEnvironment env)
+        public ProductsController(
+            ApplicationDbContext context,
+            IWebHostEnvironment env,
+            UserManager<ApplicationUser> userManager)
         {
             db = context;
             _env = env;
+            _userManager = userManager;
         }
 
+        // 1. INDEX - Vizitatorii vad doar produsele APROBATE
+        [HttpGet]
+        public IActionResult Index()
+        {
+            var products = db.Products
+                             .Include(p => p.Category)
+                             .Where(p => p.Status == "Approved") // Filtrare esentiala
+                             .ToList();
+
+            ViewBag.Products = products;
+
+            if (!products.Any())
+            {
+                TempData["message"] = "Nu există produse aprobate momentan.";
+            }
+
+            return View();
+        }
+
+        // 2. SHOW - Detalii produs
         [HttpGet]
         public IActionResult Show(int id)
         {
-            // INCLUDE: Category, Reviews, si User-ul care a scris Review-ul
             var product = db.Products
                             .Include(p => p.Category)
                             .Include(p => p.Reviews)
-                            .ThenInclude(r => r.User) // Aducem si datele userului care a scris (Nume, etc.)
+                            .ThenInclude(r => r.User)
+                            .Include(p => p.User)
                             .FirstOrDefault(p => p.Id == id);
 
-            if (product == null)
+            if (product == null) return NotFound();
+
+            // Securitate: Vezi produsul doar daca e Aprobat SAU e al tau SAU esti Admin
+            bool isOwner = _userManager.GetUserId(User) == product.UserId;
+            bool isAdmin = User.IsInRole("Admin");
+
+            if (product.Status != "Approved" && !isOwner && !isAdmin)
             {
-                return NotFound();
+                return Forbid();
             }
 
             return View(product);
         }
 
-        [HttpGet]
-        public IActionResult Index()
-        {
-            var products = db.Products.Include(p => p.Category).ToList();
-            ViewBag.Products = products;
-            return View();
-        }
-
+        // 3. NEW - Adaugare (Doar Admin si Proposer)
+        [Authorize(Roles = "Admin,Proposer")]
         [HttpGet]
         public IActionResult New()
         {
@@ -51,35 +76,37 @@ namespace OnlineShopProject_dNet.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin,Proposer")]
         [HttpPost]
         public async Task<IActionResult> New(Product product, IFormFile? Image)
         {
-            product.Status = product.Stock > 0;
+            product.UserId = _userManager.GetUserId(User);
 
-            // LOGICA IMAGINE
+            // LOGICA STATUS: Admin -> Approved direct / Colaborator -> Pending
+            if (User.IsInRole("Admin"))
+            {
+                product.Status = "Approved";
+            }
+            else
+            {
+                product.Status = "Pending";
+            }
+
+            // --- Logica Imagine ---
             if (Image != null && Image.Length > 0)
             {
-                // Verificari 
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
                 var fileExtension = Path.GetExtension(Image.FileName).ToLower();
 
-                if (!allowedExtensions.Contains(fileExtension))
+                if (!allowedExtensions.Contains(fileExtension) || Image.Length > 5 * 1024 * 1024)
                 {
-                    ModelState.AddModelError("Image", "Extensie nepermisă.");
-                    ViewBag.Categories = db.Categories;
-                    return View(product);
-                }
-                if (Image.Length > 5 * 1024 * 1024)
-                {
-                    ModelState.AddModelError("Image", "Fișierul este prea mare (Max 5MB).");
+                    ModelState.AddModelError("Image", "Fișier invalid.");
                     ViewBag.Categories = db.Categories;
                     return View(product);
                 }
 
-                // Salvare fizica imagine noua
                 var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
                 var databaseFileName = "/images/" + Image.FileName;
-
                 using (var fileStream = new FileStream(storagePath, FileMode.Create))
                 {
                     await Image.CopyToAsync(fileStream);
@@ -88,17 +115,21 @@ namespace OnlineShopProject_dNet.Controllers
             }
             else
             {
-                // Daca nu se incarca nimic, setam PLACEHOLDER-ul
                 product.Image = "/images/default-product.jpeg";
             }
 
-            
             ModelState.Remove(nameof(product.Image));
 
             if (TryValidateModel(product))
             {
                 db.Products.Add(product);
                 await db.SaveChangesAsync();
+
+                if (product.Status == "Pending")
+                    TempData["message"] = "Produsul a fost trimis spre aprobare!";
+                else
+                    TempData["message"] = "Produsul a fost adăugat!";
+
                 return RedirectToAction("Index");
             }
 
@@ -106,71 +137,79 @@ namespace OnlineShopProject_dNet.Controllers
             return View(product);
         }
 
+        // 4. EDIT
+        [Authorize(Roles = "Admin,Proposer")]
         [HttpGet]
         public IActionResult Edit(int id)
         {
             var product = db.Products.Find(id);
             if (product == null) return NotFound();
 
+            if (product.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
+            {
+                TempData["message"] = "Nu ai dreptul să editezi acest produs!";
+                return RedirectToAction("Index");
+            }
+
             ViewBag.Categories = db.Categories;
             return View(product);
         }
 
+        [Authorize(Roles = "Admin,Proposer")]
         [HttpPost]
         public async Task<IActionResult> Edit(int id, Product requestProduct, IFormFile? Image)
         {
             var product = await db.Products.FindAsync(id);
             if (product == null) return NotFound();
 
-            // Actualizam datele
+            if (product.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             product.Title = requestProduct.Title;
             product.Description = requestProduct.Description;
             product.Price = requestProduct.Price;
             product.Stock = requestProduct.Stock;
-            product.Status = product.Stock > 0;
             product.CategoryId = requestProduct.CategoryId;
 
-            // Logica Imagine la Editare
+            // RESETARE STATUS LA EDITARE
+            // Daca esti Colaborator si modifici ceva, produsul reintra in verificare
+            if (User.IsInRole("Proposer"))
+            {
+                product.Status = "Pending";
+            }
+            else if (User.IsInRole("Admin"))
+            {
+                product.Status = "Approved";
+            }
+
+            // --- Logica Imagine ---
             if (Image != null && Image.Length > 0)
             {
-                
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var fileExtension = Path.GetExtension(Image.FileName).ToLower();
-
-                if (!allowedExtensions.Contains(fileExtension) || Image.Length > 5 * 1024 * 1024)
-                {
-                    ModelState.AddModelError("Image", "Eroare la fișier (extensie sau mărime).");
-                    ViewBag.Categories = db.Categories;
-                    return View(requestProduct);
-                }
-
-                // PROTECTIE PLACEHOLDER: Stergem imaginea veche DOAR daca NU este placeholder-ul
                 if (!string.IsNullOrEmpty(product.Image) && product.Image != "/images/default-product.jpeg")
                 {
                     var oldPath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
-                    if (System.IO.File.Exists(oldPath))
-                    {
-                        System.IO.File.Delete(oldPath);
-                    }
+                    if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
                 }
 
-                // Salvam noua imagine
                 var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
-                var databaseFileName = "/images/" + Image.FileName;
                 using (var fileStream = new FileStream(storagePath, FileMode.Create))
                 {
                     await Image.CopyToAsync(fileStream);
                 }
-                product.Image = databaseFileName;
+                product.Image = "/images/" + Image.FileName;
             }
-            // Nota: Daca Image e null, product.Image ramane neschimbat 
-
-            ModelState.Remove("Image");
-            ModelState.Remove("requestProduct.Image");
 
             if (TryValidateModel(product))
             {
                 await db.SaveChangesAsync();
+
+                if (product.Status == "Pending")
+                    TempData["message"] = "Produsul modificat necesită o nouă aprobare!";
+                else
+                    TempData["message"] = "Produsul a fost actualizat!";
+
                 return RedirectToAction("Index");
             }
 
@@ -178,24 +217,29 @@ namespace OnlineShopProject_dNet.Controllers
             return View(requestProduct);
         }
 
+        // 5. DELETE
         [HttpPost]
+        [Authorize(Roles = "Admin,Proposer")]
         public ActionResult Delete(int id)
         {
             var product = db.Products.Find(id);
             if (product == null) return NotFound();
 
-            //  Nu stergem fisierul daca este cel default
+            if (product.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
+            {
+                TempData["message"] = "Nu ai dreptul să ștergi acest produs!";
+                return RedirectToAction("Index");
+            }
+
             if (!string.IsNullOrEmpty(product.Image) && product.Image != "/images/default-product.jpeg")
             {
                 var imagePath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
-                if (System.IO.File.Exists(imagePath))
-                {
-                    System.IO.File.Delete(imagePath);
-                }
+                if (System.IO.File.Exists(imagePath)) System.IO.File.Delete(imagePath);
             }
 
             db.Products.Remove(product);
             db.SaveChanges();
+            TempData["message"] = "Produsul a fost șters.";
             return RedirectToAction("Index");
         }
     }
