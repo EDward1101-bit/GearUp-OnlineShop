@@ -30,7 +30,7 @@ namespace OnlineShopProject_dNet.Models
 
         //TODO: Schimba tipul in string
         // Status: "Pending", "Approved", "Rejected"
-        public bool Status { get; set; }
+        public string? Status { get; set; }
 
         // Relația cu Categoria
         [Required(ErrorMessage = "Categoria este obligatorie")]
