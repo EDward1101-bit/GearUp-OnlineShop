@@ -14,5 +14,12 @@ namespace OnlineShopProject_dNet.Models
 
         // Un user (Inregistrat) lasă review-uri (în diagramă Review are UserId)
         public virtual ICollection<Review>? Reviews { get; set; }
+
+
+        // Relatia 1-M cu Orders
+        public virtual ICollection<Order>? Orders { get; set; }
+
+        // Relatia M-M cu Products (prin Wishlist)
+        public virtual ICollection<Wishlist>? Wishlists { get; set; }
     }
 }
