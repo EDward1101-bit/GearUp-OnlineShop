@@ -243,7 +243,7 @@ namespace OnlineShopProject_dNet.Controllers
                 return RedirectToAction("Index");
             }
 
-            // 1. VALIDARE ADRESĂ: Este obligatoriu să completăm adresa
+            // VALIDARE ADRESĂ: Este obligatoriu să completăm adresa
             if (string.IsNullOrWhiteSpace(requestOrder.ShippingAddress))
             {
                 TempData["message"] = "Te rugăm să completezi adresa de livrare!";
@@ -253,7 +253,7 @@ namespace OnlineShopProject_dNet.Controllers
                 return View(cart);
             }
 
-            // 2. ULTIMA VERIFICARE DE STOC (Security Check)
+            // ULTIMA VERIFICARE DE STOC (Security Check)
             foreach (var item in cart.OrderDetails)
             {
                 // Verificăm dacă produsul e null sau stocul e insuficient
@@ -264,7 +264,7 @@ namespace OnlineShopProject_dNet.Controllers
                 }
             }
 
-            // 3. Procesarea Comenzii - SCĂDEREA STOCULUI
+            // Procesarea Comenzii - SCĂDEREA STOCULUI
             foreach (var item in cart.OrderDetails)
             {
                 // Verificare de siguranță pentru a evita warning-urile
@@ -274,7 +274,7 @@ namespace OnlineShopProject_dNet.Controllers
                 }
             }
 
-            // 4. Finalizarea datelor
+            // Finalizarea datelor
             cart.Status = "Placed";
             cart.Date = DateTime.Now;
             cart.ShippingAddress = requestOrder.ShippingAddress; // Salvăm adresa validată
@@ -284,6 +284,44 @@ namespace OnlineShopProject_dNet.Controllers
 
             TempData["message"] = "Comanda a fost plasată cu succes!";
             return RedirectToAction("Index", "Products");
+        }
+
+
+        // 7. ISTORIC COMENZI (MyOrders) - Lista tuturor comenzilor plasate
+        [HttpGet]
+        public async Task<IActionResult> MyOrders()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // Luăm toate comenzile care NU mai sunt în stadiul de "Coș"
+            var orders = await db.Orders
+                                 .Where(o => o.UserId == userId && o.Status != "InCart")
+                                 .OrderByDescending(o => o.Date) // Cele mai recente primele
+                                 .ToListAsync();
+
+            return View(orders);
+        }
+
+        // 8. DETALII COMANDĂ (Details) - Ce produse sunt într-o comandă veche
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // Căutăm comanda specifică (id) și încărcăm produsele
+            // Verificăm și UserId pentru securitate (să nu vezi comenzile altuia)
+            var order = await db.Orders
+                                .Include(o => o.OrderDetails)
+                                .ThenInclude(od => od.Product)
+                                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+
+            if (order == null)
+            {
+                // Dacă comanda nu există sau nu e a ta
+                return NotFound();
+            }
+
+            return View(order);
         }
     }
 }
