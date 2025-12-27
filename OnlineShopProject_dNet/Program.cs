@@ -27,6 +27,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+builder.Services.AddScoped<OnlineShopProject_dNet.Services.CartService>();
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
