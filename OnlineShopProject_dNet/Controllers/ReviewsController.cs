@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
@@ -17,12 +18,26 @@ namespace OnlineShopProject_dNet.Controllers
             _userManager = userManager;
         }
 
-        // POST: Adaugarea unui review
+        // POST: Adaugarea unui review (doar utilizatori înregistrați)
+        [Authorize]
         [HttpPost]
         public IActionResult New(Review rev)
         {
             rev.Date = DateTime.Now;
             rev.UserId = _userManager.GetUserId(User);
+
+            // Validare: Verifică dacă utilizatorul are deja un review pentru acest produs
+            if (rev.ProductId.HasValue && !string.IsNullOrEmpty(rev.UserId))
+            {
+                var existingReview = db.Reviews
+                    .FirstOrDefault(r => r.ProductId == rev.ProductId.Value && r.UserId == rev.UserId);
+
+                if (existingReview != null)
+                {
+                    TempData["message"] = "Aveți deja un review pentru acest produs. Puteți edita review-ul existent.";
+                    return Redirect("/Products/Show/" + rev.ProductId);
+                }
+            }
 
             if (ModelState.IsValid)
             {
@@ -35,13 +50,15 @@ namespace OnlineShopProject_dNet.Controllers
                     SetProductRating(rev.ProductId.Value);
                 }
 
+                TempData["message"] = "Review-ul a fost adăugat cu succes!";
                 return Redirect("/Products/Show/" + rev.ProductId);
             }
 
             return Redirect("/Products/Show/" + rev.ProductId);
         }
 
-        // GET: Editare review
+        // GET: Editare review (doar utilizatori înregistrați)
+        [Authorize]
         public IActionResult Edit(int id)
         {
             Review? rev = db.Reviews.Find(id);
@@ -61,6 +78,7 @@ namespace OnlineShopProject_dNet.Controllers
             return View();
         }
 
+        [Authorize]
         [HttpPost]
         public IActionResult Edit(int id, Review requestReview)
         {
@@ -97,6 +115,7 @@ namespace OnlineShopProject_dNet.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         public IActionResult Delete(int id)
         {

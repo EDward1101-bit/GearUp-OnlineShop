@@ -1,8 +1,13 @@
-﻿@model OnlineShopProject_dNet.Models.Product
+@model OnlineShopProject_dNet.Models.Product
 @using Microsoft.AspNetCore.Identity
 @using OnlineShopProject_dNet.Models
 
 @inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUserId = User.Identity?.IsAuthenticated == true ? UserManager.GetUserId(User) : null;
+    var userHasReview = currentUserId != null && Model.Reviews != null && Model.Reviews.Any(r => r.UserId == currentUserId);
+}
 
 @* Link CSS pentru iconițe *@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -33,7 +38,15 @@
 </style>
 
 <div class="mt-5 mb-5">
-    <h3 class="mb-4 text-dark fw-bold">Review-uri clienți</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0 text-dark fw-bold">
+            <i class="bi bi-star-fill text-warning"></i> Review-uri clienți
+            @if (Model.Reviews != null && Model.Reviews.Any())
+            {
+                <span class="badge bg-secondary ms-2">@Model.Reviews.Count()</span>
+            }
+        </h3>
+    </div>
 
     <div class="row">
         <div class="col-12">
@@ -41,29 +54,36 @@
             @* --- ZONA 1: LISTAREA REVIEW-URILOR --- *@
             @if (Model.Reviews != null && Model.Reviews.Any())
             {
-                <div class="d-flex flex-column gap-3">
+                <div class="d-flex flex-column gap-4">
                     @foreach (var review in Model.Reviews.OrderByDescending(r => r.Date))
                     {
                         string displayName = !string.IsNullOrEmpty(review.User?.FirstName)
                         ? review.User.FirstName
                         : (review.User?.UserName ?? "Anonim");
 
-                        <div class="border-bottom pb-3" id="review-container-@review.Id">
+                        <div class="card border-0 shadow-sm" id="review-container-@review.Id">
+                            <div class="card-body">
 
                             @* --- MOD VIZUALIZARE --- *@
                             <div id="view-mode-@review.Id">
-
-                                @* HEADER: Avatar + Nume *@
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <div class="user-avatar rounded-circle d-flex justify-content-center align-items-center">
-                                        <i class="bi bi-person-fill"></i>
+                                @* HEADER: Avatar + Nume + Data *@
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="user-avatar rounded-circle d-flex justify-content-center align-items-center shadow-sm">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@displayName</div>
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar"></i> @review.Date.ToString("dd MMMM yyyy")
+                                            </small>
+                                        </div>
                                     </div>
-                                    <span class="fw-bold text-dark">@displayName</span>
                                 </div>
 
-                                @* STELE + DATA *@
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <div class="review-stars-display d-flex">
+                                @* STELE *@
+                                <div class="mb-3">
+                                    <div class="review-stars-display d-flex gap-1">
                                         @for (int i = 1; i <= 5; i++)
                                         {
                                             if (review.Rating.HasValue && i <= review.Rating.Value)
@@ -72,29 +92,24 @@
                                             }
                                             else
                                             {
-
                                                 <i class="bi bi-star"></i>
                                             }
                                         }
                                     </div>
-                                    <span class="text-secondary" style="font-size: 0.85rem;">@review.Date.ToString("dd MMMM yyyy")</span>
                                 </div>
 
                                 @* CONTINUT *@
-                                <div class="text-break mb-2">
-                                    @review.Content
+                                <div class="text-break mb-3">
+                                    <p class="mb-0">@review.Content</p>
                                 </div>
 
-                                @* BUTOANE ACTIUNE (Corectate pentru aliniere) *@
+                                @* BUTOANE ACTIUNE *@
                                 @if (User.Identity?.IsAuthenticated == true && (review.UserId == UserManager.GetUserId(User) || User.IsInRole("Admin")))
                                 {
-                                    <div class="d-flex align-items-center gap-3">
-                                        @* Link Editeaza *@
-                                        <a href="javascript:void(0)" onclick="toggleEditMode(@review.Id)" class="text-decoration-none text-muted small d-flex align-items-center gap-1">
+                                    <div class="d-flex align-items-center gap-3 pt-2 border-top">
+                                        <a href="javascript:void(0)" onclick="toggleEditMode(@review.Id)" class="text-decoration-none text-primary small d-flex align-items-center gap-1">
                                             <i class="bi bi-pencil"></i> Editează
                                         </a>
-
-                                        @* Buton Sterge *@
                                         <form method="post" action="/Reviews/Delete/@review.Id" class="d-inline-block m-0 p-0">
                                             <button type="submit" class="btn btn-link p-0 text-decoration-none text-danger small d-flex align-items-center gap-1" style="border: none; vertical-align: baseline;" onclick="return confirm('Ștergi review-ul?');">
                                                 <i class="bi bi-trash"></i> Șterge
@@ -107,11 +122,11 @@
                             @* --- MOD EDITARE (Inline) --- *@
                             @if (User.Identity?.IsAuthenticated == true && (review.UserId == UserManager.GetUserId(User) || User.IsInRole("Admin")))
                             {
-                                <div id="edit-mode-@review.Id" style="display: none;" class="bg-light p-3 rounded mt-2">
+                                <div id="edit-mode-@review.Id" style="display: none;" class="bg-light p-3 rounded mt-3 border">
                                     <form method="post" action="/Reviews/Edit/@review.Id">
-                                        <div class="mb-2">
-                                            <label class="small text-muted mb-1">Nota:</label>
-                                            <div class="star-rating text-warning fs-5" data-review-id="@review.Id">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold mb-2">Rating:</label>
+                                            <div class="star-rating text-warning fs-5 d-flex gap-1" data-review-id="@review.Id">
                                                 @for (int i = 1; i <= 5; i++)
                                                 {
                                                     var iconClass = (review.Rating.HasValue && i <= review.Rating.Value) ? "bi-star-fill" : "bi-star";
@@ -121,25 +136,33 @@
                                             <input type="hidden" name="Rating" id="rating-input-@review.Id" value="@(review.Rating ?? 5)" />
                                         </div>
 
-                                        <div class="mb-2">
-                                            <textarea class="form-control form-control-sm" name="Content" rows="3">@review.Content</textarea>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold mb-2">Comentariu:</label>
+                                            <textarea class="form-control" name="Content" rows="4">@review.Content</textarea>
                                         </div>
 
                                         <div class="d-flex gap-2">
-                                            <button type="submit" class="btn btn-sm btn-dark rounded-pill px-3">Salvează</button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="toggleEditMode(@review.Id)">Anulează</button>
+                                            <button type="submit" class="btn btn-primary px-3">
+                                                <i class="bi bi-check"></i> Salvează
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary px-3" onclick="toggleEditMode(@review.Id)">
+                                                <i class="bi bi-x"></i> Anulează
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
                             }
-
+                            </div>
                         </div>
                     }
                 </div>
             }
             else
             {
-                <div class="text-muted fst-italic">Nu există încă review-uri. Fii primul care scrie unul!</div>
+                <div class="alert alert-light border-0 shadow-sm text-center py-4">
+                    <i class="bi bi-chat-left-text fs-1 text-muted d-block mb-2"></i>
+                    <p class="text-muted mb-0">Nu există încă review-uri. Fii primul care scrie unul!</p>
+                </div>
             }
 
             <hr class="my-5" />
@@ -147,36 +170,54 @@
             @* --- ZONA 2: FORMULAR ADAUGARE --- *@
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <div class="card border-light bg-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Scrie un review</h5>
-                        <form method="post" action="/Reviews/New">
-                            <input type="hidden" name="ProductId" value="@Model.Id" />
+                @if (!userHasReview)
+                {
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-pencil-square text-primary"></i> Scrie un review
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="/Reviews/New">
+                                <input type="hidden" name="ProductId" value="@Model.Id" />
 
-                            <div class="mb-3">
-                                <div class="star-rating d-flex gap-1 fs-4 text-warning">
-                                    <i class="bi bi-star-fill" data-value="1" onclick="setRating(this, 0)"></i>
-                                    <i class="bi bi-star-fill" data-value="2" onclick="setRating(this, 0)"></i>
-                                    <i class="bi bi-star-fill" data-value="3" onclick="setRating(this, 0)"></i>
-                                    <i class="bi bi-star-fill" data-value="4" onclick="setRating(this, 0)"></i>
-                                    <i class="bi bi-star-fill" data-value="5" onclick="setRating(this, 0)"></i>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Rating:</label>
+                                    <div class="star-rating d-flex gap-1 fs-4 text-warning">
+                                        <i class="bi bi-star-fill" data-value="1" onclick="setRating(this, 0)"></i>
+                                        <i class="bi bi-star-fill" data-value="2" onclick="setRating(this, 0)"></i>
+                                        <i class="bi bi-star-fill" data-value="3" onclick="setRating(this, 0)"></i>
+                                        <i class="bi bi-star-fill" data-value="4" onclick="setRating(this, 0)"></i>
+                                        <i class="bi bi-star-fill" data-value="5" onclick="setRating(this, 0)"></i>
+                                    </div>
+                                    <input type="hidden" name="Rating" id="rating-input-0" value="5" />
+                                    <small class="text-muted">Click pe stele pentru a selecta rating-ul</small>
                                 </div>
-                                <input type="hidden" name="Rating" id="rating-input-0" value="5" />
-                            </div>
 
-                            <div class="mb-3">
-                                <textarea class="form-control" name="Content" rows="3" placeholder="Detaliază experiența ta..." required></textarea>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="review-content" class="form-label fw-semibold">Comentariul tău:</label>
+                                    <textarea class="form-control" id="review-content" name="Content" rows="4" placeholder="Detaliază experiența ta cu acest produs..." required></textarea>
+                                </div>
 
-                            <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Postează review</button>
-                        </form>
+                                <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                    <i class="bi bi-send"></i> Postează review
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="alert alert-info border-0 shadow-sm">
+                        <i class="bi bi-info-circle"></i> <strong>Aveți deja un review pentru acest produs.</strong> Puteți edita review-ul existent din lista de mai sus.
+                    </div>
+                }
             }
             else
             {
-                <div class="alert alert-light border">
-                    <a href="/Identity/Account/Login" class="fw-bold text-decoration-none">Autentifică-te</a> pentru a scrie un review.
+                <div class="alert alert-light border shadow-sm">
+                    <i class="bi bi-lock"></i> <a href="/Identity/Account/Login" class="fw-bold text-decoration-none">Autentifică-te</a> pentru a scrie un review.
                 </div>
             }
         </div>
