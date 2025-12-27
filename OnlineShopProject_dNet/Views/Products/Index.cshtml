@@ -19,9 +19,6 @@
                 <p class="mb-0 mt-2 opacity-75">Descoperă produsele noastre</p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <a class="btn btn-light btn-sm me-2" href="/Categories/Index/">
-                    <i class="bi bi-grid"></i> Categorii
-                </a>
                 @if (User.IsInRole("Admin") || User.IsInRole("Proposer"))
                 {
                     <a class="btn btn-warning btn-sm" href="/Products/New">
@@ -35,6 +32,114 @@
 
 <div class="container">
 
+@* ZONA PRODUSE PENDING - DOAR ADMIN *@
+@if (User.IsInRole("Admin"))
+{
+    var pendingProducts = ViewBag.PendingProducts as IEnumerable<OnlineShopProject_dNet.Models.Product>;
+    if (pendingProducts != null && pendingProducts.Any())
+    {
+        <div class="card border-warning mb-4 shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-hourglass-split"></i> Produse în Așteptare (@pendingProducts.Count())
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                    @foreach (var product in pendingProducts)
+                    {
+                        <div class="col">
+                            <div class="card h-100 border-warning">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">@product.Title</h6>
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-hourglass-split"></i> Pending
+                                        </span>
+                                    </div>
+                                    <p class="text-muted small mb-2">
+                                        <i class="bi bi-person"></i> @(product.User?.UserName ?? "Necunoscut")
+                                    </p>
+                                    <p class="text-muted small mb-2">
+                                        <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără categorie")
+                                    </p>
+                                    <p class="text-danger fw-bold mb-3">@product.Price RON</p>
+                                    <div class="d-flex gap-2">
+                                        <form method="post" action="/Products/Approve/@product.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="bi bi-check-circle"></i> Aprobă
+                                            </button>
+                                        </form>
+                                        <form method="post" action="/Products/Reject/@product.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?')">
+                                                <i class="bi bi-x-circle"></i> Respinge
+                                            </button>
+                                        </form>
+                                        <a href="/Products/Show/@product.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye"></i> Vezi
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@* ZONA PRODUSE PENDING PROPRIE - DOAR PROPOSER *@
+@if (User.IsInRole("Proposer"))
+{
+    var myPendingProducts = ViewBag.MyPendingProducts as IEnumerable<OnlineShopProject_dNet.Models.Product>;
+    if (myPendingProducts != null && myPendingProducts.Any())
+    {
+        <div class="card border-info mb-4 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-hourglass-split"></i> Produsele Mele în Așteptare (@myPendingProducts.Count())
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                    @foreach (var product in myPendingProducts)
+                    {
+                        <div class="col">
+                            <div class="card h-100 border-info">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">@product.Title</h6>
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-hourglass-split"></i> În așteptare
+                                        </span>
+                                    </div>
+                                    <p class="text-muted small mb-2">
+                                        <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără categorie")
+                                    </p>
+                                    <p class="text-danger fw-bold mb-3">@product.Price RON</p>
+                                    <div class="d-flex gap-2">
+                                        <a href="/Products/Show/@product.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye"></i> Vezi
+                                        </a>
+                                        <a href="/Products/Edit/@product.Id" class="btn btn-outline-warning btn-sm">
+                                            <i class="bi bi-pencil"></i> Editează
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@* PRODUSE APROBATE - TOȚI *@
+<h3 class="mb-4">
+    <i class="bi bi-box-seam"></i> Produse Disponibile
+</h3>
 
 @* Folosim .Any() care este mai rapid și mai sigur decât .Count() == 0 *@
 @if (productsList == null || !productsList.Any())

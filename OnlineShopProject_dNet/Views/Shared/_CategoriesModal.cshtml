@@ -1,0 +1,217 @@
+@* Modal pentru gestionarea categoriilor - categoriile se încarcă prin AJAX *@
+
+<!-- Modal pentru Categorii -->
+<div class="modal fade" id="categoriesModal" tabindex="-1" aria-labelledby="categoriesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="categoriesModalLabel">
+                    <i class="bi bi-grid"></i> Gestionare Categorii
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @* Mesaj de succes/eroare *@
+                <div id="categoryMessage" class="alert" style="display: none;"></div>
+
+                @* Formular adăugare categorie nouă *@
+                <div class="card mb-4 border-primary">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-plus-circle text-primary"></i> Adaugă Categorie Nouă
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="addCategoryForm" method="post" action="/Categories/New">
+                            <div class="mb-3">
+                                <label for="newCategoryName" class="form-label fw-semibold">Nume Categorie:</label>
+                                <input type="text" class="form-control" id="newCategoryName" name="Name" required 
+                                       placeholder="Ex: Electronice, Haine, etc." />
+                                <div class="form-text">Numele categoriei trebuie să fie unic.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Adaugă Categorie
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                @* Lista categoriilor existente *@
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-list-ul text-primary"></i> Categorii Existente
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="categoriesList">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Se încarcă...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Închide</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Modal pentru editare categorie *@
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="editCategoryModalLabel">
+                    <i class="bi bi-pencil"></i> Editează Categorie
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editCategoryForm" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="editCategoryId" name="id" />
+                    <div class="mb-3">
+                        <label for="editCategoryName" class="form-label fw-semibold">Nume Categorie:</label>
+                        <input type="text" class="form-control" id="editCategoryName" name="Name" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle"></i> Salvează Modificările
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Încărcare categorii când se deschide modalul
+    document.getElementById('categoriesModal')?.addEventListener('show.bs.modal', function() {
+        loadCategories();
+    });
+
+    function loadCategories() {
+        fetch('/Categories/GetAll')
+            .then(response => response.json())
+            .then(data => {
+                const categoriesList = document.getElementById('categoriesList');
+                if (data && data.length > 0) {
+                    let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nume</th><th>Acțiuni</th></tr></thead><tbody>';
+                    data.forEach(category => {
+                        html += `
+                            <tr id="category-row-${category.id}">
+                                <td>
+                                    <strong>${category.name}</strong>
+                                    <small class="text-muted d-block">${category.productCount} produse</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-warning btn-edit-category" 
+                                                data-id="${category.id}" data-name="${category.name}">
+                                            <i class="bi bi-pencil"></i> Editează
+                                        </button>
+                                        <form method="post" action="/Categories/Delete/${category.id}" class="d-inline">
+                                            <button type="submit" class="btn btn-danger" 
+                                                    onclick="return confirm('ATENȚIE: Ștergerea categoriei va șterge TOATE produsele din ea! Continui?')">
+                                                <i class="bi bi-trash"></i> Șterge
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table></div>';
+                    categoriesList.innerHTML = html;
+                    
+                    // Reattach event listeners
+                    attachEditListeners();
+                } else {
+                    categoriesList.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle"></i> Nu există categorii. Adaugă prima categorie!</div>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('categoriesList').innerHTML = '<div class="alert alert-danger">Eroare la încărcarea categoriilor!</div>';
+            });
+    }
+
+    function attachEditListeners() {
+        document.querySelectorAll('.btn-edit-category').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const categoryId = this.getAttribute('data-id');
+                const categoryName = this.getAttribute('data-name');
+                
+                document.getElementById('editCategoryId').value = categoryId;
+                document.getElementById('editCategoryName').value = categoryName;
+                document.getElementById('editCategoryForm').action = '/Categories/Edit/' + categoryId;
+                
+                const editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+                editModal.show();
+            });
+        });
+    }
+
+    // Gestionare formular adăugare categorie
+    document.getElementById('addCategoryForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('/Categories/New', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok || response.redirected) {
+                loadCategories();
+                document.getElementById('newCategoryName').value = '';
+                showMessage('Categoria a fost adăugată cu succes!', 'success');
+            } else {
+                showMessage('Eroare la adăugarea categoriei!', 'danger');
+            }
+        })
+        .catch(error => {
+            showMessage('Eroare la adăugarea categoriei!', 'danger');
+        });
+    });
+
+    // Gestionare formular editare
+    document.getElementById('editCategoryForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const categoryId = document.getElementById('editCategoryId').value;
+        
+        fetch('/Categories/Edit/' + categoryId, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok || response.redirected) {
+                bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
+                loadCategories();
+                showMessage('Categoria a fost actualizată cu succes!', 'success');
+            } else {
+                showMessage('Eroare la editarea categoriei!', 'danger');
+            }
+        })
+        .catch(error => {
+            showMessage('Eroare la editarea categoriei!', 'danger');
+        });
+    });
+
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('categoryMessage');
+        messageDiv.className = 'alert alert-' + type;
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000);
+    }
+</script>
+

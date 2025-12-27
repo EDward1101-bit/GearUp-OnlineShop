@@ -17,32 +17,31 @@ namespace OnlineShopProject_dNet.Controllers
             _env = env;
         }
 
-        // 1. INDEX - Public: Oricine vede lista
-        public IActionResult Index()
-        {
-            var categories = from category in db.Categories
-                             orderby category.Name
-                             select category;
-            ViewBag.Categories = categories;
-            return View();
-        }
-
-        // 2. SHOW - Public: Oricine vede produsele din categorie
+        // 1. GETALL - Returnează categorii ca JSON (pentru modal)
+        [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult Show(int id)
+        public IActionResult GetAll()
         {
-            // MODIFICARE: Folosim Include pentru a avea acces si la Produse in View
-            Category? category = db.Categories
-                                   .Include(c => c.Products)
-                                   .FirstOrDefault(c => c.Id == id);
+            var categories = db.Categories
+                .Include(c => c.Products)
+                .OrderBy(c => c.Name)
+                .Select(c => new
+                {
+                    id = c.Id,
+                    name = c.Name,
+                    productCount = c.Products != null ? c.Products.Count : 0
+                })
+                .ToList();
 
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
+            return Json(categories);
         }
+
+        // INDEX - Eliminat (folosim modal acum)
+        // [HttpGet]
+        // public IActionResult Index() { ... }
+
+        // SHOW - Eliminat (nu mai avem nevoie de view separat)
+        // Produsele se filtrează direct din Products/Index
 
         // 3. NEW - RESTRICTIONAT: Doar Admin
         [Authorize(Roles = "Admin")]
@@ -61,7 +60,7 @@ namespace OnlineShopProject_dNet.Controllers
                 db.Categories.Add(cat);
                 db.SaveChanges();
                 TempData["message"] = "Categoria a fost adăugată!";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Products");
             }
             return View(cat);
         }
@@ -96,7 +95,7 @@ namespace OnlineShopProject_dNet.Controllers
                 category.Name = requestCategory.Name;
                 db.SaveChanges();
                 TempData["message"] = "Categoria a fost modificată!";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Products");
             }
             return View(requestCategory);
         }
@@ -130,7 +129,7 @@ namespace OnlineShopProject_dNet.Controllers
             db.SaveChanges();
             TempData["message"] = "Categoria și produsele aferente au fost șterse!";
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Products");
         }
     }
 }

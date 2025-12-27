@@ -34,6 +34,30 @@ namespace OnlineShopProject_dNet.Controllers
 
             ViewBag.Products = products;
 
+            // Pentru Admin: adăugăm produsele Pending într-o zonă separată
+            if (User.IsInRole("Admin"))
+            {
+                var pendingProducts = db.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.User)
+                    .Where(p => p.Status == "Pending")
+                    .OrderByDescending(p => p.Id)
+                    .ToList();
+                ViewBag.PendingProducts = pendingProducts;
+            }
+
+            // Pentru Proposer: adăugăm produsele proprii Pending
+            if (User.IsInRole("Proposer"))
+            {
+                var currentUserId = _userManager.GetUserId(User);
+                var myPendingProducts = db.Products
+                    .Include(p => p.Category)
+                    .Where(p => p.Status == "Pending" && p.UserId == currentUserId)
+                    .OrderByDescending(p => p.Id)
+                    .ToList();
+                ViewBag.MyPendingProducts = myPendingProducts;
+            }
+
             if (!products.Any())
             {
                 TempData["message"] = "Nu există produse aprobate momentan.";
@@ -240,6 +264,36 @@ namespace OnlineShopProject_dNet.Controllers
             db.Products.Remove(product);
             db.SaveChanges();
             TempData["message"] = "Produsul a fost șters.";
+            return RedirectToAction("Index");
+        }
+
+        // 6. APPROVE - Doar Admin poate aproba produse
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult Approve(int id)
+        {
+            var product = db.Products.Find(id);
+            if (product == null) return NotFound();
+
+            product.Status = "Approved";
+            db.SaveChanges();
+
+            TempData["message"] = "Produsul a fost aprobat cu succes!";
+            return RedirectToAction("Index");
+        }
+
+        // 7. REJECT - Doar Admin poate respinge produse
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult Reject(int id)
+        {
+            var product = db.Products.Find(id);
+            if (product == null) return NotFound();
+
+            product.Status = "Rejected";
+            db.SaveChanges();
+
+            TempData["message"] = "Produsul a fost respins.";
             return RedirectToAction("Index");
         }
     }

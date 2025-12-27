@@ -33,11 +33,15 @@
                                 <i class="bi bi-box-seam"></i> Produse
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">
-                                <i class="bi bi-grid"></i> Categorii
-                            </a>
-                        </li>
+                        @* Modal pentru categorii - doar Admin *@
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <button type="button" class="nav-link btn btn-link text-white border-0 p-0" data-bs-toggle="modal" data-bs-target="#categoriesModal" style="text-decoration: none;">
+                                    <i class="bi bi-grid"></i> Categorii
+                                </button>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
@@ -55,6 +59,13 @@
             &copy; 2025 - OnlineShopProject_dNet - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
+    @* Modal pentru gestionarea categoriilor (doar Admin) *@
+    @if (User.IsInRole("Admin"))
+    {
+        <partial name="_CategoriesModal" />
+    }
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,8 @@ namespace OnlineShopProject_dNet.Controllers
             _userManager = userManager;
         }
 
-        // POST: Adaugarea unui review
+        // POST: Adaugarea unui review (doar utilizatori înregistrați)
+        [Authorize]
         [HttpPost]
         public IActionResult New(Review rev)
         {
@@ -55,7 +57,8 @@ namespace OnlineShopProject_dNet.Controllers
             return Redirect("/Products/Show/" + rev.ProductId);
         }
 
-        // GET: Editare review
+        // GET: Editare review (doar utilizatori înregistrați)
+        [Authorize]
         public IActionResult Edit(int id)
         {
             Review? rev = db.Reviews.Find(id);
@@ -75,6 +78,7 @@ namespace OnlineShopProject_dNet.Controllers
             return View();
         }
 
+        [Authorize]
         [HttpPost]
         public IActionResult Edit(int id, Review requestReview)
         {
@@ -111,6 +115,7 @@ namespace OnlineShopProject_dNet.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         public IActionResult Delete(int id)
         {
