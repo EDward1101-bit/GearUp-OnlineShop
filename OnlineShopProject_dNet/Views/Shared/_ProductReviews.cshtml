@@ -4,6 +4,11 @@
 
 @inject UserManager<ApplicationUser> UserManager
 
+@{
+    var currentUserId = User.Identity?.IsAuthenticated == true ? UserManager.GetUserId(User) : null;
+    var userHasReview = currentUserId != null && Model.Reviews != null && Model.Reviews.Any(r => r.UserId == currentUserId);
+}
+
 @* Link CSS pentru iconițe *@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -165,11 +170,6 @@
             @* --- ZONA 2: FORMULAR ADAUGARE --- *@
             @if (User.Identity?.IsAuthenticated == true)
             {
-                @{
-                    var currentUserId = UserManager.GetUserId(User);
-                    var userHasReview = Model.Reviews != null && Model.Reviews.Any(r => r.UserId == currentUserId);
-                }
-
                 @if (!userHasReview)
                 {
                     <div class="card border-0 shadow-sm">
