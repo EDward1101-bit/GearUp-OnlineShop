@@ -25,6 +25,6 @@ namespace OnlineShopProject_dNet.Models
         public decimal TotalAmount { get; set; }
 
         // Relatia cu produsele prin tabelul asociativ OrderDetail
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
     }
 }
