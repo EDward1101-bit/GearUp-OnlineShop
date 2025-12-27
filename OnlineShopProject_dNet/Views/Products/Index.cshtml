@@ -1,4 +1,4 @@
-﻿@model OnlineShopProject_dNet.Models.Product
+@model OnlineShopProject_dNet.Models.Product
 
 @{
     ViewBag.Title = "Lista Produse";
@@ -8,79 +8,139 @@
     var productsList = ViewBag.Products as IEnumerable<OnlineShopProject_dNet.Models.Product>;
 }
 
-<h2 class="text-center mb-4">Afișare Produse</h2>
-
-<div class="d-flex justify-content-center mb-4 gap-3">
-    <a class="btn btn-outline-info" href="/Categories/Index/">Afișare categorii</a>
-    <a class="btn btn-outline-success" href="/Products/New">Adaugă produs nou</a>
+@* Header Section *@
+<div class="bg-primary text-white py-4 mb-4 rounded shadow-sm">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-0 fw-bold">
+                    <i class="bi bi-shop"></i> Magazin Online
+                </h1>
+                <p class="mb-0 mt-2 opacity-75">Descoperă produsele noastre</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a class="btn btn-light btn-sm me-2" href="/Categories/Index/">
+                    <i class="bi bi-grid"></i> Categorii
+                </a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Proposer"))
+                {
+                    <a class="btn btn-warning btn-sm" href="/Products/New">
+                        <i class="bi bi-plus-circle"></i> Adaugă produs
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
 </div>
 
-<hr />
+<div class="container">
 
 
 @* Folosim .Any() care este mai rapid și mai sigur decât .Count() == 0 *@
 @if (productsList == null || !productsList.Any())
 {
-    <div class="alert alert-warning text-center" role="alert">
-        Nu există produse de afișat.
+    <div class="alert alert-warning text-center shadow-sm border-0" role="alert">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        <h5>Nu există produse de afișat</h5>
+        <p class="text-muted mb-0">Momentan nu sunt produse disponibile.</p>
     </div>
 }
 else
 {
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
 
         @*  Iterăm prin lista *@
         @foreach (var product in productsList)
         {
             <div class="col">
-                <div class="card h-100 shadow-sm">
-
-                    @* ZONA IMAGINE *@
-                    <div style="height: 250px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        @if (!string.IsNullOrEmpty(product.Image))
-                        {
-                            <img src="@product.Image" class="card-img-top" alt="@product.Title" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
-                        }
-                        else
-                        {
-                            <img src="/images/default-product.jpeg" class="card-img-top" alt="Fara imagine" style="max-height: 100%; max-width: 100%; object-fit: contain;" />
-                        }
-                    </div>
-
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title text-primary text-truncate">@product.Title</h5>
-
-                        <p class="card-text text-muted" style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                            @product.Description
-                        </p>
-
-                        <div class="mt-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="fs-5 fw-bold text-danger">@product.Price RON</span>
-
+                <a href="/Products/Show/@product.Id" class="text-decoration-none" style="color: inherit;">
+                    <div class="card h-100 shadow-sm border-0 product-card" style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;">
+                        @* ZONA IMAGINE *@
+                        <div style="height: 280px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                            @if (!string.IsNullOrEmpty(product.Image))
+                            {
+                                <img src="@product.Image" class="card-img-top" alt="@product.Title" style="max-height: 100%; max-width: 100%; object-fit: contain; transition: transform 0.3s;" />
+                            }
+                            else
+                            {
+                                <img src="/images/default-product.jpeg" class="card-img-top" alt="Fara imagine" style="max-height: 100%; max-width: 100%; object-fit: contain; transition: transform 0.3s;" />
+                            }
+                            @* Badge pentru stoc peste imagine *@
+                            <div class="position-absolute top-0 end-0 m-2">
                                 @if (product.Stock > 0)
                                 {
-                                    <span class="badge bg-success rounded-pill">In Stoc</span>
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> În Stoc
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary rounded-pill">Stoc Epuizat</span>
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle"></i> Stoc Epuizat
+                                    </span>
                                 }
                             </div>
+                        </div>
 
-                            <div class="d-flex justify-content-between align-items-center">
+                        <div class="card-body d-flex flex-column">
+                            @* Categorie *@
+                            <div class="mb-2">
                                 <small class="text-muted">
-                                    @* Folosim ?. pentru a evita erorile daca Categoria e null *@
                                     <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără Categorie")
                                 </small>
-                                <a href="/Products/Show/@product.Id" class="btn btn-sm btn-primary">
-                                    Detalii
-                                </a>
+                            </div>
+
+                            @* Titlu *@
+                            <h5 class="card-title text-dark text-truncate mb-2" style="min-height: 2.5rem;">@product.Title</h5>
+
+                            @* Rating dacă există *@
+                            @if (product.Rating.HasValue)
+                            {
+                                <div class="mb-2 d-flex align-items-center gap-1">
+                                    <div class="text-warning">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Math.Round(product.Rating.Value))
+                                            {
+                                                <i class="bi bi-star-fill" style="font-size: 0.85rem;"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star" style="font-size: 0.85rem;"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <small class="text-muted">(@product.Rating.Value.ToString("0.0"))</small>
+                                </div>
+                            }
+
+                            @* Descriere *@
+                            <p class="card-text text-muted small mb-3" style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                                @product.Description
+                            </p>
+
+                            @* Preț *@
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-4 fw-bold text-danger mb-0">@product.Price <small class="fs-6 text-muted">RON</small></span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         }
     </div>
+
+    <style>
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+    </style>
 }
+</div>

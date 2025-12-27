@@ -1,4 +1,8 @@
-﻿@model OnlineShopProject_dNet.Models.Product
+@model OnlineShopProject_dNet.Models.Product
+@using Microsoft.AspNetCore.Identity
+@using OnlineShopProject_dNet.Models
+
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewBag.Title = "Detalii Produs";
@@ -22,92 +26,127 @@ else
 {
     <div class="container my-5">
 
-        @* --- ZONA 1: CARD PRODUS (Codul tău original) --- *@
-        <div class="card shadow-lg border-0">
-            <div class="row g-0">
-
-                @* IMAGINEA *@
-                <div class="col-md-6 d-flex align-items-center justify-content-center bg-light" style="min-height: 400px;">
+        @* --- ZONA 1: IMAGINEA PRODUSULUI --- *@
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center justify-content-center bg-light" style="min-height: 500px; padding: 2rem;">
                     @if (!string.IsNullOrEmpty(Model.Image))
                     {
                         <img src="@Model.Image"
                              alt="@Model.Title"
-                             class="img-fluid rounded-start"
+                             class="img-fluid"
                              style="max-height: 500px; width: auto; object-fit: contain;" />
                     }
                     else
                     {
-                        @* Fallback *@
                         <img src="/images/default-product.jpeg"
                              alt="Imagine indisponibilă"
-                             class="img-fluid rounded-start"
+                             class="img-fluid"
                              style="max-height: 500px; width: auto; object-fit: contain;" />
                     }
-                </div>
-
-                @* DETALIILE *@
-                <div class="col-md-6">
-                    <div class="card-body p-5 h-100 d-flex flex-column">
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="badge bg-info text-dark fs-6">
-                                @* Folosim ?. pentru a evita crash daca Category e null *@
-                                <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fără Categorie")
-                            </span>
-
-                            @if (Model.Stock > 0)
-                            {
-                                <span class="badge bg-success fs-6">În Stoc</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger fs-6">Stoc Epuizat</span>
-                            }
-                        </div>
-
-                        <h1 class="card-title fw-bold text-primary mb-3">@Model.Title</h1>
-                        <h2 class="text-danger fw-bold mb-4">@Model.Price RON</h2>
-
-                        <h5 class="text-muted mb-2">Descriere:</h5>
-                        <p class="card-text fs-5 text-secondary flex-grow-1">
-                            @Model.Description
-                        </p>
-
-                        <p class="text-muted"><small>Stoc disponibil: @Model.Stock bucăți</small></p>
-
-                        @* Aici am putea afisa si Rating-ul general al produsului, daca vrei pe viitor *@
-                        @if (Model.Rating.HasValue)
-                        {
-                            <div class="mb-3 text-warning fs-5">
-                                Rating Mediu: <strong>@Model.Rating.Value.ToString("0.0")</strong> <i class="bi bi-star-fill"></i>
-                            </div>
-                        }
-
-                        <hr />
-
-                        <div class="d-flex gap-2 flex-wrap mt-3">
-                            <a href="/Products/Edit/@Model.Id" class="btn btn-warning px-4">
-                                Editează
-                            </a>
-
-                            <form method="post" action="/Products/Delete/@Model.Id">
-                                <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur stergi produsul?');">
-                                    Șterge
-                                </button>
-                            </form>
-
-                            <a href="/Products/Index" class="btn btn-outline-secondary px-4 ms-auto">
-                                Înapoi
-                            </a>
-                        </div>
-
-                    </div>
                 </div>
             </div>
         </div>
 
-        @* --- ZONA 2: REVIEW-URI (Partial View Integrat) --- *@
-        @* Aici "lipim" codul din _ProductReviews.cshtml *@
+        @* --- ZONA 2: DETALIILE PRODUSULUI --- *@
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                @* Badge-uri pentru categorie și stoc *@
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <span class="badge bg-info text-dark fs-6">
+                        <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fără Categorie")
+                    </span>
+                    @if (Model.Stock > 0)
+                    {
+                        <span class="badge bg-success fs-6">
+                            <i class="bi bi-check-circle"></i> În Stoc
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger fs-6">
+                            <i class="bi bi-x-circle"></i> Stoc Epuizat
+                        </span>
+                    }
+                </div>
+
+                @* Titlu cu rating-ul lângă *@
+                <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
+                    <h1 class="card-title fw-bold text-dark mb-0 flex-grow-1">@Model.Title</h1>
+                    @if (Model.Rating.HasValue)
+                    {
+                        <div class="d-flex align-items-center gap-1 text-warning">
+                            <strong class="fs-4">@Model.Rating.Value.ToString("0.0")</strong>
+                            <i class="bi bi-star-fill fs-5"></i>
+                            @if (Model.Reviews != null && Model.Reviews.Any())
+                            {
+                                <span class="text-muted ms-2" style="font-size: 0.9rem;">
+                                    (@Model.Reviews.Count() @(Model.Reviews.Count() == 1 ? "review" : "review-uri"))
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* Preț *@
+                <div class="mb-4">
+                    <h2 class="text-danger fw-bold mb-0">
+                        @Model.Price <small class="fs-6 text-muted">RON</small>
+                    </h2>
+                </div>
+
+                @* Descriere *@
+                <div class="mb-4">
+                    <h5 class="text-dark fw-semibold mb-3">
+                        <i class="bi bi-info-circle"></i> Descriere
+                    </h5>
+                    <p class="card-text text-secondary fs-6 lh-lg mb-0">
+                        @Model.Description
+                    </p>
+                </div>
+
+                <hr class="my-4" />
+
+                @* Informații suplimentare *@
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-box-seam text-primary"></i>
+                            <span class="text-muted">Stoc disponibil:</span>
+                            <strong class="text-dark">@Model.Stock bucăți</strong>
+                        </div>
+                    </div>
+                </div>
+
+                @* Butoane acțiune (doar pentru admin/owner) *@
+                @if (User.IsInRole("Admin") || (Model.UserId != null && Model.UserId == UserManager.GetUserId(User)))
+                {
+                    <div class="d-flex gap-2 flex-wrap mt-4 pt-3 border-top">
+                        <a href="/Products/Edit/@Model.Id" class="btn btn-warning px-4">
+                            <i class="bi bi-pencil"></i> Editează
+                        </a>
+                        <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
+                            <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur ștergi produsul?');">
+                                <i class="bi bi-trash"></i> Șterge
+                            </button>
+                        </form>
+                        <a href="/Products/Index" class="btn btn-outline-secondary px-4 ms-auto">
+                            <i class="bi bi-arrow-left"></i> Înapoi
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="/Products/Index" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-arrow-left"></i> Înapoi la produse
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* --- ZONA 3: REVIEW-URI (Partial View Integrat) --- *@
         <partial name="_ProductReviews" model="Model" />
 
     </div>

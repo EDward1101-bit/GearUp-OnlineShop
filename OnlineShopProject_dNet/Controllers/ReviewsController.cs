@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
@@ -24,6 +24,19 @@ namespace OnlineShopProject_dNet.Controllers
             rev.Date = DateTime.Now;
             rev.UserId = _userManager.GetUserId(User);
 
+            // Validare: Verifică dacă utilizatorul are deja un review pentru acest produs
+            if (rev.ProductId.HasValue && !string.IsNullOrEmpty(rev.UserId))
+            {
+                var existingReview = db.Reviews
+                    .FirstOrDefault(r => r.ProductId == rev.ProductId.Value && r.UserId == rev.UserId);
+
+                if (existingReview != null)
+                {
+                    TempData["message"] = "Aveți deja un review pentru acest produs. Puteți edita review-ul existent.";
+                    return Redirect("/Products/Show/" + rev.ProductId);
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 db.Reviews.Add(rev);
@@ -35,6 +48,7 @@ namespace OnlineShopProject_dNet.Controllers
                     SetProductRating(rev.ProductId.Value);
                 }
 
+                TempData["message"] = "Review-ul a fost adăugat cu succes!";
                 return Redirect("/Products/Show/" + rev.ProductId);
             }
 
