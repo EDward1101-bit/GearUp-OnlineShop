@@ -4,15 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using OnlineShopProject_dNet.Services; // 1. IMPORT IMPORTANT
 
 namespace OnlineShopProject_dNet.Controllers
 {
-    [Authorize] // Doar utilizatorii logati pot avea cos
-    public class OrdersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager) : Controller
+    [Authorize]
+    public class OrdersController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, CartService cartService) : Controller
     {
         private readonly ApplicationDbContext db = context;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-
+        private readonly CartService _cartService = cartService; // 2. DEFINIRE SERVICIU
 
         // 1. INDEX - Afișarea Coșului de Cumpărături
         [HttpGet]
@@ -53,69 +54,26 @@ namespace OnlineShopProject_dNet.Controllers
         }
 
 
-        // 2. ADD TO CART - Varianta AJAX (Modificată)
+        // 2. ADD TO CART - REFACTORIZAT (Mult mai scurt!)
         [HttpPost]
         public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
-            // Validare simplă (cantitate minimă 1)
             if (quantity < 1) quantity = 1;
-
             var userId = _userManager.GetUserId(User);
-            var product = await db.Products.FindAsync(productId);
 
-            if (product == null) return Json(new { success = false, message = "Produsul nu a fost găsit." });
-
-            // 1. Validare Stoc (Returnăm JSON cu eroare)
-            if (product.Stock < quantity)
+            if (userId == null)
             {
-                return Json(new { success = false, message = "Stoc insuficient!" });
+                return Json(new { success = false, message = "Eroare: Utilizator neautentificat." });
             }
 
-            // 2. Găsim sau creăm coșul
-            var order = await db.Orders
-                                .Include(o => o.OrderDetails)
-                                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
-
-            if (order == null)
+            // delegam munca catre serviciu
+            bool success = await _cartService.AddItemToCart(userId, productId, quantity);
+            if (!success)
             {
-                order = new Order
-                {
-                    UserId = userId,
-                    Date = DateTime.Now,
-                    Status = "InCart",
-                    TotalAmount = 0
-                };
-                db.Orders.Add(order);
-                await db.SaveChangesAsync();
+                return Json(new { success = false, message = "Stoc insuficient sau produs invalid!" });
             }
 
-            var orderDetail = order.OrderDetails.FirstOrDefault(od => od.ProductId == productId);
-
-            if (orderDetail != null)
-            {
-                // Validare cumulativă (Ce e în coș + Ce adaugă acum)
-                if (product.Stock < orderDetail.Quantity + quantity)
-                {
-                    return Json(new { success = false, message = "Nu poți adăuga mai mult decât stocul disponibil!" });
-                }
-                orderDetail.Quantity += quantity;
-            }
-            else
-            {
-                var newOrderDetail = new OrderDetail
-                {
-                    OrderId = order.Id,
-                    ProductId = productId,
-                    Quantity = quantity,
-                    UnitPrice = product.Price // Înghețăm prețul
-                };
-                db.OrderDetails.Add(newOrderDetail);
-            }
-
-            await db.SaveChangesAsync();
-
-            // AICI E SCHIMBAREA MAJORĂ: Returnăm JSON
-            return Json(new { success = true, message = "Produsul a fost adăugat în coș!", cartCount = order.OrderDetails.Sum(x => x.Quantity) });
+            return Json(new { success = true, message = "Produsul a fost adăugat în coș!" });
         }
 
 
