@@ -17,10 +17,28 @@ namespace OnlineShopProject_dNet.Controllers
             _env = env;
         }
 
-        // 1. GETALL - Returnează categorii ca JSON (pentru modal)
-        [Authorize(Roles = "Admin")]
+        // 1. GETALL - Returnează categorii ca JSON (pentru dropdown - public)
         [HttpGet]
         public IActionResult GetAll()
+        {
+            var categories = db.Categories
+                .Include(c => c.Products)
+                .OrderBy(c => c.Name)
+                .Select(c => new
+                {
+                    id = c.Id,
+                    name = c.Name,
+                    productCount = c.Products != null ? c.Products.Count(p => p.Status == "Approved") : 0
+                })
+                .ToList();
+
+            return Json(categories);
+        }
+
+        // GETALLFORADMIN - Returnează categorii cu detalii pentru admin (pentru gestionare)
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult GetAllForAdmin()
         {
             var categories = db.Categories
                 .Include(c => c.Products)

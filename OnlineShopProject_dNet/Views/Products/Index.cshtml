@@ -8,20 +8,20 @@
     var productsList = ViewBag.Products as IEnumerable<OnlineShopProject_dNet.Models.Product>;
 }
 
-@* Header Section *@
-<div class="bg-primary text-white py-4 mb-4 rounded shadow-sm">
+@* Header Section - Modern Design *@
+<div class="bg-gradient-primary text-white py-5 mb-4 rounded-3 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h1 class="mb-0 fw-bold">
-                    <i class="bi bi-shop"></i> Magazin Online
+                <h1 class="mb-2 fw-bold display-5">
+                    <i class="bi bi-shop-window"></i> Magazin Online
                 </h1>
-                <p class="mb-0 mt-2 opacity-75">Descoperă produsele noastre</p>
+                <p class="mb-0 fs-5 opacity-90">Descoperă produsele noastre premium</p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
                 @if (User.IsInRole("Admin") || User.IsInRole("Proposer"))
                 {
-                    <a class="btn btn-warning btn-sm" href="/Products/New">
+                    <a class="btn btn-light btn-lg shadow-sm" href="/Products/New">
                         <i class="bi bi-plus-circle"></i> Adaugă produs
                     </a>
                 }
@@ -32,58 +32,60 @@
 
 <div class="container">
 
-@* ZONA PRODUSE PENDING - DOAR ADMIN *@
+@* ZONA PRODUSE PENDING - DOAR ADMIN - Stilizare îmbunătățită *@
 @if (User.IsInRole("Admin"))
 {
     var pendingProducts = ViewBag.PendingProducts as IEnumerable<OnlineShopProject_dNet.Models.Product>;
     if (pendingProducts != null && pendingProducts.Any())
     {
-        <div class="card border-warning mb-4 shadow-sm">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">
-                    <i class="bi bi-hourglass-split"></i> Produse în Așteptare (@pendingProducts.Count())
-                </h5>
+        <div id="pending-products" class="alert alert-warning border-0 shadow-lg mb-4 rounded-3" role="alert" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-hourglass-split"></i> Produse în Așteptare
+                    <span class="badge bg-danger ms-2">@pendingProducts.Count()</span>
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="card-body">
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-                    @foreach (var product in pendingProducts)
-                    {
-                        <div class="col">
-                            <div class="card h-100 border-warning">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="card-title mb-0">@product.Title</h6>
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-hourglass-split"></i> Pending
-                                        </span>
-                                    </div>
-                                    <p class="text-muted small mb-2">
-                                        <i class="bi bi-person"></i> @(product.User?.UserName ?? "Necunoscut")
-                                    </p>
-                                    <p class="text-muted small mb-2">
-                                        <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără categorie")
-                                    </p>
-                                    <p class="text-danger fw-bold mb-3">@product.Price RON</p>
-                                    <div class="d-flex gap-2">
-                                        <form method="post" action="/Products/Approve/@product.Id" class="d-inline">
-                                            <button type="submit" class="btn btn-success btn-sm">
-                                                <i class="bi bi-check-circle"></i> Aprobă
-                                            </button>
-                                        </form>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+                @foreach (var product in pendingProducts)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0" style="background: white;">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0 fw-bold text-truncate" style="max-width: 70%;">@product.Title</h6>
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-hourglass-split"></i>
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-1">
+                                    <i class="bi bi-person-circle"></i> @(product.User?.UserName ?? "Necunoscut")
+                                </p>
+                                <p class="text-muted small mb-2">
+                                    <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără categorie")
+                                </p>
+                                <p class="text-danger fw-bold mb-3 fs-5">@product.Price <small class="fs-6">RON</small></p>
+                                <div class="d-grid gap-2">
+                                    <form method="post" action="/Products/Approve/@product.Id" class="d-inline">
+                                        <button type="submit" class="btn btn-success btn-sm w-100">
+                                            <i class="bi bi-check-circle"></i> Aprobă
+                                        </button>
+                                    </form>
+                                    <div class="btn-group" role="group">
                                         <form method="post" action="/Products/Reject/@product.Id" class="d-inline">
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?')">
-                                                <i class="bi bi-x-circle"></i> Respinge
+                                                <i class="bi bi-x-circle"></i>
                                             </button>
                                         </form>
                                         <a href="/Products/Show/@product.Id" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-eye"></i> Vezi
+                                            <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         </div>
     }
@@ -137,9 +139,17 @@
 }
 
 @* PRODUSE APROBATE - TOȚI *@
-<h3 class="mb-4">
-    <i class="bi bi-box-seam"></i> Produse Disponibile
-</h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 fw-bold">
+        <i class="bi bi-box-seam text-primary"></i> Produse Disponibile
+    </h2>
+    @if (productsList != null && productsList.Any())
+    {
+        <span class="badge bg-primary fs-6 px-3 py-2">
+            @productsList.Count() produse
+        </span>
+    }
+</div>
 
 @* Folosim .Any() care este mai rapid și mai sigur decât .Count() == 0 *@
 @if (productsList == null || !productsList.Any())
@@ -238,13 +248,27 @@ else
     </div>
 
     <style>
+        .product-card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
         }
 
         .product-card:hover img {
-            transform: scale(1.05);
+            transform: scale(1.1);
+        }
+
+        .product-card .card-body {
+            background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
     </style>
 }

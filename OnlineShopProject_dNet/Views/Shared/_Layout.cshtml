@@ -9,23 +9,125 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/OnlineShopProject_dNet.styles.css" asp-append-version="true" />
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --light-bg: #f8fafc;
+            --dark-text: #1e293b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-bg);
+            padding-left: 20px;
+        }
+
+        .badge-notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-lg mb-4">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-shop"></i> Magazin Online
+                    <i class="bi bi-shop-window"></i> Magazin Online
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav flex-grow-1 align-items-center">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house"></i> Acasă
+                                <i class="bi bi-house-door"></i> Acasă
                             </a>
                         </li>
                         <li class="nav-item">
@@ -33,13 +135,44 @@
                                 <i class="bi bi-box-seam"></i> Produse
                             </a>
                         </li>
-                        @* Modal pentru categorii - doar Admin *@
+                        @* Dropdown Categorii - pentru toți utilizatorii *@
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-grid-3x3-gap"></i> Categorii
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="categoriesDropdown" id="categoriesDropdownMenu">
+                                <li><a class="dropdown-item" href="/Products/Index"><i class="bi bi-list-ul"></i> Toate produsele</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li class="px-3 py-2 text-muted small"><i class="bi bi-hourglass-split"></i> Se încarcă...</li>
+                            </ul>
+                        </li>
+                        @* Admin - Gestionare Categorii + Produse Pending *@
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <button type="button" class="nav-link btn btn-link text-white border-0 p-0" data-bs-toggle="modal" data-bs-target="#categoriesModal" style="text-decoration: none;">
-                                    <i class="bi bi-grid"></i> Categorii
-                                </button>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle position-relative" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-gear"></i> Administrare
+                                    <span id="pendingBadge" class="badge bg-danger badge-notification" style="display: none;">0</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                                    <li>
+                                        <h6 class="dropdown-header">
+                                            <i class="bi bi-shield-check"></i> Panou Admin
+                                        </h6>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#categoriesModal">
+                                            <i class="bi bi-tags"></i> Gestionare Categorii
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Products/Index#pending-products">
+                                            <i class="bi bi-hourglass-split"></i> Produse în Așteptare
+                                            <span id="pendingCountNav" class="badge bg-warning text-dark ms-2">0</span>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                     </ul>
@@ -49,14 +182,21 @@
         </nav>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-4">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-5 py-4" style="background-color: white;">
         <div class="container">
-            &copy; 2025 - OnlineShopProject_dNet - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2025 - OnlineShopProject_dNet</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -69,6 +209,67 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        // Încărcare categorii în dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategoriesDropdown();
+            @if (User.IsInRole("Admin"))
+            {
+                <text>
+                loadPendingCount();
+                setInterval(loadPendingCount, 30000); // Actualizează la fiecare 30 secunde
+                </text>
+            }
+        });
+
+        function loadCategoriesDropdown() {
+            fetch('/Categories/GetAll')
+                .then(response => response.json())
+                .then(data => {
+                    const menu = document.getElementById('categoriesDropdownMenu');
+                    if (data && data.length > 0) {
+                        let html = '<li><a class="dropdown-item" href="/Products/Index"><i class="bi bi-list-ul"></i> Toate produsele</a></li>';
+                        html += '<li><hr class="dropdown-divider"></li>';
+                        data.forEach(category => {
+                            if (category.productCount > 0) {
+                                html += `<li><a class="dropdown-item" href="/Products/Index?category=${category.id}"><i class="bi bi-tag"></i> ${category.name} <span class="badge bg-secondary ms-2">${category.productCount}</span></a></li>`;
+                            }
+                        });
+                        menu.innerHTML = html;
+                    } else {
+                        menu.innerHTML = '<li><a class="dropdown-item" href="/Products/Index"><i class="bi bi-list-ul"></i> Toate produsele</a></li>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Eroare la încărcarea categoriilor:', error);
+                });
+        }
+
+        @if (User.IsInRole("Admin"))
+        {
+            <text>
+            function loadPendingCount() {
+                fetch('/Products/GetPendingCount')
+                    .then(response => response.json())
+                    .then(data => {
+                        const badge = document.getElementById('pendingBadge');
+                        const countNav = document.getElementById('pendingCountNav');
+                        if (data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'inline-block';
+                            if (countNav) countNav.textContent = data.count;
+                        } else {
+                            badge.style.display = 'none';
+                            if (countNav) countNav.textContent = '0';
+                        }
+                    })
+                    .catch(error => console.error('Eroare la încărcarea numărului de produse pending:', error));
+            }
+            </text>
+        }
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

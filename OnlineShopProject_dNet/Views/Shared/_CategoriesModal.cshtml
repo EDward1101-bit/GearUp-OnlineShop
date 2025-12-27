@@ -97,7 +97,7 @@
     });
 
     function loadCategories() {
-        fetch('/Categories/GetAll')
+        fetch('/Categories/GetAllForAdmin')
             .then(response => response.json())
             .then(data => {
                 const categoriesList = document.getElementById('categoriesList');
