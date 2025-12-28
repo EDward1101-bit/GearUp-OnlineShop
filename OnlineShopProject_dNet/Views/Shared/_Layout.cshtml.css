@@ -39,10 +39,12 @@ button.accept-policy {
   line-height: inherit;
 }
 
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
-}
+ body {
+   min-height: 100vh;
+ }
+ 
+ .footer-custom {
+   background: #f8f9fa;
+   padding: 20px;
+   text-align: center;
+ }

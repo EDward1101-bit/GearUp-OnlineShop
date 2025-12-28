@@ -340,20 +340,26 @@
 
             // Funcție AJAX pentru Coș
             function addToCart(productId) {
-                fetch('/Orders/AddToCart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `productId=${productId}&quantity=1`
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Refresh pentru a vedea produsul în Navbar
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(err => console.error(err));
+                if (isAuthenticated) {
+                    fetch('/Orders/AddToCart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `productId=${productId}&quantity=1`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // update server mini-cart
+                            loadMiniCart();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(err => console.error(err));
+                } else {
+                    // fallback to localStorage
+                    addToLocalCart(productId, 1, null);
+                }
             }
         </script>
     }

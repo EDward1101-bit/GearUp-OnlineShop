@@ -1,0 +1,150 @@
+@model OnlineShopProject_dNet.Models.Order
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Finalizare Comand?";
+}
+
+<div class="container py-5">
+    <!-- ERROR MESSAGES FROM CONTROLLER -->
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i> @TempData["message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- LEFT: ORDER SUMMARY -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i> Rezumat Comand?</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.OrderDetails.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <thead class="border-bottom">
+                                    <tr>
+                                        <th>Produs</th>
+                                        <th>Pre?</th>
+                                        <th>Cantitate</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderDetails)
+                                    {
+                                        <tr class="border-bottom">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(item.Product?.Image))
+                                                    {
+                                                        <img src="@item.Product.Image" alt="@item.Product?.Title" style="width:50px; height:50px; object-fit:contain; margin-right:10px;" />
+                                                    }
+                                                    <div>
+                                                        <strong>@item.Product?.Title</strong>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>@item.UnitPrice RON</td>
+                                            <td><span class="badge bg-light text-dark">@item.Quantity</span></td>
+                                            <td class="fw-bold">@(item.Quantity * item.UnitPrice) RON</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6 offset-md-6">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Subtotal:</span>
+                                    <span>@Model.TotalAmount RON</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Livrare:</span>
+                                    <span class="text-success">Gratuit</span>
+                                </div>
+                                <hr />
+                                <div class="d-flex justify-content-between fs-5 fw-bold">
+                                    <span>TOTAL FINAL:</span>
+                                    <span class="text-primary">@Model.TotalAmount RON</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i> Co?ul t?u este gol. <a href="/Products/Index">Mergi la Magazin</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: CHECKOUT FORM -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top:100px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i> Finalizeaz? Comanda</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.OrderDetails.Any())
+                    {
+                        <form method="post" asp-action="Checkout">
+                            <div class="mb-3">
+                                <label for="shippingAddress" class="form-label fw-semibold">Adresa de Livrare *</label>
+                                <textarea class="form-control" id="shippingAddress" name="ShippingAddress" rows="3" 
+                                          placeholder="Str. Exemplu, nr. 123, Apartament 4, Bucure?ti, Sector 1, 010101" 
+                                          required></textarea>
+                                <small class="text-muted">Introdu adresa complet? pentru livrare</small>
+                            </div>
+
+                            <div class="alert alert-info small mb-3">
+                                <i class="bi bi-info-circle me-2"></i> 
+                                <strong>Info Livrare:</strong> Comanda va fi procesat? în 24 ore. Livrare în 2-3 zile lucr?toare.
+                            </div>
+
+                            <div class="alert alert-light border mb-3">
+                                <strong>Metoda de Plat?:</strong>
+                                <div class="mt-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="cash" value="cash" checked />
+                                        <label class="form-check-label" for="cash">
+                                            <i class="bi bi-cash-coin me-2"></i> Plat? la Livrare
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a href="/Orders/Index" class="btn btn-outline-secondary flex-grow-1">
+                                    <i class="bi bi-arrow-left me-2"></i> Înapoi
+                                </a>
+                                <button type="submit" class="btn btn-success flex-grow-1 fw-bold">
+                                    <i class="bi bi-check-circle me-2"></i> Confirma
+                                </button>
+                            </div>
+
+                            <small class="text-muted d-block text-center mt-3">
+                                Prin confirmarea comenzii, accep?i <a href="/Home/Terms" class="text-decoration-none">Termenii ?i Condi?iile</a>
+                            </small>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            Co?ul este gol. <a href="/Products/Index" class="btn btn-sm btn-primary">Mergi la Magazin</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+@model OnlineShopProject_dNet.Models.Order
+
+@* Partial HTML used by the mini cart dropdown. Expects an Order (InCart) model. *@
+@if (Model == null || Model.OrderDetails == null || !Model.OrderDetails.Any())
+{
+    <div class="text-center py-3 text-muted">
+        <i class="bi bi-cart-x"></i> Co? gol
+    </div>
+}
+else
+{
+    <div>
+        @{
+            var itemsToShow = Model.OrderDetails.Take(5).ToList();
+            var moreCount = Model.OrderDetails.Count - itemsToShow.Count;
+        }
+
+        @foreach (var item in itemsToShow)
+        {
+            <div class="d-flex align-items-center mb-2">
+                <div style="width:56px; height:56px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:8px;">
+                    @if (!string.IsNullOrEmpty(item.Product?.Image))
+                    {
+                        <img src="@item.Product.Image" style="max-width:100%; max-height:100%; object-fit:contain;" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-image text-muted fs-4"></i>
+                    }
+                </div>
+                <div class="ms-2 flex-grow-1">
+                    <div class="fw-semibold text-dark" style="font-size:0.9rem;">@item.Product?.Title</div>
+                    <div class="text-muted small">@item.Quantity x @item.UnitPrice RON</div>
+                </div>
+                <div class="ms-2 text-end small fw-bold">@(@item.Quantity * item.UnitPrice) RON</div>
+            </div>
+        }
+
+        @if (moreCount > 0)
+        {
+            <div class="text-center small text-muted">+ @moreCount alte produse în co? &middot; <a href="/Orders/Index">Vezi toate</a></div>
+        }
+
+        <div class="dropdown-divider my-2"></div>
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <div>
+                <div class="small text-muted">Total:</div>
+                <div class="fw-bold">@Model.TotalAmount RON</div>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="/Orders/Index" style="padding: 0.4rem 0.7rem; font-size: 0.8rem; font-weight: 600;">Cos</a>
+                <a class="btn btn-sm btn-primary" href="/Orders/Checkout" style="padding: 0.4rem 0.7rem; font-size: 0.8rem; font-weight: 600;">Finalizeaza</a>
+            </div>
+        </div>
+    </div>
+}

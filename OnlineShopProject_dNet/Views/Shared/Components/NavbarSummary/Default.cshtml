@@ -2,15 +2,9 @@
 
 @* 1. WISHLIST - Root este LI (Corect!) *@
 <li class="nav-item me-3">
-    <a class="nav-link position-relative" asp-controller="Wishlist" asp-action="Index">
+    <a class="nav-link position-relative" asp-controller="Wishlist" asp-action="Index" aria-label="Wishlist">
         <i class="bi bi-heart fs-5"></i>
-        @if (Model.WishlistCount > 0)
-        {
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                  style="font-size: 0.7rem;">
-                @Model.WishlistCount
-            </span>
-        }
+        <span id="wishlist-badge-count" class="icon-badge badge rounded-pill bg-danger text-white" style="display:@(Model.WishlistCount>0?"inline-block":"none")">@Model.WishlistCount</span>
     </a>
 </li>
 
@@ -20,13 +14,7 @@
        data-bs-toggle="dropdown" aria-expanded="false" onclick="loadMiniCart()">
 
         <i class="bi bi-cart3 fs-5"></i>
-        @if (Model.CartCount > 0)
-        {
-            <span id="cart-badge-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
-                  style="font-size: 0.7rem;">
-                @Model.CartCount
-            </span>
-        }
+        <span id="cart-badge-count" class="icon-badge badge rounded-pill bg-warning text-dark" style="display:@(Model.CartCount>0?"inline-block":"none")">@Model.CartCount</span>
     </a>
 
     @* Folosim DIV pentru containerul dropdown, NU UL *@
@@ -43,14 +31,5 @@
         </div>
 
         <div class="dropdown-divider"></div>
-
-        <div>
-            <a class="btn btn-primary w-100 py-2 fw-bold" asp-controller="Orders" asp-action="Checkout">
-                Finalizează Comanda <i class="bi bi-arrow-right"></i>
-            </a>
-        </div>
-        <div class="mt-2 text-center">
-            <a class="small text-decoration-none" asp-controller="Orders" asp-action="Index">Vezi coșul detaliat</a>
-        </div>
     </div>
 </li>

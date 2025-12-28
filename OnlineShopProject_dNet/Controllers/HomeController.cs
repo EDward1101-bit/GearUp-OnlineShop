@@ -7,15 +7,21 @@ namespace OnlineShopProject_dNet.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly OnlineShopProject_dNet.Data.ApplicationDbContext _db;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, OnlineShopProject_dNet.Data.ApplicationDbContext db)
         {
             _logger = logger;
+            _db = db;
         }
-
         public IActionResult Index()
         {
-            return View();
+            var products = _db.Products
+                              .Where(p => p.Status == "Approved")
+                              .OrderByDescending(p => p.Id)
+                              .Take(12)
+                              .ToList();
+            return View(products);
         }
 
         public IActionResult Privacy()
