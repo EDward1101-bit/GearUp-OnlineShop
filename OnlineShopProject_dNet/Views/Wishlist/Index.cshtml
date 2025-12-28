@@ -7,7 +7,7 @@
         </h2>
 
         @* Butonul "Adaugă Tot în Coș" - apare doar dacă ai produse *@
-        @if (Model.Any())
+        @if (Model != null && Model.Any())
         {
             <form asp-action="AddAllToCart" method="post">
                 <button type="submit" class="btn btn-success fw-bold shadow-sm">
@@ -32,13 +32,26 @@
             @foreach (var item in Model)
             {
                 <div class="col">
-                    <div class="card h-100 shadow-sm border-0">
+                    @* Make the card position-relative so stretched-link works *@
+                    <div class="card h-100 shadow-sm border-0 position-relative">
                         @* Imagine *@
                         <div class="position-relative" style="height: 250px; overflow: hidden;">
-                            <img src="@(item.Product?.Image ?? "/images/default-product.jpg")"
-                                 class="card-img-top w-100 h-100"
-                                 style="object-fit: cover;"
-                                 alt="@item.Product?.Title">
+                            @if (item.Product != null)
+                            {
+                                <a href="/Products/Show/@item.ProductId" class="w-100 h-100 d-block text-decoration-none">
+                                    <img src="@(item.Product.Image ?? "/images/default-product.jpg")"
+                                         class="card-img-top w-100 h-100"
+                                         style="object-fit: cover;"
+                                         alt="@item.Product.Title">
+                                </a>
+                            }
+                            else
+                            {
+                                <img src="/images/default-product.jpg"
+                                     class="card-img-top w-100 h-100"
+                                     style="object-fit: cover;"
+                                     alt="Produs indisponibil">
+                            }
 
                             @* Badge Stoc *@
                             @if (item.Product?.Stock > 0)
@@ -52,11 +65,23 @@
                         </div>
 
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-truncate">@item.Product?.Title</h5>
+                            @if (item.Product != null)
+                            {
+                                <h5 class="card-title text-truncate">
+                                    <a href="/Products/Show/@item.ProductId" class="text-dark text-decoration-none">@item.Product.Title</a>
+                                </h5>
+                                @* stretched-link covers the whole card body area to improve clickability *@
+                                <a href="/Products/Show/@item.ProductId" class="stretched-link" aria-label="Vezi produsul"></a>
+                            }
+                            else
+                            {
+                                <h5 class="card-title text-truncate">Produs indisponibil</h5>
+                            }
+
                             <p class="card-text text-muted small text-truncate">@item.Product?.Description</p>
 
                             <div class="mt-auto d-flex justify-content-between align-items-center">
-                                <span class="fs-5 fw-bold text-primary">@item.Product?.Price Lei</span>
+                                <span class="fs-5 fw-bold text-primary">@item.Product?.Price RON</span>
                             </div>
                         </div>
 
