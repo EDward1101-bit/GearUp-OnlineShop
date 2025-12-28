@@ -29,6 +29,7 @@ namespace OnlineShopProject_dNet.Controllers
         {
             var query = db.Products
                          .Include(p => p.Category)
+                         .Include(p => p.Wishlists)
                          .Where(p => p.Status == "Approved"); // Filtrare esentiala
 
             // Filtrare după categorie dacă este specificată
@@ -47,11 +48,11 @@ namespace OnlineShopProject_dNet.Controllers
             if (User.IsInRole("Admin"))
             {
                 var pendingProducts = db.Products
-                    .Include(p => p.Category)
-                    .Include(p => p.User)
-                    .Where(p => p.Status == "Pending")
-                    .OrderByDescending(p => p.Id)
-                    .ToList();
+                                        .Include(p => p.Category)
+                                        .Include(p => p.User)
+                                        .Where(p => p.Status == "Pending")
+                                        .OrderByDescending(p => p.Id)
+                                        .ToList();
                 ViewBag.PendingProducts = pendingProducts;
             }
 
@@ -84,6 +85,7 @@ namespace OnlineShopProject_dNet.Controllers
                             .Include(p => p.Reviews)
                             .ThenInclude(r => r.User)
                             .Include(p => p.User)
+                            .Include(p => p.Wishlists)
                             .FirstOrDefault(p => p.Id == id);
 
             if (product == null) return NotFound();

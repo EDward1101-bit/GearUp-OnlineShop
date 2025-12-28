@@ -98,7 +98,7 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (success)
             {
-                TempData["message"] = "Produsul a fost copiat în coș!";
+                TempData["message"] = "Produsul a fost adaugat în coș!";
             }
             else
             {
