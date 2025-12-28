@@ -10,9 +10,10 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/OnlineShopProject_dNet.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark shadow-lg mb-4">
+        @* Removed 'sticky-top' so navbar scrolls with the page (footer will move normally). *@
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-lg" style="z-index: 1030;">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-shop-window"></i> Magazin Online
@@ -60,6 +61,8 @@
                                 </ul>
                             </li>
                         }
+
+        <!-- mini cart placeholder; real loader defined later -->
                     </ul>
 
                     @* --- GRUP 2: MENIUL DREAPTA (Iconițe + User) --- *@
@@ -80,20 +83,62 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-4">
+    <div class="container flex-grow-1">
+        <main role="main" class="pb-4 flex-grow-1">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-5 py-4" style="background-color: white;">
+    <footer class="bg-light border-top mt-4 pt-5 pb-4 text-muted">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2025 - OnlineShopProject_dNet</p>
+            <div class="row gy-4">
+                <div class="col-md-4">
+                    <h5 class="fw-bold text-dark"><i class="bi bi-shop-window"></i> Magazin Online</h5>
+                    <p class="small text-muted">Magazine Online — produse de calitate, livrare rapidă și suport dedicat. Descoperă selecțiile noastre atent curate.</p>
+                    <div class="mt-3">
+                        <a href="#" class="text-decoration-none me-2"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#" class="text-decoration-none me-2"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#" class="text-decoration-none me-2"><i class="bi bi-twitter fs-5"></i></a>
+                    </div>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a>
+
+                <div class="col-6 col-md-2">
+                    <h6 class="fw-semibold">Servicii Clienți</h6>
+                    <ul class="list-unstyled small">
+                        <li><a class="text-decoration-none text-muted" href="/Home/Contact">Contact</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Orders/Index">Comenzile mele</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/ReturnPolicy">Returnări</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/Shipping">Livrare</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <h6 class="fw-semibold">Info</h6>
+                    <ul class="list-unstyled small">
+                        <li><a class="text-decoration-none text-muted" href="/Products/Index">Catalog</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/About">Despre noi</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/Privacy">Politica de confidențialitate</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/Terms">Termeni și condiții</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-4">
+                    <h6 class="fw-semibold">Abonează-te la newsletter</h6>
+                    <p class="small text-muted">Primești oferte și noutăți exclusive.</p>
+                    <form class="d-flex" method="post" action="/Home/Subscribe">
+                        <input type="email" name="email" class="form-control form-control-sm me-2" placeholder="Adresa ta de email" required />
+                        <button class="btn btn-primary btn-sm">Abonează-te</button>
+                    </form>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-between small">
+                <div class="text-muted">&copy; @DateTime.Now.Year - Magazin Online. Toate drepturile rezervate.</div>
+                <div>
+                    <a class="text-muted text-decoration-none me-3" href="/Home/Privacy">Privacy</a>
+                    <a class="text-muted text-decoration-none" href="/Home/Terms">Terms</a>
                 </div>
             </div>
         </div>
@@ -105,73 +150,21 @@
         <partial name="_CategoriesModal" />
     }
 
+    <script>
+        // expose server-side flags for site.js before loading it
+        window.isAdmin = '@(User.IsInRole("Admin").ToString().ToLower())' === 'true';
+        window.isAuthenticated = '@(User.Identity?.IsAuthenticated.ToString().ToLower() ?? "false")' === 'true';
+    </script>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
-    <script>
-        // 1. Definim variabila o singură dată (Transmitem din C# -> JS)
-        const isAdmin = '@(User.IsInRole("Admin").ToString().ToLower())' === 'true';
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCategoriesDropdown();
 
-            // 2. Activăm logica de Admin doar dacă e cazul
-            if (isAdmin) {
-                loadPendingCount();
-                setInterval(loadPendingCount, 30000);
-            }
-        });
-
-        function loadCategoriesDropdown() {
-            fetch('/Categories/GetAll')
-                .then(response => response.json())
-                .then(data => {
-                    const menu = document.getElementById('categoriesDropdownMenu');
-                    if (data && data.length > 0) {
-                        let html = '<li><a class="dropdown-item" href="/Products/Index"><i class="bi bi-list-ul"></i> Toate produsele</a></li>';
-                        html += '<li><hr class="dropdown-divider"></li>';
-                        data.forEach(function(category) {
-                            if (category.productCount > 0) {
-                                html += '<li><a class="dropdown-item" href="/Products/Index?category=' + category.id + '"><i class="bi bi-tag"></i> ' + category.name + ' <span class="badge bg-secondary ms-2">' + category.productCount + '</span></a></li>';
-                            }
-                        });
-                        menu.innerHTML = html;
-                    } else {
-                        menu.innerHTML = '<li><a class="dropdown-item" href="/Products/Index"><i class="bi bi-list-ul"></i> Toate produsele</a></li>';
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Eroare la încărcarea categoriilor:', error);
-                });
-        }
-
-        // 3. Funcția există mereu, dar e apelată doar de admini
-        function loadPendingCount() {
-            fetch('/Products/GetPendingCount')
-                .then(function(response) {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(function(data) {
-                    const badge = document.getElementById('pendingBadge');
-                    const countNav = document.getElementById('pendingCountNav');
-                    if (data.count > 0) {
-                        if (badge) {
-                            badge.textContent = data.count;
-                            badge.style.display = 'inline-block';
-                        }
-                        if (countNav) countNav.textContent = data.count;
-                    } else {
-                        if (badge) badge.style.display = 'none';
-                        if (countNav) countNav.textContent = '0';
-                    }
-                })
-                .catch(function(error) {
-                    // Silent catch pentru non-admini sau erori de rețea
-                    console.log('Info: Pending count check skipped or failed.');
-                });
-        }
-    </script>
+    <style>
+        /* Auto-hide navbar helper (left for future use) */
+        .navbar-hidden { transform: translateY(-110%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .navbar .dropdown-menu { z-index: 1040; }
+    </style>
     
     @await RenderSectionAsync("Scripts", required: false)
 </body>

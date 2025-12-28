@@ -205,8 +205,6 @@ namespace OnlineShopProject_dNet.Controllers
             if (string.IsNullOrWhiteSpace(requestOrder.ShippingAddress))
             {
                 TempData["message"] = "Te rugăm să completezi adresa de livrare!";
-
-                // Recalculăm totalul pentru a reafisa corect pagina (fiindcă nu s-a salvat încă)
                 cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
                 return View(cart);
             }
@@ -214,10 +212,9 @@ namespace OnlineShopProject_dNet.Controllers
             // ULTIMA VERIFICARE DE STOC (Security Check)
             foreach (var item in cart.OrderDetails)
             {
-                // Verificăm dacă produsul e null sau stocul e insuficient
                 if (item.Product == null || item.Quantity > item.Product.Stock)
                 {
-                    TempData["message"] = $"Produsul {item.Product?.Title} nu mai este pe stoc. Actualizează coșul.";
+                    TempData["message"] = $"Produsul nu mai este pe stoc. Actualizează coșul.";
                     return RedirectToAction("Index");
                 }
             }
@@ -225,7 +222,6 @@ namespace OnlineShopProject_dNet.Controllers
             // Procesarea Comenzii - SCĂDEREA STOCULUI
             foreach (var item in cart.OrderDetails)
             {
-                // Verificare de siguranță pentru a evita warning-urile
                 if (item.Product != null)
                 {
                     item.Product.Stock -= item.Quantity;
@@ -235,13 +231,32 @@ namespace OnlineShopProject_dNet.Controllers
             // Finalizarea datelor
             cart.Status = "Placed";
             cart.Date = DateTime.Now;
-            cart.ShippingAddress = requestOrder.ShippingAddress; // Salvăm adresa validată
+            cart.ShippingAddress = requestOrder.ShippingAddress;
             cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
 
             await db.SaveChangesAsync();
 
-            TempData["message"] = "Comanda a fost plasată cu succes!";
-            return RedirectToAction("Index", "Products");
+            TempData["success"] = "Comanda a fost plasată cu succes! Vei primi un email de confirmare.";
+            return RedirectToAction("OrderSuccess", new { orderId = cart.Id });
+        }
+
+        // 9. ORDER SUCCESS PAGE - Afișare mesaj după plasarea comenzii
+        [HttpGet]
+        public async Task<IActionResult> OrderSuccess(int orderId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var order = await db.Orders
+                                .Include(o => o.OrderDetails)
+                                .ThenInclude(od => od.Product)
+                                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId && o.Status == "Placed");
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
         }
 
 

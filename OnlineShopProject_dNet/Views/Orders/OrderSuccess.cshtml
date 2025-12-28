@@ -1,0 +1,116 @@
+@model OnlineShopProject_dNet.Models.Order
+@{
+    ViewData["Title"] = "Comand? Confirmat?";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- SUCCESS CARD -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <div style="width: 80px; height: 80px; background: #d4edda; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+
+                    <h2 class="fw-bold text-success mb-2">Comand? Confirmat?!</h2>
+                    <p class="text-muted mb-4">
+                        Mul?umim pentru achizi?ia ta. Comanda ta a fost procesat? cu succes.
+                    </p>
+
+                    <div class="alert alert-light border text-start">
+                        <h6 class="fw-bold">Detalii Comand?</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Num?r Comand?</small>
+                                <strong>#@Model.Id</strong>
+                            </div>
+                            <div class="col-6 text-end">
+                                <small class="text-muted d-block">Data Comand?</small>
+                                <strong>@Model.Date.ToString("dd.MM.yyyy HH:mm")</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCTS SUMMARY -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-start mb-3">Produse Comandate</h6>
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in Model.OrderDetails)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="text-start">
+                                        <strong>@item.Product?.Title</strong>
+                                        <br />
+                                        <small class="text-muted">@item.Quantity x @item.UnitPrice RON</small>
+                                    </div>
+                                    <div class="fw-bold">@(item.Quantity * item.UnitPrice) RON</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- TOTAL -->
+                    <div class="bg-light p-3 rounded mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>@Model.TotalAmount RON</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Livrare:</span>
+                            <span class="text-success">Gratuit</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between fs-5 fw-bold">
+                            <span>TOTAL:</span>
+                            <span class="text-primary">@Model.TotalAmount RON</span>
+                        </div>
+                    </div>
+
+                    <!-- SHIPPING ADDRESS -->
+                    <div class="mb-4 text-start">
+                        <h6 class="fw-bold">Adresa de Livrare</h6>
+                        <p class="text-muted">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            @Model.ShippingAddress
+                        </p>
+                    </div>
+
+                    <!-- INFO BOXES -->
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-truck text-primary fs-5 d-block mb-2"></i>
+                                <small class="text-muted d-block">Livrare în</small>
+                                <strong>2-3 zile</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <i class="bi bi-envelope text-success fs-5 d-block mb-2"></i>
+                                <small class="text-muted d-block">Email confirmare</small>
+                                <strong>Trimis</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="d-flex gap-2">
+                        <a href="/Products/Index" class="btn btn-outline-primary flex-grow-1">
+                            <i class="bi bi-shop me-2"></i> Continu? Cump?r?turile
+                        </a>
+                        <a href="/Orders/MyOrders" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-list-check me-2"></i> Comenzile Mele
+                        </a>
+                    </div>
+
+                    <p class="text-muted small mt-4">
+                        Vei primi un email cu detaliile comenzii ?i codul de urm?rire.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
