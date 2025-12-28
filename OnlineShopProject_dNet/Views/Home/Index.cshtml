@@ -1,15 +1,14 @@
-@model IEnumerable<OnlineShopProject_dNet.Models.Product>
+﻿@model IEnumerable<OnlineShopProject_dNet.Models.Product>
 @{
-    ViewData["Title"] = "Acas?";
+    ViewData["Title"] = "Acasă";
 }
 
-<!-- HERO SECTION -->
 <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 5rem 0; margin-bottom: 3rem;">
     <div class="container">
         <div class="row align-items-center gy-4">
             <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-3">Descoper? produse de calitate</h1>
-                <p class="lead mb-4">Livrare rapid?, pre? corect ?i select? verificat? pentru tine.</p>
+                <h1 class="display-4 fw-bold mb-3">Descoperă produse de calitate</h1>
+                <p class="lead mb-4">Livrare rapidă, preț corect și selecție verificată pentru tine.</p>
                 <div class="d-flex gap-3">
                     <a href="/Products/Index" class="btn btn-light btn-lg fw-bold shadow-sm">
                         <i class="bi bi-shop me-2"></i>Magazin
@@ -21,13 +20,13 @@
             </div>
             <div class="col-lg-6 text-center">
                 <svg style="max-height:250px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 250">
-                    <rect width="300" height="250" fill="rgba(255,255,255,0.1)" rx="15"/>
+                    <rect width="300" height="250" fill="rgba(255,255,255,0.1)" rx="15" />
                     <g transform="translate(100,50)">
-                        <rect width="80" height="100" fill="rgba(255,255,255,0.3)" rx="6"/>
-                        <circle cx="40" cy="30" r="20" fill="rgba(255,255,255,0.5)"/>
+                        <rect width="80" height="100" fill="rgba(255,255,255,0.3)" rx="6" />
+                        <circle cx="40" cy="30" r="20" fill="rgba(255,255,255,0.5)" />
                     </g>
                     <g transform="translate(60,130)">
-                        <circle cx="25" cy="25" r="15" fill="rgba(255,255,255,0.2)"/>
+                        <circle cx="25" cy="25" r="15" fill="rgba(255,255,255,0.2)" />
                     </g>
                 </svg>
             </div>
@@ -35,12 +34,11 @@
     </div>
 </section>
 
-<!-- FEATURED PRODUCTS -->
 <section id="featured" class="py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
             <h2 class="display-6 fw-bold mb-2">Produse Populare</h2>
-            <p class="lead text-muted">Selecta noastr? �n trending</p>
+            <p class="lead text-muted">Selecția noastră în trending</p>
         </div>
 
         @if (Model != null && Model.Any())
@@ -76,7 +74,7 @@
                                     @if (p.Stock > 0)
                                     {
                                         <button class="btn btn-sm btn-primary flex-grow-1 py-2" onclick="addToCartDetailed(@p.Id, 1, this); return false;">
-                                            <i class="bi bi-bag-plus"></i> Co?
+                                            <i class="bi bi-bag-plus"></i> Coș
                                         </button>
                                     }
                                     else
@@ -107,24 +105,23 @@
     </div>
 </section>
 
-<!-- INFO SECTION -->
 <section class="py-5">
     <div class="container">
         <div class="row g-4 text-center">
             <div class="col-md-4">
                 <i class="bi bi-truck fs-1 text-primary mb-3 d-block"></i>
-                <h5 class="fw-bold">Livrare Rapid?</h5>
-                <p class="text-muted">24-48 ore �n toat? ?ara</p>
+                <h5 class="fw-bold">Livrare Rapidă</h5>
+                <p class="text-muted">24-48 ore în toată țara</p>
             </div>
             <div class="col-md-4">
                 <i class="bi bi-shield-check fs-1 text-success mb-3 d-block"></i>
                 <h5 class="fw-bold">100% Sigur</h5>
-                <p class="text-muted">Pl??i securizate ?i garantie</p>
+                <p class="text-muted">Plăți securizate și garanție</p>
             </div>
             <div class="col-md-4">
                 <i class="bi bi-chat-dots fs-1 text-info mb-3 d-block"></i>
                 <h5 class="fw-bold">Suport 24/7</h5>
-                <p class="text-muted">Echipa mereu disponibil?</p>
+                <p class="text-muted">Echipa mereu disponibilă</p>
             </div>
         </div>
     </div>
