@@ -7,21 +7,14 @@ using OnlineShopProject_dNet.Models;
 
 namespace OnlineShopProject_dNet.Controllers
 {
-    public class ProductsController : Controller
+    public class ProductsController(
+        ApplicationDbContext context,
+        IWebHostEnvironment env,
+        UserManager<ApplicationUser> userManager) : Controller
     {
-        private readonly ApplicationDbContext db;
-        private readonly IWebHostEnvironment _env;
-        private readonly UserManager<ApplicationUser> _userManager;
-
-        public ProductsController(
-            ApplicationDbContext context,
-            IWebHostEnvironment env,
-            UserManager<ApplicationUser> userManager)
-        {
-            db = context;
-            _env = env;
-            _userManager = userManager;
-        }
+        private readonly ApplicationDbContext db = context;
+        private readonly IWebHostEnvironment _env = env;
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
 
         // 1. INDEX - Vizitatorii vad doar produsele APROBATE
         [HttpGet]
@@ -68,7 +61,7 @@ namespace OnlineShopProject_dNet.Controllers
                 ViewBag.MyPendingProducts = myPendingProducts;
             }
 
-            if (!products.Any())
+            if (products.Count == 0)
             {
                 TempData["message"] = "Nu există produse aprobate momentan.";
             }

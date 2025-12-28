@@ -202,10 +202,10 @@
                             </div>
 
                             @* 3. BUTOANE ACȚIUNE  *@
-                            @* Verificare sigură pentru null *@
                             @if (User.Identity?.IsAuthenticated == true)
                             {
-                                <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2" style="z-index: 10;">
+                                <div class="position-absolute top-0 end-0 mt-4 me-3 d-flex flex-column gap-2" style="z-index: 10;">
+
                                     @* Buton Wishlist *@
                                     <button class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
                                             style="width: 38px; height: 38px;"
