@@ -73,6 +73,8 @@
                                 </ul>
                             </li>
                         }
+                        @* Cos + Wishlist *@
+                        @await Component.InvokeAsync("NavbarSummary")
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
@@ -109,15 +111,15 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     
     <script>
-        // Încărcare categorii în dropdown
+        // 1. Definim variabila o singură dată (Transmitem din C# -> JS)
+        const isAdmin = '@(User.IsInRole("Admin").ToString().ToLower())' === 'true';
         document.addEventListener('DOMContentLoaded', function() {
             loadCategoriesDropdown();
-            @if (User.IsInRole("Admin"))
-            {
-                <text>
+
+            // 2. Activăm logica de Admin doar dacă e cazul
+            if (isAdmin) {
                 loadPendingCount();
                 setInterval(loadPendingCount, 30000);
-                </text>
             }
         });
 
@@ -144,29 +146,31 @@
                 });
         }
 
-        @if (User.IsInRole("Admin"))
-        {
-            <text>
-            function loadPendingCount() {
-                fetch('/Products/GetPendingCount')
-                    .then(function(response) { return response.json(); })
-                    .then(function(data) {
-                        const badge = document.getElementById('pendingBadge');
-                        const countNav = document.getElementById('pendingCountNav');
-                        if (data.count > 0) {
+        // 3. Funcția există mereu, dar e apelată doar de admini
+        function loadPendingCount() {
+            fetch('/Products/GetPendingCount')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(function(data) {
+                    const badge = document.getElementById('pendingBadge');
+                    const countNav = document.getElementById('pendingCountNav');
+                    if (data.count > 0) {
+                        if (badge) {
                             badge.textContent = data.count;
                             badge.style.display = 'inline-block';
-                            if (countNav) countNav.textContent = data.count;
-                        } else {
-                            badge.style.display = 'none';
-                            if (countNav) countNav.textContent = '0';
                         }
-                    })
-                    .catch(function(error) { 
-                        console.error('Eroare la încărcarea numărului de produse pending:', error); 
-                    });
-            }
-            </text>
+                        if (countNav) countNav.textContent = data.count;
+                    } else {
+                        if (badge) badge.style.display = 'none';
+                        if (countNav) countNav.textContent = '0';
+                    }
+                })
+                .catch(function(error) {
+                    // Silent catch pentru non-admini sau erori de rețea
+                    console.log('Info: Pending count check skipped or failed.');
+                });
         }
     </script>
     

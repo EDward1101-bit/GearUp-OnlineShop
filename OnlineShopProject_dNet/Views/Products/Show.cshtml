@@ -1,17 +1,22 @@
 @model OnlineShopProject_dNet.Models.Product
 @using Microsoft.AspNetCore.Identity
 @using OnlineShopProject_dNet.Models
-
 @inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewBag.Title = "Detalii Produs";
+
+    // --- LOGICA PENTRU WISHLIST (Calculată la încărcare) ---
+    var currentUserId = UserManager.GetUserId(User);
+    // Verificăm sigur dacă lista de wishlists nu e null înainte de Any
+    bool isInWishlist = currentUserId != null && (Model.Wishlists?.Any(w => w.UserId == currentUserId) ?? false);
+    string heartClass = isInWishlist ? "bi-heart-fill text-danger" : "bi-heart";
 }
 
-@* --- Afisarea mesajului de eroare de la Securitate (TempData) --- *@
+@* --- Afișarea mesajelor (TempData) --- *@
 @if (TempData["message"] != null)
 {
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
         @TempData["message"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -19,153 +24,219 @@
 
 @if (Model == null)
 {
-    @* Protectie in cazul extrem in care modelul e null *@
-    <div class="alert alert-danger">Produsul nu a fost găsit sau a apărut o eroare la încărcare.</div>
+    <div class="alert alert-danger">Produsul nu a fost găsit.</div>
 }
 else
 {
     <div class="container my-5">
+        <div class="row">
 
-        @* --- ZONA 1: IMAGINEA PRODUSULUI --- *@
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body p-0">
-                <div class="d-flex align-items-center justify-content-center bg-light" style="min-height: 500px; padding: 2rem;">
-                    @if (!string.IsNullOrEmpty(Model.Image))
-                    {
-                        <img src="@Model.Image"
-                             alt="@Model.Title"
-                             class="img-fluid"
-                             style="max-height: 500px; width: auto; object-fit: contain;" />
-                    }
-                    else
-                    {
-                        <img src="/images/default-product.jpeg"
-                             alt="Imagine indisponibilă"
-                             class="img-fluid"
-                             style="max-height: 500px; width: auto; object-fit: contain;" />
-                    }
-                </div>
-            </div>
-        </div>
-
-        @* --- ZONA 2: DETALIILE PRODUSULUI --- *@
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body p-4">
-                @* Badge-uri pentru categorie și stoc *@
-                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                    <span class="badge bg-info text-dark fs-6">
-                        <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fără Categorie")
-                    </span>
-                    @if (Model.Stock > 0)
-                    {
-                        <span class="badge bg-success fs-6">
-                            <i class="bi bi-check-circle"></i> În Stoc
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger fs-6">
-                            <i class="bi bi-x-circle"></i> Stoc Epuizat
-                        </span>
-                    }
-                </div>
-
-                @* Titlu cu rating-ul lângă *@
-                <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
-                    <h1 class="card-title fw-bold text-dark mb-0 flex-grow-1">@Model.Title</h1>
-                    @if (Model.Rating.HasValue)
-                    {
-                        <div class="d-flex align-items-center gap-1 text-warning">
-                            <strong class="fs-4">@Model.Rating.Value.ToString("0.0")</strong>
-                            <i class="bi bi-star-fill fs-5"></i>
-                            @if (Model.Reviews != null && Model.Reviews.Any())
+            @* --- ZONA 1: IMAGINE --- *@
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="d-flex align-items-center justify-content-center bg-light" style="min-height: 500px; padding: 2rem;">
+                            @if (!string.IsNullOrEmpty(Model.Image))
                             {
-                                <span class="text-muted ms-2" style="font-size: 0.9rem;">
-                                    (@Model.Reviews.Count() @(Model.Reviews.Count() == 1 ? "review" : "review-uri"))
-                                </span>
+                                <img src="@Model.Image" alt="@Model.Title" class="img-fluid" style="max-height: 500px; width: auto; object-fit: contain;" />
                             }
-                        </div>
-                    }
-                </div>
-
-                @* Preț *@
-                <div class="mb-4">
-                    <h2 class="text-danger fw-bold mb-0">
-                        @Model.Price <small class="fs-6 text-muted">RON</small>
-                    </h2>
-                </div>
-
-                @* Descriere *@
-                <div class="mb-4">
-                    <h5 class="text-dark fw-semibold mb-3">
-                        <i class="bi bi-info-circle"></i> Descriere
-                    </h5>
-                    <p class="card-text text-secondary fs-6 lh-lg mb-0">
-                        @Model.Description
-                    </p>
-                </div>
-
-                <hr class="my-4" />
-
-                @* Informații suplimentare *@
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-box-seam text-primary"></i>
-                            <span class="text-muted">Stoc disponibil:</span>
-                            <strong class="text-dark">@Model.Stock bucăți</strong>
+                            else
+                            {
+                                <img src="/images/default-product.jpeg" alt="Imagine indisponibilă" class="img-fluid" style="max-height: 500px; width: auto; object-fit: contain;" />
+                            }
                         </div>
                     </div>
                 </div>
+            </div>
 
-                @* Butoane acțiune în funcție de rol *@
-                <div class="d-flex gap-2 flex-wrap mt-4 pt-3 border-top">
-                    @* Admin poate edita/șterge orice produs *@
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a href="/Products/Edit/@Model.Id" class="btn btn-warning px-4">
-                            <i class="bi bi-pencil"></i> Editează
-                        </a>
-                        <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
-                            <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur ștergi produsul?');">
-                                <i class="bi bi-trash"></i> Șterge
-                            </button>
-                        </form>
-                        @if (Model.Status == "Pending")
+            @* --- ZONA 2: DETALII --- *@
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 mb-4 h-100">
+                    <div class="card-body p-4">
+
+                        @* Badge-uri Categorie & Stoc *@
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <span class="badge bg-info text-dark fs-6">
+                                <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fără Categorie")
+                            </span>
+                            @if (Model.Stock > 0)
+                            {
+                                <span class="badge bg-success fs-6"><i class="bi bi-check-circle"></i> În Stoc</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger fs-6"><i class="bi bi-x-circle"></i> Stoc Epuizat</span>
+                            }
+                        </div>
+
+                        @* Titlu & Rating *@
+                        <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
+                            <h1 class="card-title fw-bold text-dark mb-0 flex-grow-1">@Model.Title</h1>
+                            @if (Model.Rating.HasValue)
+                            {
+                                <div class="d-flex align-items-center gap-1 text-warning">
+                                    <strong class="fs-4">@Model.Rating.Value.ToString("0.0")</strong>
+                                    <i class="bi bi-star-fill fs-5"></i>
+                                    @if (Model.Reviews != null && Model.Reviews.Any())
+                                    {
+                                        <span class="text-muted ms-2" style="font-size: 0.9rem;">
+                                            (@Model.Reviews.Count() @(Model.Reviews.Count() == 1 ? "review" : "review-uri"))
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        @* Preț *@
+                        <div class="mb-4">
+                            <h2 class="text-danger fw-bold mb-0">
+                                @Model.Price <small class="fs-6 text-muted">RON</small>
+                            </h2>
+                        </div>
+
+                        @* Descriere *@
+                        <div class="mb-4">
+                            <h5 class="text-dark fw-semibold mb-3"><i class="bi bi-info-circle"></i> Descriere</h5>
+                            <p class="card-text text-secondary fs-6 lh-lg mb-0">@Model.Description</p>
+                        </div>
+
+                        @* Info Stoc *@
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-box-seam text-primary"></i>
+                                <span class="text-muted">Stoc disponibil:</span>
+                                <strong class="text-dark">@Model.Stock bucăți</strong>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        @* --- ZONA 3 (LIPSĂ ÎN FIȘIERUL TĂU): ACȚIUNI CUMPĂRĂTOR --- *@
+                        @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <form method="post" action="/Products/Approve/@Model.Id" class="d-inline">
-                                <button type="submit" class="btn btn-success px-4">
-                                    <i class="bi bi-check-circle"></i> Aprobă
-                                </button>
-                            </form>
-                            <form method="post" action="/Products/Reject/@Model.Id" class="d-inline">
-                                <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur respingi acest produs?');">
-                                    <i class="bi bi-x-circle"></i> Respinge
-                                </button>
-                            </form>
+                            <div class="bg-light p-3 rounded mb-4 border">
+                                <div class="d-flex align-items-end gap-3">
+
+                                    @* A. Controale Coș (doar dacă e stoc) *@
+                                    @if (Model.Stock > 0)
+                                    {
+                                        <div style="max-width: 100px;">
+                                            <label class="form-label small fw-bold mb-1">Cantitate</label>
+                                            <input type="number" id="qtyInput" class="form-control" value="1" min="1" max="@Model.Stock">
+                                        </div>
+                                        <button class="btn btn-primary flex-grow-1 py-2 fw-bold shadow-sm" onclick="addToCartDetailed(@Model.Id)">
+                                            <i class="bi bi-cart-plus me-2"></i> Adaugă în Coș
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary flex-grow-1" disabled>Stoc Epuizat</button>
+                                    }
+
+                                    @* B. Buton Wishlist *@
+                                    <button class="btn btn-outline-secondary py-2 px-3 shadow-sm" onclick="toggleWishlistDetailed(@Model.Id, this)" title="Adaugă la favorite">
+                                        <i class="bi @heartClass fs-5"></i>
+                                    </button>
+                                </div>
+                            </div>
                         }
-                    }
-                    @* Proposer poate edita/șterge doar produsele proprii *@
-                    else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User))
-                    {
-                        <a href="/Products/Edit/@Model.Id" class="btn btn-warning px-4">
-                            <i class="bi bi-pencil"></i> Editează
-                        </a>
-                        <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
-                            <button type="submit" class="btn btn-danger px-4" onclick="return confirm('Sigur ștergi produsul?');">
-                                <i class="bi bi-trash"></i> Șterge
-                            </button>
-                        </form>
-                    }
-                    <a href="/Products/Index" class="btn btn-outline-secondary px-4 ms-auto">
-                        <i class="bi bi-arrow-left"></i> Înapoi la produse
-                    </a>
+                        else
+                        {
+                            <div class="alert alert-light border text-center">
+                                <i class="bi bi-lock"></i> <a href="/Identity/Account/Login">Autentifică-te</a> pentru a cumpăra acest produs.
+                            </div>
+                        }
+                        @* --------------------------------------------------------- *@
+
+
+                        @* --- ZONA 4: ADMIN / PROPOSER --- *@
+                        <div class="d-flex gap-2 flex-wrap mt-auto pt-3 border-top">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a href="/Products/Edit/@Model.Id" class="btn btn-warning px-3"><i class="bi bi-pencil"></i> Editează</a>
+                                <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
+                                    <button type="submit" class="btn btn-danger px-3" onclick="return confirm('Sigur ștergi produsul?');"><i class="bi bi-trash"></i> Șterge</button>
+                                </form>
+                                @if (Model.Status == "Pending")
+                                {
+                                    <form method="post" action="/Products/Approve/@Model.Id" class="d-inline">
+                                        <button type="submit" class="btn btn-success px-3"><i class="bi bi-check-circle"></i> Aprobă</button>
+                                    </form>
+                                    <form method="post" action="/Products/Reject/@Model.Id" class="d-inline">
+                                        <button type="submit" class="btn btn-danger px-3" onclick="return confirm('Sigur respingi acest produs?');"><i class="bi bi-x-circle"></i> Respinge</button>
+                                    </form>
+                                }
+                            }
+                            else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User))
+                            {
+                                <a href="/Products/Edit/@Model.Id" class="btn btn-warning px-3"><i class="bi bi-pencil"></i> Editează</a>
+                                <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
+                                    <button type="submit" class="btn btn-danger px-3" onclick="return confirm('Sigur ștergi produsul?');"><i class="bi bi-trash"></i> Șterge</button>
+                                </form>
+                            }
+
+                            <a href="/Products/Index" class="btn btn-outline-secondary px-4 ms-auto">
+                                <i class="bi bi-arrow-left"></i> Înapoi
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
             </div>
+
+            @* --- ZONA 5: REVIEW-URI --- *@
+            <partial name="_ProductReviews" model="Model" />
+
         </div>
-
-        @* --- ZONA 3: REVIEW-URI (Partial View Integrat) --- *@
-        <partial name="_ProductReviews" model="Model" />
-
     </div>
+
+    @* --- ZONA 6 (LIPSĂ ÎN FIȘIERUL TĂU): SCRIPTURI AJAX --- *@
+    @section Scripts {
+        <script>
+            // 1. Adăugare în Coș cu Cantitate
+            function addToCartDetailed(productId) {
+                var qtyInput = document.getElementById('qtyInput');
+                var qty = qtyInput ? qtyInput.value : 1;
+
+                fetch('/Orders/AddToCart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `productId=${productId}&quantity=${qty}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Refresh pentru a actualiza coșul din Navbar
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => console.error(err));
+            }
+
+            // 2. Wishlist Toggle
+            function toggleWishlistDetailed(productId, btn) {
+                fetch('/Wishlist/Toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `productId=${productId}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const icon = btn.querySelector('i');
+                        if (data.action === 'added') {
+                            icon.className = 'bi bi-heart-fill fs-5 text-danger';
+                        } else {
+                            icon.className = 'bi bi-heart fs-5';
+                        }
+                        location.reload(); // Refresh pentru badge
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => console.error(err));
+            }
+        </script>
+    }
 }

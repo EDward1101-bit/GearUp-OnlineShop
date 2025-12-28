@@ -18,6 +18,7 @@ namespace OnlineShopProject_dNet.Models
 
         public string? Image { get; set; }
 
+
         [Required(ErrorMessage = "Pretul este obligatoriu")]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; }
@@ -37,14 +38,14 @@ namespace OnlineShopProject_dNet.Models
         public string? UserId { get; set; }
         public virtual ApplicationUser? User { get; set; }
 
-        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<Review> Reviews { get; set; } = [];
 
 
 
         // Relatia M-M cu Orders (prin OrderDetail)
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = [];
 
         // Relatia M-M cu Users (prin Wishlist)
-        public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+        public virtual ICollection<Wishlist> Wishlists { get; set; } = [];
     }
 }
