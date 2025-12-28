@@ -1,9 +1,9 @@
-@model OnlineShopProject_dNet.Models.Order
+﻿@model OnlineShopProject_dNet.Models.Order
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<ApplicationUser> UserManager
 
 @{
-    ViewData["Title"] = "Finalizare Comand?";
+    ViewData["Title"] = "Finalizare Comandă?";
 }
 
 <div class="container py-5">
@@ -21,7 +21,7 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i> Rezumat Comand?</h5>
+                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i> Rezumat Comandă</h5>
                 </div>
                 <div class="card-body">
                     @if (Model != null && Model.OrderDetails.Any())
@@ -31,7 +31,7 @@
                                 <thead class="border-bottom">
                                     <tr>
                                         <th>Produs</th>
-                                        <th>Pre?</th>
+                                        <th>Preț</th>
                                         <th>Cantitate</th>
                                         <th>Total</th>
                                     </tr>
@@ -81,7 +81,7 @@
                     else
                     {
                         <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle me-2"></i> Co?ul t?u este gol. <a href="/Products/Index">Mergi la Magazin</a>
+                            <i class="bi bi-exclamation-triangle me-2"></i> Coșul tău este gol. <a href="/Products/Index">Mergi la Magazin</a>
                         </div>
                     }
                 </div>
@@ -92,7 +92,7 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm sticky-top" style="top:100px;">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i> Finalizeaz? Comanda</h5>
+                    <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i> Finalizează Comanda</h5>
                 </div>
                 <div class="card-body">
                     @if (Model != null && Model.OrderDetails.Any())
@@ -101,23 +101,23 @@
                             <div class="mb-3">
                                 <label for="shippingAddress" class="form-label fw-semibold">Adresa de Livrare *</label>
                                 <textarea class="form-control" id="shippingAddress" name="ShippingAddress" rows="3" 
-                                          placeholder="Str. Exemplu, nr. 123, Apartament 4, Bucure?ti, Sector 1, 010101" 
+                                          placeholder="Str. Exemplu, nr. 123, Apartament 4, București, Sector 1, 010101" 
                                           required></textarea>
-                                <small class="text-muted">Introdu adresa complet? pentru livrare</small>
+                                <small class="text-muted">Introdu adresa completă pentru livrare</small>
                             </div>
 
                             <div class="alert alert-info small mb-3">
                                 <i class="bi bi-info-circle me-2"></i> 
-                                <strong>Info Livrare:</strong> Comanda va fi procesat? �n 24 ore. Livrare �n 2-3 zile lucr?toare.
+                                <strong>Info Livrare:</strong> Comanda va fi procesată în 24 ore. Livrare în 2-3 zile lucrătoare.
                             </div>
 
                             <div class="alert alert-light border mb-3">
-                                <strong>Metoda de Plat?:</strong>
+                                <strong>Metoda de Plată:</strong>
                                 <div class="mt-2">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="paymentMethod" id="cash" value="cash" checked />
                                         <label class="form-check-label" for="cash">
-                                            <i class="bi bi-cash-coin me-2"></i> Plat? la Livrare
+                                            <i class="bi bi-cash-coin me-2"></i> Plată la Livrare
                                         </label>
                                     </div>
                                 </div>
@@ -125,15 +125,15 @@
 
                             <div class="d-flex gap-2">
                                 <a href="/Orders/Index" class="btn btn-outline-secondary flex-grow-1">
-                                    <i class="bi bi-arrow-left me-2"></i> �napoi
+                                    <i class="bi bi-arrow-left me-2"></i> Înapoi
                                 </a>
                                 <button type="submit" class="btn btn-success flex-grow-1 fw-bold">
-                                    <i class="bi bi-check-circle me-2"></i> Confirma
+                                    <i class="bi bi-check-circle me-2"></i> Confirmă
                                 </button>
                             </div>
 
                             <small class="text-muted d-block text-center mt-3">
-                                Prin confirmarea comenzii, accep?i <a href="/Home/Terms" class="text-decoration-none">Termenii ?i Condi?iile</a>
+                                Prin confirmarea comenzii, accepți <a href="/Home/Terms" class="text-decoration-none">Termenii și Condițiile</a>
                             </small>
                         </form>
                     }

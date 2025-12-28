@@ -1,6 +1,6 @@
-@model OnlineShopProject_dNet.Models.Order
+﻿@model OnlineShopProject_dNet.Models.Order
 @{
-    ViewData["Title"] = "Comand? Confirmat?";
+    ViewData["Title"] = "Comanda Confirmata";
 }
 
 <div class="container py-5">
@@ -15,20 +15,20 @@
                         </div>
                     </div>
 
-                    <h2 class="fw-bold text-success mb-2">Comand? Confirmat?!</h2>
+                    <h2 class="fw-bold text-success mb-2">Comanda Confirmată</h2>
                     <p class="text-muted mb-4">
-                        Mul?umim pentru achizi?ia ta. Comanda ta a fost procesat? cu succes.
+                        Mulțumim pentru achiziția ta. Comanda ta a fost procesată cu succes.
                     </p>
 
                     <div class="alert alert-light border text-start">
-                        <h6 class="fw-bold">Detalii Comand?</h6>
+                        <h6 class="fw-bold">Detalii Comandă</h6>
                         <div class="row">
                             <div class="col-6">
-                                <small class="text-muted d-block">Num?r Comand?</small>
+                                <small class="text-muted d-block">Număr Comandă</small>
                                 <strong>#@Model.Id</strong>
                             </div>
                             <div class="col-6 text-end">
-                                <small class="text-muted d-block">Data Comand?</small>
+                                <small class="text-muted d-block">Data Comenzii</small>
                                 <strong>@Model.Date.ToString("dd.MM.yyyy HH:mm")</strong>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                         <div class="col-6">
                             <div class="p-3 bg-light rounded">
                                 <i class="bi bi-truck text-primary fs-5 d-block mb-2"></i>
-                                <small class="text-muted d-block">Livrare �n</small>
+                                <small class="text-muted d-block">Livrare în</small>
                                 <strong>2-3 zile</strong>
                             </div>
                         </div>
@@ -99,7 +99,7 @@
                     <!-- ACTIONS -->
                     <div class="d-flex gap-2">
                         <a href="/Products/Index" class="btn btn-outline-primary flex-grow-1">
-                            <i class="bi bi-shop me-2"></i> Continu? Cump?r?turile
+                            <i class="bi bi-shop me-2"></i> Continui Cumpărăturile
                         </a>
                         <a href="/Orders/MyOrders" class="btn btn-primary flex-grow-1">
                             <i class="bi bi-list-check me-2"></i> Comenzile Mele
@@ -107,7 +107,7 @@
                     </div>
 
                     <p class="text-muted small mt-4">
-                        Vei primi un email cu detaliile comenzii ?i codul de urm?rire.
+                        Vei primi un email cu detaliile comenzii și codul de urmărire.
                     </p>
                 </div>
             </div>
