@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+
+// Force UTF-8 encoding for console and strings
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +34,13 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.CartService>();
 
 var app = builder.Build();
+
+// Force UTF-8 response encoding
+app.Use(async (context, next) =>
+{
+    context.Response.ContentType = "text/html; charset=utf-8";
+    await next();
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

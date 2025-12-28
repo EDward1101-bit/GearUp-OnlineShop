@@ -12,7 +12,8 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark shadow-lg sticky-top" style="z-index: 1030;">
+        @* Removed 'sticky-top' so navbar scrolls with the page (footer will move normally). *@
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-lg" style="z-index: 1030;">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-shop-window"></i> Magazin Online
@@ -160,9 +161,8 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <style>
-        /* Auto-hide navbar helper */
+        /* Auto-hide navbar helper (left for future use) */
         .navbar-hidden { transform: translateY(-110%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sticky-top { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .navbar .dropdown-menu { z-index: 1040; }
     </style>
     
