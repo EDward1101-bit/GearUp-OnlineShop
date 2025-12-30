@@ -211,10 +211,40 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <style>
-        /* Auto-hide navbar helper (left for future use) */
-        .navbar-hidden { transform: translateY(-110%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .navbar .dropdown-menu { z-index: 1040; }
+        /* Smart sticky navbar that follows user scroll position */
+        .navbar.sticky-top { 
+            position: fixed !important; 
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1030;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+        
+        /* Hidden state - slides up out of view */
+        .navbar-hidden { 
+            transform: translateY(-100%) !important;
+        }
+        
+        /* Ensure dropdowns stay on top */
+        .navbar .dropdown-menu { 
+            z-index: 1040; 
+        }
+        
+        /* Add padding to body to prevent content jump when navbar is fixed */
+        body.has-fixed-navbar {
+            padding-top: 56px; /* Adjust based on your navbar height */
+        }
     </style>
+    
+    <script>
+        // Add class to body for fixed navbar spacing
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('has-fixed-navbar');
+        });
+    </script>
     
     @await RenderSectionAsync("Scripts", required: false)
 </body>

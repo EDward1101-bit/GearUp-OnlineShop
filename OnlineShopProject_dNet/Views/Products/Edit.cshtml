@@ -40,7 +40,7 @@
 
     <div class="mb-3">
         <label for="Description" class="form-label">Descriere Produs</label>
-        <textarea name="Description" id="Description" class="form-control" rows="5">@displayProduct.Description</textarea>
+        <textarea name="Description" id="Description" class="form-control" rows="5">@displayProduct.Description?.Replace("<br>", "\n")</textarea>
         @Html.ValidationMessage("Description", new { @class = "text-danger" })
     </div>
 

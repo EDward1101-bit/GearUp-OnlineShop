@@ -385,24 +385,38 @@ window.loadPendingCount = function() {
         .catch(function(error) { console.log('Info: Pending count check skipped or failed.'); });
 };
 
-// Auto-hide navbar on scroll - IMPROVED
+// Smart navbar: hides when scrolling DOWN, shows when scrolling UP (follows user position)
 (function() {
     var lastScroll = 0;
     var navbar = null;
     var ticking = false;
+    var scrollThreshold = 5; // minimum scroll distance to trigger hide/show
 
     function updateNavbar() {
-        var current = window.pageYOffset || document.documentElement.scrollTop;
-        if (navbar) {
-            // Hide navbar when scrolling DOWN and current > 100px
-            // Show navbar when scrolling UP
-            if (current > lastScroll && current > 100) {
-                navbar.classList.add('navbar-hidden');
-            } else {
-                navbar.classList.remove('navbar-hidden');
-            }
+        var currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (!navbar) return;
+        
+        // Determine scroll direction
+        if (Math.abs(currentScroll - lastScroll) < scrollThreshold) {
+            ticking = false;
+            return; // Ignore tiny movements
         }
-        lastScroll = current <= 0 ? 0 : current;
+
+        if (currentScroll > lastScroll && currentScroll > 80) {
+            // Scrolling DOWN - hide navbar
+            navbar.classList.add('navbar-hidden');
+        } else if (currentScroll < lastScroll) {
+            // Scrolling UP - show navbar immediately
+            navbar.classList.remove('navbar-hidden');
+        }
+        
+        // Keep visible at very top
+        if (currentScroll <= 0) {
+            navbar.classList.remove('navbar-hidden');
+        }
+
+        lastScroll = currentScroll <= 0 ? 0 : currentScroll;
         ticking = false;
     }
 
@@ -410,6 +424,7 @@ window.loadPendingCount = function() {
         navbar = document.querySelector('.navbar');
         if (!navbar) return;
 
+        // Listen to scroll events with requestAnimationFrame for smooth performance
         window.addEventListener('scroll', function() {
             if (!ticking) {
                 window.requestAnimationFrame(updateNavbar);

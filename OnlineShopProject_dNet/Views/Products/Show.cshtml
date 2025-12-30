@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @using OnlineShopProject_dNet.Models
 @inject UserManager<ApplicationUser> UserManager
+@inject OnlineShopProject_dNet.Services.TextProcessingService _textProcessor
 
 @{
     ViewBag.Title = "Detalii Produs";
@@ -95,7 +96,9 @@ else
                             <hr class="my-3" />
 
                             @* 5. Descriere *@
-                            <p class="card-text text-secondary lh-lg mb-4">@Model.Description</p>
+                            <div class="card-text text-secondary lh-lg mb-4" style="white-space: normal;">
+                                @Html.Raw(_textProcessor.ProcessForDisplay(Model.Description))
+                            </div>
 
                             <hr class="my-3" />
 

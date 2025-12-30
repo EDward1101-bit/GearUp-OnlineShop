@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @using OnlineShopProject_dNet.Models
 @inject UserManager<ApplicationUser> UserManager
+@inject OnlineShopProject_dNet.Services.TextProcessingService _textProcessor
 
 @{
     ViewBag.Title = "Lista Produse";
@@ -333,9 +334,9 @@
                             }
 
                             @* Descriere *@
-                            <p class="card-text text-muted small mb-3" style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                                @product.Description
-                            </p>
+                            <div class="card-text text-muted small mb-3" style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                                @Html.Raw(_textProcessor.ProcessForDisplay(product.Description))
+                            </div>
 
                             @* Preț *@
                             <div class="mt-auto">

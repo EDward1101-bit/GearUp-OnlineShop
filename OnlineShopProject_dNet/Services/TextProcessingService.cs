@@ -62,10 +62,13 @@ namespace OnlineShopProject_dNet.Services
             if (string.IsNullOrEmpty(input))
                 return string.Empty;
 
-            // Keep HTML structure - don't convert back to newlines
-            // The sanitized HTML will be stored as-is
-            // This preserves formatting when displayed with Html.Raw
-            return input;
+            // Preserve user formatting by converting new lines to <br>
+            // and sanitizing with the same rules used for display
+            var withBreaks = input.Replace("\r\n", "<br>")
+                                  .Replace("\n", "<br>")
+                                  .Replace("\r", "<br>");
+
+            return _sanitizer.Sanitize(withBreaks);
         }
 
         /// <summary>
