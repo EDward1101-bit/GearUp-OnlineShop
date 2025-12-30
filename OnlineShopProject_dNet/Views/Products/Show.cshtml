@@ -71,7 +71,7 @@ else
 
                             @* 3. Preț (prominent) *@
                             <h2 class="text-danger fw-bold mb-3">
-                                @Model.Price <small class="fs-6 text-muted">RON</small>
+                                @(Model.Price?.ToString("0.##") ?? "-") <small class="fs-6 text-muted">RON</small>
                             </h2>
 
                             @* 4. Categorie & Stoc (badges) *@
@@ -79,10 +79,10 @@ else
                                 <span class="badge bg-info text-dark">
                                     <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fără Categorie")
                                 </span>
-                                @if (Model.Stock > 0)
+                                @if (Model.Stock.GetValueOrDefault() > 0)
                                 {
                                     <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> În stoc (@Model.Stock bucăți)
+                                        <i class="bi bi-check-circle"></i> În stoc (@Model.Stock.GetValueOrDefault() bucăți)
                                     </span>
                                 }
                                 else
@@ -106,11 +106,11 @@ else
                             @if (User.Identity?.IsAuthenticated == true)
                             {
                                 <div class="d-flex align-items-end gap-3 mb-4 flex-wrap">
-                                    @if (Model.Stock > 0)
+                                    @if (Model.Stock.GetValueOrDefault() > 0)
                                     {
                                         <div>
                                             <label class="form-label small fw-bold d-block mb-2">Cantitate</label>
-                                            <input type="number" id="qtyInput" class="form-control" value="1" min="1" max="@Model.Stock" style="width: 80px;">
+                                            <input type="number" id="qtyInput" class="form-control" value="1" min="1" max="@Model.Stock.GetValueOrDefault()" style="width: 80px;">
                                         </div>
                                         <button class="btn btn-primary btn-lg fw-bold flex-grow-1" id="addToCartBtn" data-product-id="@Model.Id">
                                             <i class="bi bi-cart-plus me-2"></i> Adaugă în coș

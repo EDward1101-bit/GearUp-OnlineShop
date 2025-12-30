@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,9 +16,23 @@ namespace OnlineShopProject_dNet.Controllers
         private readonly NotificationService _notificationService = notificationService;
 
         [HttpGet]
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(string? search, int page = 1, int pageSize = 10)
         {
-            var users = _userManager.Users.ToList();
+            page = Math.Max(1, page);
+
+            var usersQuery = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                usersQuery = usersQuery.Where(u =>
+                    (u.Email ?? "").Contains(search) ||
+                    (u.UserName ?? "").Contains(search) ||
+                    (u.FirstName ?? "").Contains(search) ||
+                    (u.LastName ?? "").Contains(search));
+            }
+
+            var users = usersQuery.ToList();
             var model = new List<AdminUserVm>();
 
             foreach (var user in users)
@@ -27,13 +42,32 @@ namespace OnlineShopProject_dNet.Controllers
                 {
                     Id = user.Id,
                     Email = user.Email ?? user.UserName ?? "",
-                    Name = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(s => !string.IsNullOrWhiteSpace(s)) ).Trim(),
+                    Name = string.Join(" ", new[] { user.FirstName, user.LastName }.Where(s => !string.IsNullOrWhiteSpace(s))).Trim(),
                     IsProposer = roles.Contains("Proposer"),
                     IsAdmin = roles.Contains("Admin")
                 });
             }
 
-            return View(model);
+            // Dac? nu exist? c?utare, afi??m doar Proposerii
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                model = model.Where(m => m.IsProposer).ToList();
+            }
+
+            var totalCount = model.Count;
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            var items = model.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var vm = new AdminUsersPageVm
+            {
+                Items = items,
+                Page = page,
+                TotalPages = totalPages,
+                Search = search,
+                TotalCount = totalCount
+            };
+
+            return View(vm);
         }
 
         [HttpPost]
@@ -89,5 +123,14 @@ namespace OnlineShopProject_dNet.Controllers
         public string Name { get; set; } = string.Empty;
         public bool IsProposer { get; set; }
         public bool IsAdmin { get; set; }
+    }
+
+    public class AdminUsersPageVm
+    {
+        public IEnumerable<AdminUserVm> Items { get; set; } = Enumerable.Empty<AdminUserVm>();
+        public int Page { get; set; }
+        public int TotalPages { get; set; }
+        public string? Search { get; set; }
+        public int TotalCount { get; set; }
     }
 }

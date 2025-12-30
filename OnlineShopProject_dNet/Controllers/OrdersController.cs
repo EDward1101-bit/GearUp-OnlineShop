@@ -50,7 +50,7 @@ namespace OnlineShopProject_dNet.Controllers
                 foreach (var item in cart.OrderDetails)
                 {
                     // Dacă produsul a fost șters sau cantitatea din coș depășește stocul actual
-                    if (item.Product != null && item.Quantity > item.Product.Stock)
+                    if (item.Product != null && item.Quantity > item.Product.Stock.GetValueOrDefault())
                     {
                         hasStockIssues = true;
                     }
@@ -183,7 +183,7 @@ namespace OnlineShopProject_dNet.Controllers
             // Validăm stocul înainte să lăsăm omul să completeze adresa
             foreach (var item in cart.OrderDetails)
             {
-                if (item.Product != null && item.Quantity > item.Product.Stock)
+                if (item.Product != null && item.Quantity > item.Product.Stock.GetValueOrDefault())
                 {
                     TempData["message"] = "Nu poți finaliza comanda deoarece ai produse cu stoc insuficient!";
                     return RedirectToAction("Index"); // Îl întoarcem în coș
@@ -232,7 +232,7 @@ namespace OnlineShopProject_dNet.Controllers
                     item.ProductCategorySnapshot ??= item.Product.Category?.Name;
                 }
 
-                if (item.Product == null || item.Quantity > item.Product.Stock)
+                if (item.Product == null || item.Quantity > item.Product.Stock.GetValueOrDefault())
                 {
                     TempData["message"] = $"Produsul nu mai este pe stoc. Actualizează coșul.";
                     return RedirectToAction("Index");
