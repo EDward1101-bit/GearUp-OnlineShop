@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // NECESAR pentru Include
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using OnlineShopProject_dNet.Services;
 
 namespace OnlineShopProject_dNet.Controllers
 {
@@ -10,11 +11,13 @@ namespace OnlineShopProject_dNet.Controllers
     {
         private readonly ApplicationDbContext db;
         private readonly IWebHostEnvironment _env;
+        private readonly TextProcessingService _textProcessor;
 
-        public CategoriesController(ApplicationDbContext context, IWebHostEnvironment env)
+        public CategoriesController(ApplicationDbContext context, IWebHostEnvironment env, TextProcessingService textProcessor)
         {
             db = context;
             _env = env;
+            _textProcessor = textProcessor;
         }
 
         // 1. GETALL - Returnează categorii ca JSON (pentru dropdown - public)
@@ -73,6 +76,9 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public IActionResult New(Category cat)
         {
+            // Sanitize category name
+            cat.Name = _textProcessor.SanitizeText(cat.Name);
+
             if (ModelState.IsValid)
             {
                 db.Categories.Add(cat);
@@ -107,6 +113,9 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 return NotFound();
             }
+
+            // Sanitize category name
+            requestCategory.Name = _textProcessor.SanitizeText(requestCategory.Name);
 
             if (ModelState.IsValid)
             {

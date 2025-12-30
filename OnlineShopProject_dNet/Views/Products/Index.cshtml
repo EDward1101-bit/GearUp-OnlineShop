@@ -34,6 +34,72 @@
 
 <div class="container">
 
+    @* ZONA CĂUTARE, FILTRARE ȘI SORTARE *@>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        @* Căutare *@
+                        <div class="col-md-4">
+                            <label for="search" class="form-label fw-semibold">Caută produs</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="search" name="search"
+                                       value="@ViewBag.Search" placeholder="Nume produs...">
+                            </div>
+                        </div>
+
+                        @* Filtrare categorie *@
+                        <div class="col-md-3">
+                            <label for="category" class="form-label fw-semibold">Categorie</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Toate categoriile</option>
+                                @foreach (var cat in ViewBag.Categories)
+                                {
+                                    if (cat.Id == ViewBag.SelectedCategory)
+                                    {
+                                        <option selected="selected" value="@cat.Id">@cat.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@cat.Id">@cat.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        @* Sortare *@
+                        <div class="col-md-2">
+                            <label for="sortBy" class="form-label fw-semibold">Sortează după</label>
+                            <select class="form-select" id="sortBy" name="sortBy">
+                                <option value="name" selected="@(ViewBag.SortBy == "name")">Nume</option>
+                                <option value="price" selected="@(ViewBag.SortBy == "price")">Preț</option>
+                                <option value="rating" selected="@(ViewBag.SortBy == "rating")">Rating</option>
+                            </select>
+                        </div>
+
+                        @* Ordine sortare *@
+                        <div class="col-md-2">
+                            <label for="sortOrder" class="form-label fw-semibold">Ordine</label>
+                            <select class="form-select" id="sortOrder" name="sortOrder">
+                                <option value="asc" selected="@(ViewBag.SortOrder == "asc")">Crescător</option>
+                                <option value="desc" selected="@(ViewBag.SortOrder == "desc")">Descrescător</option>
+                            </select>
+                        </div>
+
+                        @* Buton căutare *@
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @* ZONA PRODUSE PENDING - DOAR ADMIN *@
     @if (User.IsInRole("Admin"))
     {

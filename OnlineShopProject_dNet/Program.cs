@@ -28,10 +28,28 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+});
+
 builder.Services.AddRazorPages();
 
+// Add HttpContext accessor
+builder.Services.AddHttpContextAccessor();
+
+// Add logging
+builder.Services.AddLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.AddConsole();
+    logging.AddDebug();
+    logging.SetMinimumLevel(LogLevel.Information);
+});
+
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.CartService>();
+builder.Services.AddScoped<OnlineShopProject_dNet.Services.TextProcessingService>();
+builder.Services.AddScoped<OnlineShopProject_dNet.Services.ProductAIService>();
 
 var app = builder.Build();
 
@@ -44,6 +62,47 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Custom error handling middleware
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An unhandled exception occurred.");
+
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "text/html";
+
+        await context.Response.WriteAsync(@"
+            <html>
+                <head>
+                    <title>Eroare Internă Server</title>
+                    <link href='/lib/bootstrap/dist/css/bootstrap.min.css' rel='stylesheet' />
+                </head>
+                <body class='bg-light'>
+                    <div class='container mt-5'>
+                        <div class='row justify-content-center'>
+                            <div class='col-md-6'>
+                                <div class='card shadow'>
+                                    <div class='card-body text-center'>
+                                        <i class='bi bi-exclamation-triangle text-danger' style='font-size: 4rem;'></i>
+                                        <h1 class='card-title mt-3'>Oops! Ceva nu a mers bine</h1>
+                                        <p class='card-text'>A apărut o eroare neașteptată. Vă rugăm să încercați din nou mai târziu.</p>
+                                        <a href='/' class='btn btn-primary'>Înapoi la Acasă</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+            </html>");
+    }
+});
 
 app.UseRouting();
 

@@ -37,6 +37,19 @@ namespace OnlineShopProject_dNet.Controllers
                     TempData["message"] = "Aveți deja un review pentru acest produs. Puteți edita review-ul existent.";
                     return Redirect("/Products/Show/" + rev.ProductId);
                 }
+
+                // Validare IMPORTANTĂ: Verifică dacă utilizatorul a cumpărat produsul
+                var hasPurchased = db.OrderDetails
+                    .Any(od => od.ProductId == rev.ProductId.Value &&
+                              od.Order != null &&
+                              od.Order.UserId == rev.UserId &&
+                              od.Order.Status == "Placed");
+
+                if (!hasPurchased)
+                {
+                    TempData["message"] = "Puteți lăsa review-uri doar pentru produsele pe care le-ați cumpărat.";
+                    return Redirect("/Products/Show/" + rev.ProductId);
+                }
             }
 
             if (ModelState.IsValid)

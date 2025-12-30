@@ -24,13 +24,17 @@ namespace OnlineShopProject_dNet.Models
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Stocul este obligatoriu")]
+        [Range(0, int.MaxValue, ErrorMessage = "Stocul nu poate fi negativ")]
         public int Stock { get; set; }
+
+        [Range(0, 5, ErrorMessage = "Rating-ul trebuie să fie între 0 și 5")]
         public float? Rating { get; set; }
+
         public string? Status { get; set; }
 
         // Relația cu Categoria
         [Required(ErrorMessage = "Categoria este obligatorie")]
-        public int? CategoryId { get; set; }
+        public int CategoryId { get; set; }
         public virtual Category? Category { get; set; }
 
 

@@ -4,7 +4,7 @@
 @{
     ViewBag.Title = "Editează Produs";
     Product displayProduct = Model ?? ViewBag.Product;
-    int selectedCategoryId = displayProduct.CategoryId ?? 0;
+    int selectedCategoryId = displayProduct.CategoryId;
 }
 
 <h2 class="text-center mb-4"> Editează Produsul: @displayProduct.Title</h2>

@@ -57,9 +57,11 @@
                 <div class="d-flex flex-column gap-4">
                     @foreach (var review in Model.Reviews.OrderByDescending(r => r.Date))
                     {
-                        string displayName = !string.IsNullOrEmpty(review.User?.FirstName)
-                        ? review.User.FirstName
-                        : (review.User?.UserName ?? "Anonim");
+                        string displayName = review.User != null
+                        ? (!string.IsNullOrEmpty(review.User.FirstName) && !string.IsNullOrEmpty(review.User.LastName)
+                            ? $"{review.User.FirstName} {review.User.LastName}"
+                            : review.User.UserName ?? "Anonim")
+                        : "Anonim";
 
                         <div class="card border-0 shadow-sm" id="review-container-@review.Id">
                             <div class="card-body">

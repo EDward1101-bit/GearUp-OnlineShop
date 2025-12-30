@@ -1,3 +1,17 @@
+@using OnlineShopProject_dNet.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    // Obține numele complet al utilizatorului
+    var currentUser = await UserManager.GetUserAsync(User);
+    var displayName = currentUser != null
+        ? (!string.IsNullOrEmpty(currentUser.FirstName) && !string.IsNullOrEmpty(currentUser.LastName)
+            ? $"{currentUser.FirstName} {currentUser.LastName}"
+            : currentUser.UserName ?? User.Identity?.Name ?? "Utilizator")
+        : User.Identity?.Name ?? "Utilizator";
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,8 +26,7 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
     <header>
-        @* Removed 'sticky-top' so navbar scrolls with the page (footer will move normally). *@
-        <nav class="navbar navbar-expand-lg navbar-dark shadow-lg" style="z-index: 1030;">
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-lg sticky-top" style="z-index: 1030;">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-shop-window"></i> Magazin Online
@@ -47,20 +60,6 @@
                             </ul>
                         </li>
 
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-gear"></i> Admin <span id="pendingBadge" class="badge bg-danger" style="display: none;">0</span>
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                    <li><h6 class="dropdown-header">Panou Admin</h6></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#categoriesModal">Gestionare Categorii</a></li>
-                                    <li><a class="dropdown-item" href="/Products/Index#pending-products">Produse în Așteptare <span id="pendingCountNav" class="badge bg-warning text-dark ms-2">0</span></a></li>
-                                </ul>
-                            </li>
-                        }
 
         <!-- mini cart placeholder; real loader defined later -->
                     </ul>
@@ -68,7 +67,55 @@
                     @* --- GRUP 2: MENIUL DREAPTA (Iconițe + User) --- *@
                     <div class="d-flex align-items-center">
 
-                        @* A. COȘ & WISHLIST (Sunt grupate aici, apropiate între ele) *@
+                        @* USER MENU - Pentru toți utilizatorii autentificați *@
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <ul class="navbar-nav align-items-center">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-circle"></i> @displayName
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
+                                        <li><h6 class="dropdown-header">Contul meu</h6></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                            <i class="bi bi-person-gear"></i> Profil
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Orders" asp-action="MyOrders">
+                                            <i class="bi bi-receipt"></i> Comenzile mele
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Wishlist" asp-action="Index">
+                                            <i class="bi bi-heart"></i> Favorite
+                                        </a></li>
+
+                                        @* ADMIN SECTION - Doar pentru administratori *@
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Panou Admin</h6></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#categoriesModal">
+                                                <i class="bi bi-tags"></i> Gestionare Categorii
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="/Products/Index#pending-products">
+                                                <i class="bi bi-clock-history"></i> Produse în Așteptare <span id="pendingCountNav" class="badge bg-warning text-dark ms-2">0</span>
+                                            </a></li>
+                                        }
+
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form class="dropdown-item p-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                                <button type="submit" class="btn btn-link text-decoration-none w-100 text-start p-2">
+                                                    <i class="bi bi-box-arrow-right"></i> Ieșire
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        }
+
+                        @* B. COȘ & WISHLIST (Sunt grupate aici, apropiate între ele) *@
                         <ul class="navbar-nav align-items-center me-3 pe-3">
                             @* border-end pune o linie verticală între iconițe și user *@
                             @await Component.InvokeAsync("NavbarSummary")

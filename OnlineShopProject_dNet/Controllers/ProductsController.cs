@@ -4,21 +4,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using OnlineShopProject_dNet.Services;
+using Microsoft.Extensions.Logging;
 
 namespace OnlineShopProject_dNet.Controllers
 {
     public class ProductsController(
         ApplicationDbContext context,
         IWebHostEnvironment env,
-        UserManager<ApplicationUser> userManager) : Controller
+        UserManager<ApplicationUser> userManager,
+        TextProcessingService textProcessor,
+        ILogger<ProductsController> logger) : Controller
     {
         private readonly ApplicationDbContext db = context;
         private readonly IWebHostEnvironment _env = env;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly TextProcessingService _textProcessor = textProcessor;
+        private readonly ILogger<ProductsController> _logger = logger;
 
-        // 1. INDEX - Vizitatorii vad doar produsele APROBATE
+        // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu căutare, filtrare și sortare
         [HttpGet]
-        public IActionResult Index(int? category)
+        public IActionResult Index(int? category, string search, string sortBy = "name", string sortOrder = "asc")
         {
             var query = db.Products
                          .Include(p => p.Category)
@@ -31,11 +37,42 @@ namespace OnlineShopProject_dNet.Controllers
                 query = query.Where(p => p.CategoryId == category.Value);
             }
 
+            // Căutare după nume (parțial matching)
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower().Trim();
+                query = query.Where(p => p.Title.ToLower().Contains(search));
+            }
+
+            // Sortare
+            switch (sortBy.ToLower())
+            {
+                case "price":
+                    query = sortOrder.ToLower() == "desc"
+                        ? query.OrderByDescending(p => p.Price)
+                        : query.OrderBy(p => p.Price);
+                    break;
+                case "rating":
+                    query = sortOrder.ToLower() == "desc"
+                        ? query.OrderByDescending(p => p.Rating ?? 0)
+                        : query.OrderBy(p => p.Rating ?? 0);
+                    break;
+                case "name":
+                default:
+                    query = sortOrder.ToLower() == "desc"
+                        ? query.OrderByDescending(p => p.Title)
+                        : query.OrderBy(p => p.Title);
+                    break;
+            }
+
             var products = query.ToList();
 
             ViewBag.Products = products;
             ViewBag.SelectedCategory = category;
             ViewBag.Categories = db.Categories.OrderBy(c => c.Name).ToList();
+            ViewBag.Search = search;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortOrder = sortOrder;
 
             // Pentru Admin: adăugăm produsele Pending într-o zonă separată
             if (User.IsInRole("Admin"))
@@ -108,7 +145,14 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public async Task<IActionResult> New(Product product, IFormFile? Image)
         {
-            product.UserId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User);
+            product.UserId = userId;
+
+            _logger.LogInformation("User {UserId} is creating a new product: {ProductTitle}", userId, product.Title);
+
+            // Sanitize inputs for security
+            product.Title = _textProcessor.SanitizeText(product.Title);
+            product.Description = _textProcessor.ProcessForStorage(_textProcessor.SanitizeHtml(product.Description));
 
             // LOGICA STATUS: Admin -> Approved direct / Colaborator -> Pending
             if (User.IsInRole("Admin"))
@@ -195,8 +239,9 @@ namespace OnlineShopProject_dNet.Controllers
                 return Forbid();
             }
 
-            product.Title = requestProduct.Title;
-            product.Description = requestProduct.Description;
+            // Sanitize inputs for security
+            product.Title = _textProcessor.SanitizeText(requestProduct.Title);
+            product.Description = _textProcessor.ProcessForStorage(_textProcessor.SanitizeHtml(requestProduct.Description));
             product.Price = requestProduct.Price;
             product.Stock = requestProduct.Stock;
             product.CategoryId = requestProduct.CategoryId;
