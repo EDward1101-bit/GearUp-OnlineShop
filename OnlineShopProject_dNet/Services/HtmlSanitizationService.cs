@@ -21,7 +21,7 @@ namespace OnlineShopProject_dNet.Services
 
         // Pattern pentru a detecta event handlers (onclick, onerror, etc)
         private static readonly Regex EventHandlerRegex = new Regex(
-            @"on\w+\s*=\s*[""']?[^""'>\s]*[""']?",
+            @"on\w+\s*=\s*[\""]?[^\"">\s]*[\""]?",
             RegexOptions.IgnoreCase | RegexOptions.Compiled
         );
 

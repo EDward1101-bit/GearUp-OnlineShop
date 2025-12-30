@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore; // NECESAR pentru Include
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
 using OnlineShopProject_dNet.Services;
+using Microsoft.Extensions.Logging;
 
 namespace OnlineShopProject_dNet.Controllers
 {
@@ -12,12 +13,14 @@ namespace OnlineShopProject_dNet.Controllers
         private readonly ApplicationDbContext db;
         private readonly IWebHostEnvironment _env;
         private readonly TextProcessingService _textProcessor;
+        private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(ApplicationDbContext context, IWebHostEnvironment env, TextProcessingService textProcessor)
+        public CategoriesController(ApplicationDbContext context, IWebHostEnvironment env, TextProcessingService textProcessor, ILogger<CategoriesController> logger)
         {
             db = context;
             _env = env;
             _textProcessor = textProcessor;
+            _logger = logger;
         }
 
         // 1. GETALL - Returnează categorii ca JSON (pentru dropdown - public)
@@ -79,14 +82,31 @@ namespace OnlineShopProject_dNet.Controllers
             // Sanitize category name
             cat.Name = _textProcessor.SanitizeText(cat.Name);
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+            {
+                foreach (var kv in ModelState)
+                {
+                    foreach (var err in kv.Value.Errors)
+                    {
+                        _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
+                    }
+                }
+                return View(cat);
+            }
+
+            try
             {
                 db.Categories.Add(cat);
                 db.SaveChanges();
                 TempData["message"] = "Categoria a fost adăugată!";
                 return RedirectToAction("Index", "Products");
             }
-            return View(cat);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving new category");
+                ModelState.AddModelError(string.Empty, "A apărut o eroare la salvarea categoriei.");
+                return View(cat);
+            }
         }
 
         // 4. EDIT - RESTRICTIONAT: Doar Admin
@@ -117,14 +137,31 @@ namespace OnlineShopProject_dNet.Controllers
             // Sanitize category name
             requestCategory.Name = _textProcessor.SanitizeText(requestCategory.Name);
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+            {
+                foreach (var kv in ModelState)
+                {
+                    foreach (var err in kv.Value.Errors)
+                    {
+                        _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
+                    }
+                }
+                return View(requestCategory);
+            }
+
+            try
             {
                 category.Name = requestCategory.Name;
                 db.SaveChanges();
                 TempData["message"] = "Categoria a fost modificată!";
                 return RedirectToAction("Index", "Products");
             }
-            return View(requestCategory);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating category {CategoryId}", id);
+                ModelState.AddModelError(string.Empty, "A apărut o eroare la actualizarea categoriei.");
+                return View(requestCategory);
+            }
         }
 
         // 5. DELETE - RESTRICTIONAT: Doar Admin + Logica ta de stergere poze
@@ -152,11 +189,19 @@ namespace OnlineShopProject_dNet.Controllers
             }
             // ------------------------------------------------
 
-            db.Categories.Remove(category);
-            db.SaveChanges();
-            TempData["message"] = "Categoria și produsele aferente au fost șterse!";
-
-            return RedirectToAction("Index", "Products");
+            try
+            {
+                db.Categories.Remove(category);
+                db.SaveChanges();
+                TempData["message"] = "Categoria și produsele aferente au fost șterse!";
+                return RedirectToAction("Index", "Products");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting category {CategoryId}", id);
+                TempData["message"] = "A apărut o eroare la ștergerea categoriei.";
+                return RedirectToAction("Index", "Products");
+            }
         }
     }
 }

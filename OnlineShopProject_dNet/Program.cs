@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using OnlineShopProject_dNet.Services;
 
 // Force UTF-8 encoding for console and strings
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -50,6 +51,8 @@ builder.Services.AddLogging(logging =>
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.CartService>();
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.TextProcessingService>();
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.ProductAIService>();
+// HTML sanitization service (prevent XSS / clean inputs)
+builder.Services.AddScoped<IHtmlSanitizationService, HtmlSanitizationService>();
 
 var app = builder.Build();
 

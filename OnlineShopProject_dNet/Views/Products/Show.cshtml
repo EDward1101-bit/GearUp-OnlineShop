@@ -139,19 +139,22 @@ else
                                     <a href="/Products/Edit/@Model.Id" class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil me-1"></i> Editează
                                     </a>
-                                    <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
+                                    <form method="post" asp-controller="Products" asp-action="Delete" asp-route-id="@Model.Id" class="d-inline">
+                                        @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur ștergi produsul?');">
                                             <i class="bi bi-trash me-1"></i> Șterge
                                         </button>
                                     </form>
                                     @if (Model.Status == "Pending")
                                     {
-                                        <form method="post" action="/Products/Approve/@Model.Id" class="d-inline">
+                                        <form method="post" asp-controller="Products" asp-action="Approve" asp-route-id="@Model.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-success btn-sm">
                                                 <i class="bi bi-check-circle me-1"></i> Aprobă
                                             </button>
                                         </form>
-                                        <form method="post" action="/Products/Reject/@Model.Id" class="d-inline">
+                                        <form method="post" asp-controller="Products" asp-action="Reject" asp-route-id="@Model.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?');">
                                                 <i class="bi bi-x-circle me-1"></i> Respinge
                                             </button>
@@ -269,12 +272,17 @@ else
                     addMessageToChat('user', question);
 
                     try {
+                        // include anti-forgery token
+                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const token = tokenInput ? tokenInput.value : '';
+                        const bodyStr = `productId=@Model.Id&question=${encodeURIComponent(question)}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+
                         const response = await fetch('/ProductAI/AskQuestion', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: `productId=@Model.Id&question=${encodeURIComponent(question)}`
+                            body: bodyStr
                         });
 
                         const data = await response.json();

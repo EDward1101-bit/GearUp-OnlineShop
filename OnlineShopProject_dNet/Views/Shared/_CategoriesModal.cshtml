@@ -23,6 +23,7 @@
                     </div>
                     <div class="card-body">
                         <form id="addCategoryForm" method="post" action="/Categories/New">
+                            @Html.AntiForgeryToken()
                             <div class="mb-3">
                                 <label for="newCategoryName" class="form-label fw-semibold">Nume Categorie:</label>
                                 <input type="text" class="form-control" id="newCategoryName" name="Name" required 
@@ -72,6 +73,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editCategoryForm" method="post">
+                @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" id="editCategoryId" name="id" />
                     <div class="mb-3">
@@ -103,7 +105,21 @@
                 const categoriesList = document.getElementById('categoriesList');
                 if (data && data.length > 0) {
                     let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nume</th><th>Acțiuni</th></tr></thead><tbody>';
+                    const antiTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                    const antiTokenValue = antiTokenInput ? antiTokenInput.value : '';
+
                     data.forEach(category => {
+                        let deleteForm = `<form method="post" action="/Categories/Delete/${category.id}" class="d-inline">`;
+                        if (antiTokenValue) {
+                            deleteForm += `<input name="__RequestVerificationToken" type="hidden" value="${antiTokenValue}" />`;
+                        }
+                        deleteForm += `
+                                            <button type="submit" class="btn btn-danger" 
+                                                    onclick="return confirm('ATENȚIE: Ștergerea categoriei va șterge TOATE produsele din ea! Continui?')">
+                                                <i class="bi bi-trash"></i> Șterge
+                                            </button>
+                                        </form>`;
+
                         html += `
                             <tr id="category-row-${category.id}">
                                 <td>
@@ -116,12 +132,7 @@
                                                 data-id="${category.id}" data-name="${category.name}">
                                             <i class="bi bi-pencil"></i> Editează
                                         </button>
-                                        <form method="post" action="/Categories/Delete/${category.id}" class="d-inline">
-                                            <button type="submit" class="btn btn-danger" 
-                                                    onclick="return confirm('ATENȚIE: Ștergerea categoriei va șterge TOATE produsele din ea! Continui?')">
-                                                <i class="bi bi-trash"></i> Șterge
-                                            </button>
-                                        </form>
+                                        ${deleteForm}
                                     </div>
                                 </td>
                             </tr>

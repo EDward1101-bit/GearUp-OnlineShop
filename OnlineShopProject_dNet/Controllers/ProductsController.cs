@@ -19,7 +19,7 @@ namespace OnlineShopProject_dNet.Controllers
         private readonly ApplicationDbContext db = context;
         private readonly IWebHostEnvironment _env = env;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly TextProcessingService _textProcessor = textProcessor;
+        private readonly TextProcessingService _text_processor = textProcessor;
         private readonly ILogger<ProductsController> _logger = logger;
 
         // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu căutare, filtrare și sortare
@@ -151,8 +151,8 @@ namespace OnlineShopProject_dNet.Controllers
             _logger.LogInformation("User {UserId} is creating a new product: {ProductTitle}", userId, product.Title);
 
             // Sanitize inputs for security
-            product.Title = _textProcessor.SanitizeText(product.Title);
-            product.Description = _textProcessor.ProcessForStorage(_textProcessor.SanitizeHtml(product.Description));
+            product.Title = _text_processor.SanitizeText(product.Title);
+            product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(product.Description));
 
             // LOGICA STATUS: Admin -> Approved direct / Colaborator -> Pending
             if (User.IsInRole("Admin"))
@@ -240,8 +240,8 @@ namespace OnlineShopProject_dNet.Controllers
             }
 
             // Sanitize inputs for security
-            product.Title = _textProcessor.SanitizeText(requestProduct.Title);
-            product.Description = _textProcessor.ProcessForStorage(_textProcessor.SanitizeHtml(requestProduct.Description));
+            product.Title = _text_processor.SanitizeText(requestProduct.Title);
+            product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(requestProduct.Description));
             product.Price = requestProduct.Price;
             product.Stock = requestProduct.Stock;
             product.CategoryId = requestProduct.CategoryId;

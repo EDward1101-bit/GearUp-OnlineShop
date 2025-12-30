@@ -79,11 +79,17 @@ window.addToCartDetailed = function(productId, qty, btn) {
     console.log('[CartDebug] Adding product:', productId, 'Qty:', qty, 'Authenticated:', window.isAuthenticated);
     
     if (window.isAuthenticated) {
-        fetch('/Orders/AddToCart', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-            body: `productId=${productId}&quantity=${qty}` 
-        })
+        try {
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : '';
+
+            const bodyStr = `productId=${productId}&quantity=${qty}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+
+            fetch('/Orders/AddToCart', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+                body: bodyStr
+            })
         .then(r => r.json())
         .then(d => {
             console.log('[CartDebug] Server response:', d);
@@ -109,11 +115,16 @@ window.addToCartDetailed = function(productId, qty, btn) {
 window.toggleWishlistDetailed = function(productId, btn) {
     console.log('[WishlistDebug] Toggling product:', productId);
     
-    fetch('/Wishlist/Toggle', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-        body: `productId=${productId}` 
-    })
+    try {
+        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+        const token = tokenInput ? tokenInput.value : '';
+        const bodyStr = `productId=${productId}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+
+        fetch('/Wishlist/Toggle', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+            body: bodyStr 
+        })
     .then(r => r.json())
     .then(d => {
         console.log('[WishlistDebug] Server response:', d);
@@ -362,11 +373,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.isAuthenticated) {
             var local = window.getLocalCart();
             if (local && local.length > 0) {
-                fetch('/OrdersAjax/MergeLocalCart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(local.map(i => ({ productId: parseInt(i.productId), quantity: parseInt(i.quantity) })))
-                }).then(r => r.json()).then(data => {
+                    try {
+                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const token = tokenInput ? tokenInput.value : '';
+
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (token) headers['RequestVerificationToken'] = token;
+
+                        fetch('/OrdersAjax/MergeLocalCart', {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify(local.map(i => ({ productId: parseInt(i.productId), quantity: parseInt(i.quantity) })))
+                        }).then(r => r.json()).then(data => {
                     if (data && data.success) {
                         // clear local only if merged
                         localStorage.removeItem('localCart');
@@ -375,6 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (data.merged && data.merged > 0) showToast('Coșul local a fost sincronizat', 'success');
                     }
                 }).catch(err => console.debug('MergeLocalCart failed', err));
+                    } catch (e) { console.debug('MergeLocalCart token attach failed', e); }
             }
         }
     } catch (e) { console.debug(e); }

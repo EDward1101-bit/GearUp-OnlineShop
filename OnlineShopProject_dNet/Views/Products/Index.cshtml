@@ -134,13 +134,15 @@
                                     </p>
                                     <p class="text-danger fw-bold mb-3 fs-5">@product.Price <small class="fs-6">RON</small></p>
                                     <div class="d-grid gap-2">
-                                        <form method="post" action="/Products/Approve/@product.Id" class="d-inline">
+                                        <form method="post" asp-controller="Products" asp-action="Approve" asp-route-id="@product.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-success btn-sm w-100">
                                                 <i class="bi bi-check-circle"></i> Aprobă
                                             </button>
                                         </form>
                                         <div class="btn-group" role="group">
-                                            <form method="post" action="/Products/Reject/@product.Id" class="d-inline">
+                                            <form method="post" asp-controller="Products" asp-action="Reject" asp-route-id="@product.Id" class="d-inline">
+                                                @Html.AntiForgeryToken()
                                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?')">
                                                     <i class="bi bi-x-circle"></i>
                                                 </button>
@@ -381,11 +383,15 @@
             function toggleWishlist(productId, btn) {
                 // Nu mai avem nevoie de event.preventDefault() aici neapărat,
                 // deoarece butonul nu mai e într-un link, dar e bine să rămână safe.
-                fetch('/Wishlist/Toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `productId=${productId}`
-                })
+                try {
+                    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                    const token = tokenInput ? tokenInput.value : '';
+                    const bodyStr = `productId=${productId}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+                    fetch('/Wishlist/Toggle', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: bodyStr
+                    })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
@@ -407,11 +413,15 @@
             // Funcție AJAX pentru Coș
             function addToCart(productId) {
                 if (isAuthenticated) {
-                    fetch('/Orders/AddToCart', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `productId=${productId}&quantity=1`
-                    })
+                    try {
+                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const token = tokenInput ? tokenInput.value : '';
+                        const bodyStr = `productId=${productId}&quantity=1` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+                        fetch('/Orders/AddToCart', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: bodyStr
+                        })
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
@@ -422,6 +432,7 @@
                         }
                     })
                     .catch(err => console.error(err));
+                    } catch (e) { console.error('Auth cart add failed', e); }
                 } else {
                     // fallback to localStorage
                     addToLocalCart(productId, 1, null);
