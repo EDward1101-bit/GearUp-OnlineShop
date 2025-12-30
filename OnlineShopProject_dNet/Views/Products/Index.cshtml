@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @using OnlineShopProject_dNet.Models
 @inject UserManager<ApplicationUser> UserManager
+@inject OnlineShopProject_dNet.Services.TextProcessingService _textProcessor
 
 @{
     ViewBag.Title = "Lista Produse";
@@ -33,6 +34,72 @@
 </div>
 
 <div class="container">
+
+    @* ZONA CĂUTARE, FILTRARE ȘI SORTARE *@
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        @* Căutare *@
+                        <div class="col-md-4">
+                            <label for="search" class="form-label fw-semibold">Caută produs</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="search" name="search"
+                                       value="@ViewBag.Search" placeholder="Nume produs...">
+                            </div>
+                        </div>
+
+                        @* Filtrare categorie *@
+                        <div class="col-md-3">
+                            <label for="category" class="form-label fw-semibold">Categorie</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Toate categoriile</option>
+                                @foreach (var cat in ViewBag.Categories)
+                                {
+                                    if (cat.Id == ViewBag.SelectedCategory)
+                                    {
+                                        <option selected="selected" value="@cat.Id">@cat.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@cat.Id">@cat.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        @* Sortare *@
+                        <div class="col-md-2">
+                            <label for="sortBy" class="form-label fw-semibold">Sortează după</label>
+                            <select class="form-select" id="sortBy" name="sortBy">
+                                <option value="name" selected="@(ViewBag.SortBy == "name")">Nume</option>
+                                <option value="price" selected="@(ViewBag.SortBy == "price")">Preț</option>
+                                <option value="rating" selected="@(ViewBag.SortBy == "rating")">Rating</option>
+                            </select>
+                        </div>
+
+                        @* Ordine sortare *@
+                        <div class="col-md-2">
+                            <label for="sortOrder" class="form-label fw-semibold">Ordine</label>
+                            <select class="form-select" id="sortOrder" name="sortOrder">
+                                <option value="asc" selected="@(ViewBag.SortOrder == "asc")">Crescător</option>
+                                <option value="desc" selected="@(ViewBag.SortOrder == "desc")">Descrescător</option>
+                            </select>
+                        </div>
+
+                        @* Buton căutare *@
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     @* ZONA PRODUSE PENDING - DOAR ADMIN *@
     @if (User.IsInRole("Admin"))
@@ -68,13 +135,15 @@
                                     </p>
                                     <p class="text-danger fw-bold mb-3 fs-5">@product.Price <small class="fs-6">RON</small></p>
                                     <div class="d-grid gap-2">
-                                        <form method="post" action="/Products/Approve/@product.Id" class="d-inline">
+                                        <form method="post" asp-controller="Products" asp-action="Approve" asp-route-id="@product.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-success btn-sm w-100">
                                                 <i class="bi bi-check-circle"></i> Aprobă
                                             </button>
                                         </form>
                                         <div class="btn-group" role="group">
-                                            <form method="post" action="/Products/Reject/@product.Id" class="d-inline">
+                                            <form method="post" asp-controller="Products" asp-action="Reject" asp-route-id="@product.Id" class="d-inline">
+                                                @Html.AntiForgeryToken()
                                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?')">
                                                     <i class="bi bi-x-circle"></i>
                                                 </button>
@@ -125,9 +194,6 @@
                                         <div class="d-flex gap-2">
                                             <a href="/Products/Show/@product.Id" class="btn btn-outline-primary btn-sm">
                                                 <i class="bi bi-eye"></i> Vezi
-                                            </a>
-                                            <a href="/Products/Edit/@product.Id" class="btn btn-outline-warning btn-sm">
-                                                <i class="bi bi-pencil"></i> Editează
                                             </a>
                                         </div>
                                     </div>
@@ -265,9 +331,9 @@
                             }
 
                             @* Descriere *@
-                            <p class="card-text text-muted small mb-3" style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                                @product.Description
-                            </p>
+                            <div class="card-text text-muted small mb-3" style="height: 60px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                                @Html.Raw(_textProcessor.ProcessForDisplay(product.Description))
+                            </div>
 
                             @* Preț *@
                             <div class="mt-auto">
@@ -307,58 +373,162 @@
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             }
         </style>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            var currentPage = (int)ViewBag.Page;
+            var totalPages = (int)ViewBag.TotalPages;
+            <nav aria-label="Paginare produse" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, category = ViewBag.SelectedCategory, search = ViewBag.Search, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder })">&laquo;</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i, category = ViewBag.SelectedCategory, search = ViewBag.Search, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, category = ViewBag.SelectedCategory, search = ViewBag.Search, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder })">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        }
     }
 
     @section Scripts {
         <script>
             // Funcție AJAX pentru Wishlist
             function toggleWishlist(productId, btn) {
-                // Nu mai avem nevoie de event.preventDefault() aici neapărat,
-                // deoarece butonul nu mai e într-un link, dar e bine să rămână safe.
-                fetch('/Wishlist/Toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `productId=${productId}`
+                try {
+                    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                    const token = tokenInput ? tokenInput.value : '';
+                    if (!token) {
+                        console.error('Anti-forgery token not found');
+                        alert('Eroare de securitate. Te rugăm să reîncarci pagina.');
+                        return;
+                    }
+                    const bodyStr = `productId=${productId}&__RequestVerificationToken=${encodeURIComponent(token)}`;
+                    fetch('/Wishlist/Toggle', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: bodyStr
+                    })
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
                 })
-                .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         const icon = btn.querySelector('i');
-                        if (data.action === 'added') {
-                            icon.className = 'bi bi-heart-fill fs-5 text-danger';
-                        } else {
-                            icon.className = 'bi bi-heart fs-5 text-dark';
+                        if (icon) {
+                            if (data.action === 'added') {
+                                icon.className = 'bi bi-heart-fill fs-5 text-danger';
+                            } else {
+                                icon.className = 'bi bi-heart fs-5 text-dark';
+                            }
+                        }
+                        // Update wishlist badge if available
+                        if (data.wishlistCount !== undefined) {
+                            const wb = document.getElementById('wishlist-badge-count');
+                            if (wb) {
+                                wb.textContent = data.wishlistCount;
+                                wb.style.display = data.wishlistCount > 0 ? 'inline-block' : 'none';
+                            }
+                        }
+                        if (typeof showToast === 'function') {
+                            showToast(data.message || (data.action === 'added' ? 'Adăugat la favorite' : 'Eliminat din favorite'), 'success');
                         }
                         // Reîncărcare rapidă pentru a actualiza badge-ul din Navbar
-                        location.reload();
+                        if (typeof loadMiniCart === 'function') {
+                            loadMiniCart();
+                        }
                     } else {
-                        alert(data.message);
+                        if (typeof showToast === 'function') {
+                            showToast(data.message || 'Eroare', 'danger');
+                        } else {
+                            alert(data.message || 'Eroare');
+                        }
                     }
                 })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    console.error('Wishlist toggle error:', err);
+                    if (typeof showToast === 'function') {
+                        showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+                    } else {
+                        alert('Eroare rețea. Te rugăm să încerci din nou.');
+                    }
+                });
+            } catch (e) {
+                console.error('Wishlist toggle failed', e);
+                alert('Eroare la actualizarea favorite.');
+            }
             }
 
             // Funcție AJAX pentru Coș
             function addToCart(productId) {
-                if (isAuthenticated) {
-                    fetch('/Orders/AddToCart', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `productId=${productId}&quantity=1`
+                if (window.isAuthenticated) {
+                    try {
+                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const token = tokenInput ? tokenInput.value : '';
+                        if (!token) {
+                            console.error('Anti-forgery token not found');
+                            alert('Eroare de securitate. Te rugăm să reîncarci pagina.');
+                            return;
+                        }
+                        const bodyStr = `productId=${productId}&quantity=1&__RequestVerificationToken=${encodeURIComponent(token)}`;
+                        fetch('/Orders/AddToCart', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: bodyStr
+                        })
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
+                        return res.json();
                     })
-                    .then(res => res.json())
                     .then(data => {
                         if (data.success) {
                             // update server mini-cart
-                            loadMiniCart();
+                            if (typeof loadMiniCart === 'function') {
+                                loadMiniCart();
+                            }
+                            if (typeof showToast === 'function') {
+                                showToast('Produs adăugat în coș', 'success');
+                            } else {
+                                alert('Produs adăugat în coș!');
+                            }
                         } else {
-                            alert(data.message);
+                            if (typeof showToast === 'function') {
+                                showToast(data.message || 'Eroare la adăugare', 'danger');
+                            } else {
+                                alert(data.message || 'Eroare la adăugare');
+                            }
                         }
                     })
-                    .catch(err => console.error(err));
+                    .catch(err => {
+                        console.error('Cart add error:', err);
+                        if (typeof showToast === 'function') {
+                            showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+                        } else {
+                            alert('Eroare rețea. Te rugăm să încerci din nou.');
+                        }
+                    });
+                    } catch (e) { 
+                        console.error('Auth cart add failed', e);
+                        alert('Eroare la adăugarea produsului.');
+                    }
                 } else {
                     // fallback to localStorage
-                    addToLocalCart(productId, 1, null);
+                    if (typeof addToLocalCart === 'function') {
+                        addToLocalCart(productId, 1, null);
+                    } else {
+                        alert('Te rugăm să te autentifici pentru a adăuga produse în coș.');
+                    }
                 }
             }
         </script>

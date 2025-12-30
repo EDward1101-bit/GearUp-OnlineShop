@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Models;
 
 namespace OnlineShopProject_dNet.Controllers
@@ -18,6 +19,8 @@ namespace OnlineShopProject_dNet.Controllers
         {
             var products = _db.Products
                               .Where(p => p.Status == "Approved")
+                              .Include(p => p.Wishlists)
+                              .Include(p => p.Category)
                               .OrderByDescending(p => p.Id)
                               .Take(12)
                               .ToList();

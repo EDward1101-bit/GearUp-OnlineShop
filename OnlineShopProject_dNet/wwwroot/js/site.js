@@ -79,16 +79,40 @@ window.addToCartDetailed = function(productId, qty, btn) {
     console.log('[CartDebug] Adding product:', productId, 'Qty:', qty, 'Authenticated:', window.isAuthenticated);
     
     if (window.isAuthenticated) {
-        fetch('/Orders/AddToCart', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-            body: `productId=${productId}&quantity=${qty}` 
+        try {
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : '';
+            
+            if (!token) {
+                console.error('[CartDebug] Anti-forgery token not found');
+                showToast('Eroare de securitate. Te rugăm să reîncarci pagina.', 'danger');
+                return;
+            }
+
+            const bodyStr = `productId=${productId}&quantity=${qty}&__RequestVerificationToken=${encodeURIComponent(token)}`;
+
+            fetch('/Orders/AddToCart', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+                body: bodyStr
+            })
+        .then(r => {
+            if (!r.ok) {
+                if (r.status === 400) {
+                    return r.text().then(text => {
+                        throw new Error('HTTP 400: ' + text);
+                    });
+                }
+                throw new Error(`HTTP error! status: ${r.status}`);
+            }
+            return r.json();
         })
-        .then(r => r.json())
         .then(d => {
             console.log('[CartDebug] Server response:', d);
             if (d.success) { 
-                loadMiniCart(); 
+                if (typeof loadMiniCart === 'function') {
+                    loadMiniCart(); 
+                }
                 showToast('Produs adăugat în coș', 'success'); 
             } else {
                 showToast(d.message || 'Eroare la adăugare', 'danger');
@@ -96,12 +120,24 @@ window.addToCartDetailed = function(productId, qty, btn) {
         })
         .catch(e=> { 
             console.error('[CartDebug] Error:', e); 
-            showToast('Eroare rețea', 'danger'); 
+            if (e.message && e.message.includes('400')) {
+                showToast('Eroare de validare. Te rugăm să reîncarci pagina și să încerci din nou.', 'danger');
+            } else {
+                showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+            }
         });
+        } catch (e) {
+            console.error('[CartDebug] Outer error:', e);
+            showToast('Eroare la adăugarea produsului.', 'danger');
+        }
     } else {
         console.log('[CartDebug] User not authenticated, using localStorage');
-        addToLocalCart(productId, qty, btn || document.querySelector('[onclick*="addToCartDetailed"]'));
-        showToast('Produs adăugat în coș (local)', 'success');
+        if (typeof addToLocalCart === 'function') {
+            addToLocalCart(productId, qty, btn || document.querySelector('[onclick*="addToCartDetailed"]'));
+            showToast('Produs adăugat în coș (local)', 'success');
+        } else {
+            showToast('Te rugăm să te autentifici pentru a adăuga produse în coș.', 'warning');
+        }
     }
 };
 
@@ -109,26 +145,49 @@ window.addToCartDetailed = function(productId, qty, btn) {
 window.toggleWishlistDetailed = function(productId, btn) {
     console.log('[WishlistDebug] Toggling product:', productId);
     
-    fetch('/Wishlist/Toggle', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-        body: `productId=${productId}` 
+    try {
+        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+        const token = tokenInput ? tokenInput.value : '';
+        
+        if (!token) {
+            console.error('[WishlistDebug] Anti-forgery token not found');
+            showToast('Eroare de securitate. Te rugăm să reîncarci pagina.', 'danger');
+            return;
+        }
+        
+        const bodyStr = `productId=${productId}&__RequestVerificationToken=${encodeURIComponent(token)}`;
+
+        fetch('/Wishlist/Toggle', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+            body: bodyStr 
+        })
+    .then(r => {
+        if (!r.ok) {
+            if (r.status === 400) {
+                return r.text().then(text => {
+                    throw new Error('HTTP 400: ' + text);
+                });
+            }
+            throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
     })
-    .then(r => r.json())
     .then(d => {
         console.log('[WishlistDebug] Server response:', d);
         if (d.success) {
-            const icon = btn.querySelector('i');
-            if (!icon) {
-                console.error('[WishlistDebug] Icon element not found in button');
-                return;
+            const icon = btn ? btn.querySelector('i') : null;
+            if (icon) {
+                if (d.action === 'added') { 
+                    icon.className = 'bi bi-heart-fill text-danger'; 
+                } else { 
+                    icon.className = 'bi bi-heart'; 
+                }
             }
             
             if (d.action === 'added') { 
-                icon.className = 'bi bi-heart-fill text-danger'; 
                 showToast('Adăugat la favorite', 'success'); 
             } else { 
-                icon.className = 'bi bi-heart'; 
                 showToast('Eliminat din favorite', 'info'); 
             }
             
@@ -149,15 +208,25 @@ window.toggleWishlistDetailed = function(productId, btn) {
                     wb.style.display = val>0 ? 'inline-block' : 'none';
                 }
             }
-            loadMiniCart();
+            if (typeof loadMiniCart === 'function') {
+                loadMiniCart();
+            }
         } else {
             showToast(d.message || 'Eroare', 'danger');
         }
     })
     .catch(e => { 
         console.error('[WishlistDebug] Error:', e); 
-        showToast('Eroare rețea', 'danger'); 
+        if (e.message && e.message.includes('400')) {
+            showToast('Eroare de validare. Te rugăm să reîncarci pagina și să încerci din nou.', 'danger');
+        } else {
+            showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+        }
     });
+    } catch (e) {
+        console.error('[WishlistDebug] Outer error:', e);
+        showToast('Eroare la actualizarea favorite.', 'danger');
+    }
 };
 
 window.saveLocalCart = function (cart) {
@@ -316,24 +385,38 @@ window.loadPendingCount = function() {
         .catch(function(error) { console.log('Info: Pending count check skipped or failed.'); });
 };
 
-// Auto-hide navbar on scroll - IMPROVED
+// Smart navbar: hides when scrolling DOWN, shows when scrolling UP (follows user position)
 (function() {
     var lastScroll = 0;
     var navbar = null;
     var ticking = false;
+    var scrollThreshold = 5; // minimum scroll distance to trigger hide/show
 
     function updateNavbar() {
-        var current = window.pageYOffset || document.documentElement.scrollTop;
-        if (navbar) {
-            // Hide navbar when scrolling DOWN and current > 100px
-            // Show navbar when scrolling UP
-            if (current > lastScroll && current > 100) {
-                navbar.classList.add('navbar-hidden');
-            } else {
-                navbar.classList.remove('navbar-hidden');
-            }
+        var currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (!navbar) return;
+        
+        // Determine scroll direction
+        if (Math.abs(currentScroll - lastScroll) < scrollThreshold) {
+            ticking = false;
+            return; // Ignore tiny movements
         }
-        lastScroll = current <= 0 ? 0 : current;
+
+        if (currentScroll > lastScroll && currentScroll > 80) {
+            // Scrolling DOWN - hide navbar
+            navbar.classList.add('navbar-hidden');
+        } else if (currentScroll < lastScroll) {
+            // Scrolling UP - show navbar immediately
+            navbar.classList.remove('navbar-hidden');
+        }
+        
+        // Keep visible at very top
+        if (currentScroll <= 0) {
+            navbar.classList.remove('navbar-hidden');
+        }
+
+        lastScroll = currentScroll <= 0 ? 0 : currentScroll;
         ticking = false;
     }
 
@@ -341,6 +424,7 @@ window.loadPendingCount = function() {
         navbar = document.querySelector('.navbar');
         if (!navbar) return;
 
+        // Listen to scroll events with requestAnimationFrame for smooth performance
         window.addEventListener('scroll', function() {
             if (!ticking) {
                 window.requestAnimationFrame(updateNavbar);
@@ -362,11 +446,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.isAuthenticated) {
             var local = window.getLocalCart();
             if (local && local.length > 0) {
-                fetch('/OrdersAjax/MergeLocalCart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(local.map(i => ({ productId: parseInt(i.productId), quantity: parseInt(i.quantity) })))
-                }).then(r => r.json()).then(data => {
+                    try {
+                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const token = tokenInput ? tokenInput.value : '';
+
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (token) headers['RequestVerificationToken'] = token;
+
+                        fetch('/OrdersAjax/MergeLocalCart', {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify(local.map(i => ({ productId: parseInt(i.productId), quantity: parseInt(i.quantity) })))
+                        }).then(r => r.json()).then(data => {
                     if (data && data.success) {
                         // clear local only if merged
                         localStorage.removeItem('localCart');
@@ -375,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (data.merged && data.merged > 0) showToast('Coșul local a fost sincronizat', 'success');
                     }
                 }).catch(err => console.debug('MergeLocalCart failed', err));
+                    } catch (e) { console.debug('MergeLocalCart token attach failed', e); }
             }
         }
     } catch (e) { console.debug(e); }

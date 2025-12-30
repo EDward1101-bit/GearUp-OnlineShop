@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // NECESAR pentru Include
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using OnlineShopProject_dNet.Services;
+using Microsoft.Extensions.Logging;
 
 namespace OnlineShopProject_dNet.Controllers
 {
@@ -10,11 +12,15 @@ namespace OnlineShopProject_dNet.Controllers
     {
         private readonly ApplicationDbContext db;
         private readonly IWebHostEnvironment _env;
+        private readonly TextProcessingService _textProcessor;
+        private readonly ILogger<CategoriesController> _logger;
 
-        public CategoriesController(ApplicationDbContext context, IWebHostEnvironment env)
+        public CategoriesController(ApplicationDbContext context, IWebHostEnvironment env, TextProcessingService textProcessor, ILogger<CategoriesController> logger)
         {
             db = context;
             _env = env;
+            _textProcessor = textProcessor;
+            _logger = logger;
         }
 
         // 1. GETALL - Returnează categorii ca JSON (pentru dropdown - public)
@@ -73,14 +79,76 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public IActionResult New(Category cat)
         {
-            if (ModelState.IsValid)
+            // Handle AJAX requests from modal
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (cat == null || string.IsNullOrWhiteSpace(cat.Name))
+                {
+                    return Json(new { success = false, message = "Numele categoriei este obligatoriu." });
+                }
+
+                // Sanitize category name
+                cat.Name = _textProcessor.SanitizeText(cat.Name);
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .SelectMany(x => x.Value.Errors)
+                        .Select(x => x.ErrorMessage)
+                        .ToList();
+                    
+                    return Json(new { success = false, message = string.Join(" ", errors) });
+                }
+
+                try
+                {
+                    db.Categories.Add(cat);
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "Categoria a fost adăugată!" });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error saving new category");
+                    return Json(new { success = false, message = "A apărut o eroare la salvarea categoriei." });
+                }
+            }
+
+            // Regular form submission
+            if (cat == null || string.IsNullOrWhiteSpace(cat.Name))
+            {
+                ModelState.AddModelError("Name", "Numele categoriei este obligatoriu.");
+                return View(cat);
+            }
+
+            // Sanitize category name
+            cat.Name = _textProcessor.SanitizeText(cat.Name);
+
+            if (!ModelState.IsValid)
+            {
+                foreach (var kv in ModelState)
+                {
+                    foreach (var err in kv.Value.Errors)
+                    {
+                        _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
+                    }
+                }
+                return View(cat);
+            }
+
+            try
             {
                 db.Categories.Add(cat);
                 db.SaveChanges();
                 TempData["message"] = "Categoria a fost adăugată!";
                 return RedirectToAction("Index", "Products");
             }
-            return View(cat);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving new category");
+                ModelState.AddModelError(string.Empty, "A apărut o eroare la salvarea categoriei.");
+                return View(cat);
+            }
         }
 
         // 4. EDIT - RESTRICTIONAT: Doar Admin
@@ -105,17 +173,81 @@ namespace OnlineShopProject_dNet.Controllers
             Category? category = db.Categories.Find(id);
             if (category == null)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Categoria nu a fost găsită." });
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            // Handle AJAX requests from modal
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (requestCategory == null || string.IsNullOrWhiteSpace(requestCategory.Name))
+                {
+                    return Json(new { success = false, message = "Numele categoriei este obligatoriu." });
+                }
+
+                // Sanitize category name
+                requestCategory.Name = _textProcessor.SanitizeText(requestCategory.Name);
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .SelectMany(x => x.Value.Errors)
+                        .Select(x => x.ErrorMessage)
+                        .ToList();
+                    
+                    return Json(new { success = false, message = string.Join(" ", errors) });
+                }
+
+                try
+                {
+                    category.Name = requestCategory.Name;
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "Categoria a fost modificată!" });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating category {CategoryId}", id);
+                    return Json(new { success = false, message = "A apărut o eroare la actualizarea categoriei." });
+                }
+            }
+
+            // Regular form submission
+            if (requestCategory == null || string.IsNullOrWhiteSpace(requestCategory.Name))
+            {
+                ModelState.AddModelError("Name", "Numele categoriei este obligatoriu.");
+                return View(requestCategory);
+            }
+
+            // Sanitize category name
+            requestCategory.Name = _textProcessor.SanitizeText(requestCategory.Name);
+
+            if (!ModelState.IsValid)
+            {
+                foreach (var kv in ModelState)
+                {
+                    foreach (var err in kv.Value.Errors)
+                    {
+                        _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
+                    }
+                }
+                return View(requestCategory);
+            }
+
+            try
             {
                 category.Name = requestCategory.Name;
                 db.SaveChanges();
                 TempData["message"] = "Categoria a fost modificată!";
                 return RedirectToAction("Index", "Products");
             }
-            return View(requestCategory);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating category {CategoryId}", id);
+                ModelState.AddModelError(string.Empty, "A apărut o eroare la actualizarea categoriei.");
+                return View(requestCategory);
+            }
         }
 
         // 5. DELETE - RESTRICTIONAT: Doar Admin + Logica ta de stergere poze
@@ -124,7 +256,12 @@ namespace OnlineShopProject_dNet.Controllers
         public ActionResult Delete(int id)
         {
             var category = db.Categories.Find(id);
-            if (category == null) return NotFound();
+            if (category == null) 
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Categoria nu a fost găsită." });
+                return NotFound();
+            }
 
             // --- LOGICA TA DE STERGERE IMAGINI (PASTRATA) ---
             var associatedProducts = db.Products.Where(p => p.CategoryId == id).ToList();
@@ -143,11 +280,32 @@ namespace OnlineShopProject_dNet.Controllers
             }
             // ------------------------------------------------
 
-            db.Categories.Remove(category);
-            db.SaveChanges();
-            TempData["message"] = "Categoria și produsele aferente au fost șterse!";
-
-            return RedirectToAction("Index", "Products");
+            try
+            {
+                db.Categories.Remove(category);
+                db.SaveChanges();
+                
+                // Return JSON for AJAX requests (modal stays open)
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, message = "Categoria și produsele aferente au fost șterse!" });
+                }
+                
+                TempData["message"] = "Categoria și produsele aferente au fost șterse!";
+                return RedirectToAction("Index", "Products");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting category {CategoryId}", id);
+                
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "A apărut o eroare la ștergerea categoriei." });
+                }
+                
+                TempData["message"] = "A apărut o eroare la ștergerea categoriei.";
+                return RedirectToAction("Index", "Products");
+            }
         }
     }
 }

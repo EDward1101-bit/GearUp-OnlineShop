@@ -11,7 +11,11 @@
 <hr />
 
 @* Adaugam enctype  *@
-<form method="post" action="/Products/Edit/@displayProduct.Id" enctype="multipart/form-data">
+<form asp-controller="Products" asp-action="Edit" asp-route-id="@displayProduct.Id" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    
+    @* Validation Summary *@
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
     <div class="mb-3">
         <label for="Title" class="form-label">Titlu Produs</label>
@@ -36,13 +40,13 @@
 
     <div class="mb-3">
         <label for="Description" class="form-label">Descriere Produs</label>
-        <textarea name="Description" id="Description" class="form-control" rows="5">@displayProduct.Description</textarea>
+        <textarea name="Description" id="Description" class="form-control" rows="5">@displayProduct.Description?.Replace("<br>", "\n")</textarea>
         @Html.ValidationMessage("Description", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
         <label for="Price" class="form-label">Preț (RON)</label>
-        <input type="number" name="Price" id="Price" class="form-control" step="1" value="@displayProduct.Price" min="0" />
+        <input type="number" name="Price" id="Price" class="form-control" step="0.01" value="@displayProduct.Price" min="0" />
         @Html.ValidationMessage("Price", new { @class = "text-danger" })
     </div>
 

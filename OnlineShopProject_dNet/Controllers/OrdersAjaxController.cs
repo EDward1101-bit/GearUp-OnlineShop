@@ -43,6 +43,7 @@ namespace OnlineShopProject_dNet.Controllers
 
         // Merge localStorage cart into user's server-side cart after login
         [HttpPost]
+        [IgnoreAntiforgeryToken] // JSON requests with [FromBody] don't need form tokens
         public async Task<IActionResult> MergeLocalCart([FromBody] List<LocalCartItem> items)
         {
             var userId = _userManager.GetUserId(User);

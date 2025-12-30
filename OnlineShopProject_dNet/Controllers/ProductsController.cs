@@ -1,25 +1,34 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using OnlineShopProject_dNet.Services;
+using Microsoft.Extensions.Logging;
 
 namespace OnlineShopProject_dNet.Controllers
 {
     public class ProductsController(
         ApplicationDbContext context,
         IWebHostEnvironment env,
-        UserManager<ApplicationUser> userManager) : Controller
+        UserManager<ApplicationUser> userManager,
+        TextProcessingService textProcessor,
+        ILogger<ProductsController> logger) : Controller
     {
         private readonly ApplicationDbContext db = context;
         private readonly IWebHostEnvironment _env = env;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly TextProcessingService _text_processor = textProcessor;
+        private readonly ILogger<ProductsController> _logger = logger;
 
-        // 1. INDEX - Vizitatorii vad doar produsele APROBATE
+        // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu căutare, filtrare și sortare
         [HttpGet]
-        public IActionResult Index(int? category)
+        public IActionResult Index(int? category, string search, string sortBy = "name", string sortOrder = "asc", int page = 1, int pageSize = 12)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 50) pageSize = 12;
+
             var query = db.Products
                          .Include(p => p.Category)
                          .Include(p => p.Wishlists)
@@ -31,11 +40,49 @@ namespace OnlineShopProject_dNet.Controllers
                 query = query.Where(p => p.CategoryId == category.Value);
             }
 
-            var products = query.ToList();
+            // Căutare după nume (parțial matching)
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower().Trim();
+                query = query.Where(p => p.Title.ToLower().Contains(search));
+            }
+
+            // Sortare
+            switch (sortBy.ToLower())
+            {
+                case "price":
+                    query = sortOrder.ToLower() == "desc"
+                        ? query.OrderByDescending(p => p.Price)
+                        : query.OrderBy(p => p.Price);
+                    break;
+                case "rating":
+                    query = sortOrder.ToLower() == "desc"
+                        ? query.OrderByDescending(p => p.Rating ?? 0)
+                        : query.OrderBy(p => p.Rating ?? 0);
+                    break;
+                case "name":
+                default:
+                    query = sortOrder.ToLower() == "desc"
+                        ? query.OrderByDescending(p => p.Title)
+                        : query.OrderBy(p => p.Title);
+                    break;
+            }
+
+            var totalCount = query.Count();
+            var products = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             ViewBag.Products = products;
             ViewBag.SelectedCategory = category;
             ViewBag.Categories = db.Categories.OrderBy(c => c.Name).ToList();
+            ViewBag.Search = search;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortOrder = sortOrder;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
             // Pentru Admin: adăugăm produsele Pending într-o zonă separată
             if (User.IsInRole("Admin"))
@@ -71,12 +118,13 @@ namespace OnlineShopProject_dNet.Controllers
 
         // 2. SHOW - Detalii produs
         [HttpGet]
-        public IActionResult Show(int id)
+        public IActionResult Show(int id, int reviewPage = 1, int reviewPageSize = 5)
         {
+            if (reviewPage < 1) reviewPage = 1;
+            if (reviewPageSize < 1 || reviewPageSize > 20) reviewPageSize = 5;
+
             var product = db.Products
                             .Include(p => p.Category)
-                            .Include(p => p.Reviews)
-                            .ThenInclude(r => r.User)
                             .Include(p => p.User)
                             .Include(p => p.Wishlists)
                             .FirstOrDefault(p => p.Id == id);
@@ -91,6 +139,29 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 return Forbid();
             }
+
+            var currentUserId = _userManager.GetUserId(User);
+
+            // Paginare review-uri
+            var reviewsQuery = db.Reviews
+                .Include(r => r.User)
+                .Where(r => r.ProductId == id)
+                .OrderByDescending(r => r.Date);
+
+            var reviewsTotal = reviewsQuery.Count();
+            var pagedReviews = reviewsQuery
+                .Skip((reviewPage - 1) * reviewPageSize)
+                .Take(reviewPageSize)
+                .ToList();
+
+            ViewBag.ReviewsPaged = pagedReviews;
+            ViewBag.ReviewsPage = reviewPage;
+            ViewBag.ReviewsTotalPages = (int)Math.Ceiling(reviewsTotal / (double)reviewPageSize);
+            ViewBag.ReviewsTotal = reviewsTotal;
+            ViewBag.UserHasReview = currentUserId != null && db.Reviews.Any(r => r.ProductId == id && r.UserId == currentUserId);
+
+            // Pentru compatibilitate cu partialul
+            product.Reviews = pagedReviews;
 
             return View(product);
         }
@@ -108,17 +179,19 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public async Task<IActionResult> New(Product product, IFormFile? Image)
         {
-            product.UserId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User);
+            
+            // Handle null product or empty fields before validation
+            if (product == null)
+            {
+                ModelState.AddModelError(string.Empty, "Datele produsului sunt invalide.");
+                ViewBag.Categories = db.Categories;
+                return View(new Product());
+            }
 
-            // LOGICA STATUS: Admin -> Approved direct / Colaborator -> Pending
-            if (User.IsInRole("Admin"))
-            {
-                product.Status = "Approved";
-            }
-            else
-            {
-                product.Status = "Pending";
-            }
+            product.UserId = userId;
+
+            _logger.LogInformation("User {UserId} is creating a new product: {ProductTitle}", userId, product.Title);
 
             // --- Logica Imagine ---
             if (Image != null && Image.Length > 0)
@@ -128,7 +201,7 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (!allowedExtensions.Contains(fileExtension) || Image.Length > 5 * 1024 * 1024)
                 {
-                    ModelState.AddModelError("Image", "Fișier invalid.");
+                    ModelState.AddModelError("Image", "Fișier invalid. Doar JPG, PNG, GIF, max 5MB.");
                     ViewBag.Categories = db.Categories;
                     return View(product);
                 }
@@ -146,19 +219,54 @@ namespace OnlineShopProject_dNet.Controllers
                 product.Image = "/images/default-product.jpeg";
             }
 
+            // Remove Image from validation since it's optional
             ModelState.Remove(nameof(product.Image));
+            ModelState.Remove(nameof(product.UserId));
+            ModelState.Remove(nameof(product.Status));
+            ModelState.Remove(nameof(product.Rating));
 
-            if (TryValidateModel(product))
+            // Sanitize inputs for security AFTER validation check
+            if (!string.IsNullOrWhiteSpace(product.Title))
             {
-                db.Products.Add(product);
-                await db.SaveChangesAsync();
+                product.Title = _text_processor.SanitizeText(product.Title);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(product.Description))
+            {
+                // Preserve formatting - sanitize HTML but keep structure
+                product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(product.Description));
+            }
 
-                if (product.Status == "Pending")
-                    TempData["message"] = "Produsul a fost trimis spre aprobare!";
-                else
-                    TempData["message"] = "Produsul a fost adăugat!";
+            // LOGICA STATUS: Admin -> Approved direct / Colaborator -> Pending
+            if (User.IsInRole("Admin"))
+            {
+                product.Status = "Approved";
+            }
+            else
+            {
+                product.Status = "Pending";
+            }
 
-                return RedirectToAction("Index");
+            // Validate model
+            if (ModelState.IsValid && TryValidateModel(product))
+            {
+                try
+                {
+                    db.Products.Add(product);
+                    await db.SaveChangesAsync();
+
+                    if (product.Status == "Pending")
+                        TempData["message"] = "Produsul a fost trimis spre aprobare!";
+                    else
+                        TempData["message"] = "Produsul a fost adăugat!";
+
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error saving product");
+                    ModelState.AddModelError(string.Empty, "A apărut o eroare la salvarea produsului. Verifică datele introduse.");
+                }
             }
 
             ViewBag.Categories = db.Categories;
@@ -179,6 +287,12 @@ namespace OnlineShopProject_dNet.Controllers
                 return RedirectToAction("Index");
             }
 
+            if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["message"] = "Poți edita produsul doar după ce a fost respins de admin (cu feedback).";
+                return RedirectToAction("Index");
+            }
+
             ViewBag.Categories = db.Categories;
             return View(product);
         }
@@ -195,8 +309,38 @@ namespace OnlineShopProject_dNet.Controllers
                 return Forbid();
             }
 
-            product.Title = requestProduct.Title;
-            product.Description = requestProduct.Description;
+            if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["message"] = "Poți edita produsul doar după ce a fost respins de admin (cu feedback).";
+                return RedirectToAction("Index");
+            }
+
+            // Remove fields from validation that we handle manually
+            ModelState.Remove(nameof(product.Image));
+            ModelState.Remove(nameof(product.UserId));
+            ModelState.Remove(nameof(product.Status));
+            ModelState.Remove(nameof(product.Rating));
+
+            // Sanitize inputs for security
+            if (!string.IsNullOrWhiteSpace(requestProduct.Title))
+            {
+                product.Title = _text_processor.SanitizeText(requestProduct.Title);
+            }
+            else
+            {
+                product.Title = product.Title; // Keep existing if empty
+            }
+            
+            if (!string.IsNullOrWhiteSpace(requestProduct.Description))
+            {
+                // Preserve formatting - sanitize HTML but keep structure
+                product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(requestProduct.Description));
+            }
+            else
+            {
+                product.Description = product.Description; // Keep existing if empty
+            }
+            
             product.Price = requestProduct.Price;
             product.Stock = requestProduct.Stock;
             product.CategoryId = requestProduct.CategoryId;
@@ -259,10 +403,27 @@ namespace OnlineShopProject_dNet.Controllers
                 return RedirectToAction("Index");
             }
 
+            if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["message"] = "Poți șterge produsul doar dacă a fost respins de admin.";
+                return RedirectToAction("Index");
+            }
+
             if (!string.IsNullOrEmpty(product.Image) && product.Image != "/images/default-product.jpeg")
             {
                 var imagePath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
                 if (System.IO.File.Exists(imagePath)) System.IO.File.Delete(imagePath);
+            }
+
+            // Curatam cosurile in lucru (InCart) care contin produsul
+            var cartsWithProduct = db.OrderDetails
+                .Include(od => od.Order)
+                .Where(od => od.ProductId == id && od.Order != null && od.Order.Status == "InCart")
+                .ToList();
+
+            if (cartsWithProduct.Any())
+            {
+                db.OrderDetails.RemoveRange(cartsWithProduct);
             }
 
             db.Products.Remove(product);

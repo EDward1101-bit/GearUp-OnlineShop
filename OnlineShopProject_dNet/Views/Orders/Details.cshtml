@@ -1,0 +1,203 @@
+@model OnlineShopProject_dNet.Models.Order
+@using OnlineShopProject_dNet.Models
+
+@{
+    ViewData["Title"] = "Detalii Comandă";
+}
+
+<div class="container py-5">
+    @if (Model == null)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Comanda nu a fost găsită sau nu ai permisiunea să o accesezi.
+        </div>
+        <a href="/Orders/MyOrders" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Înapoi la comenzi
+        </a>
+    }
+    else
+    {
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="bi bi-receipt-cutoff"></i> Detalii Comandă #@Model.Id
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Plasată pe @Model.Date.ToString("dd MMMM yyyy, HH:mm", new System.Globalization.CultureInfo("ro-RO"))
+                    </p>
+                </div>
+                <a href="/Orders/MyOrders" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Înapoi
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        @* LEFT: Detalii Comandă *@
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-box-seam"></i> Produse Comandate
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.OrderDetails == null || !Model.OrderDetails.Any())
+                    {
+                        <div class="alert alert-warning m-4">
+                            <i class="bi bi-exclamation-triangle"></i> Nu există produse în această comandă.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Produs</th>
+                                        <th>Preț unitar</th>
+                                        <th>Cantitate</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderDetails)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    @if (item.Product != null)
+                                                    {
+                                                        var imgSrc = !string.IsNullOrEmpty(item.Product.Image) ? item.Product.Image : "/images/default-product.jpeg";
+                                                        <img src="@imgSrc" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="@item.Product.Title">
+                                                        <div>
+                                                            <h6 class="mb-0 text-dark fw-semibold">
+                                                                <a href="/Products/Show/@item.ProductId" class="text-decoration-none text-dark">
+                                                                    @item.Product.Title
+                                                                </a>
+                                                            </h6>
+                                                            @if (item.Product.Category != null)
+                                                            {
+                                                                <small class="text-muted">
+                                                                    <i class="bi bi-tag"></i> @item.Product.Category.Name
+                                                                </small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        var imgSrc = !string.IsNullOrEmpty(item.ProductImageSnapshot) ? item.ProductImageSnapshot : "/images/default-product.jpeg";
+                                                        <img src="@imgSrc" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="Produs indisponibil">
+                                                        <div>
+                                                            <h6 class="mb-0 text-muted fw-semibold">
+                                                                @(!string.IsNullOrEmpty(item.ProductTitleSnapshot) ? item.ProductTitleSnapshot : "Produs șters")
+                                                            </h6>
+                                                            @if (!string.IsNullOrEmpty(item.ProductCategorySnapshot))
+                                                            {
+                                                                <small class="text-muted"><i class="bi bi-tag"></i> @item.ProductCategorySnapshot</small>
+                                                            }
+                                                            else
+                                                            {
+                                                                <small class="text-muted">Acest produs nu mai este disponibil</small>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold">@item.UnitPrice.ToString("0.00") RON</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@item.Quantity</span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-primary">@((item.Quantity * item.UnitPrice).ToString("0.00")) RON</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* RIGHT: Sumar Comandă *@
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 100px;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Sumar Comandă
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted fw-semibold d-block mb-1">
+                            <i class="bi bi-geo-alt"></i> Adresă de livrare
+                        </small>
+                        <p class="mb-0">@Model.ShippingAddress</p>
+                    </div>
+
+                    <hr />
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal:</span>
+                            <span class="fw-semibold">@Model.TotalAmount.ToString("0.00") RON</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Livrare:</span>
+                            <span class="text-success fw-semibold">Gratuit</span>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fs-5 fw-bold">Total:</span>
+                        <span class="fs-5 fw-bold text-primary">@Model.TotalAmount.ToString("0.00") RON</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted fw-semibold d-block mb-1">
+                            <i class="bi bi-info-circle"></i> Status
+                        </small>
+                        @if (Model.Status == "Placed")
+                        {
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Comandă plasată
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">@Model.Status</span>
+                        }
+                    </div>
+
+                    <a href="/Orders/MyOrders" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-left"></i> Înapoi la comenzi
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</div>
+
+<style>
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .table th {
+        border-top: none;
+        font-weight: 600;
+    }
+</style>
+

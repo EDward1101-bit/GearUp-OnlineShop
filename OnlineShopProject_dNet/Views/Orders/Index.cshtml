@@ -1,4 +1,4 @@
-﻿@model OnlineShopProject_dNet.Models.Order
+@model OnlineShopProject_dNet.Models.Order
 
 <div class="container py-5">
     <h2 class="mb-4 fw-bold text-primary">
@@ -37,30 +37,33 @@
                                         <tr>
                                             <td class="ps-4">
                                                 <div class="d-flex align-items-center">
-                                                    @if (!string.IsNullOrEmpty(item.Product?.Image))
-                                                    {
-                                                        <img src="@item.Product.Image" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    @{
+                                                        var imgSrc = item.Product != null
+                                                            ? (!string.IsNullOrEmpty(item.Product.Image) ? item.Product.Image : "/images/default-product.jpeg")
+                                                            : (!string.IsNullOrEmpty(item.ProductImageSnapshot) ? item.ProductImageSnapshot : "/images/default-product.jpeg");
                                                     }
-                                                    else
-                                                    {
-                                                        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                                            <i class="bi bi-image text-muted"></i>
-                                                        </div>
-                                                    }
+                                                    <img src="@imgSrc" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
                                                     <div>
                                                         <h6 class="mb-0 text-dark fw-semibold">
-                                                            <a href="/Products/Show/@item.ProductId" class="text-decoration-none text-dark">
-                                                                @item.Product?.Title
-                                                            </a>
+                                                            @if (item.Product != null)
+                                                            {
+                                                                <a href="/Products/Show/@item.ProductId" class="text-decoration-none text-dark">
+                                                                    @item.Product.Title
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted">@(!string.IsNullOrEmpty(item.ProductTitleSnapshot) ? item.ProductTitleSnapshot : "Produs șters")</span>
+                                                            }
                                                         </h6>
-                                                        <small class="text-muted">Cod: #@item.ProductId</small>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>@item.UnitPrice Lei</td>
                                             <td>
                                                 @* Formular modificare cantitate *@
-                                                <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center gap-2">
+                                                <form asp-controller="Orders" asp-action="UpdateQuantity" method="post" class="d-flex align-items-center gap-2">
+                                                    @Html.AntiForgeryToken()
                                                     <input type="hidden" name="productId" value="@item.ProductId" />
                                                     <input type="number" name="quantity" value="@item.Quantity" min="1" max="99"
                                                            class="form-control form-control-sm text-center" style="width: 60px;"
@@ -71,7 +74,8 @@
                                                 @(item.Quantity* item.UnitPrice) Lei
                                             </td>
                                             <td>
-                                                <form asp-action="RemoveFromCart" method="post">
+                                                <form asp-controller="Orders" asp-action="RemoveFromCart" method="post">
+                                                    @Html.AntiForgeryToken()
                                                     <input type="hidden" name="productId" value="@item.ProductId" />
                                                     <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Șterge">
                                                         <i class="bi bi-trash"></i>

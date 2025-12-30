@@ -23,6 +23,7 @@
                     </div>
                     <div class="card-body">
                         <form id="addCategoryForm" method="post" action="/Categories/New">
+                            @Html.AntiForgeryToken()
                             <div class="mb-3">
                                 <label for="newCategoryName" class="form-label fw-semibold">Nume Categorie:</label>
                                 <input type="text" class="form-control" id="newCategoryName" name="Name" required 
@@ -72,6 +73,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editCategoryForm" method="post">
+                @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <input type="hidden" id="editCategoryId" name="id" />
                     <div class="mb-3">
@@ -103,6 +105,9 @@
                 const categoriesList = document.getElementById('categoriesList');
                 if (data && data.length > 0) {
                     let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nume</th><th>Acțiuni</th></tr></thead><tbody>';
+                    const antiTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                    const antiTokenValue = antiTokenInput ? antiTokenInput.value : '';
+
                     data.forEach(category => {
                         html += `
                             <tr id="category-row-${category.id}">
@@ -116,12 +121,10 @@
                                                 data-id="${category.id}" data-name="${category.name}">
                                             <i class="bi bi-pencil"></i> Editează
                                         </button>
-                                        <form method="post" action="/Categories/Delete/${category.id}" class="d-inline">
-                                            <button type="submit" class="btn btn-danger" 
-                                                    onclick="return confirm('ATENȚIE: Ștergerea categoriei va șterge TOATE produsele din ea! Continui?')">
-                                                <i class="bi bi-trash"></i> Șterge
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-delete-category" 
+                                                data-id="${category.id}" data-name="${category.name}">
+                                            <i class="bi bi-trash"></i> Șterge
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -132,6 +135,7 @@
                     
                     // Reattach event listeners
                     attachEditListeners();
+                    attachDeleteListeners();
                 } else {
                     categoriesList.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle"></i> Nu există categorii. Adaugă prima categorie!</div>';
                 }
@@ -157,6 +161,51 @@
         });
     }
 
+    function attachDeleteListeners() {
+        document.querySelectorAll('.btn-delete-category').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const categoryId = this.getAttribute('data-id');
+                const categoryName = this.getAttribute('data-name');
+                
+                if (!confirm(`ATENȚIE: Ștergerea categoriei "${categoryName}" va șterge TOATE produsele din ea! Continui?`)) {
+                    return;
+                }
+
+                const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                const token = tokenInput ? tokenInput.value : '';
+                const bodyStr = `id=${categoryId}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+
+                fetch('/Categories/Delete/' + categoryId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: bodyStr
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message || 'Categoria a fost ștearsă!', 'success');
+                        // Remove the row from table
+                        const row = document.getElementById('category-row-' + categoryId);
+                        if (row) {
+                            row.remove();
+                        }
+                        // Reload categories to update counts
+                        loadCategories();
+                    } else {
+                        showMessage(data.message || 'Eroare la ștergerea categoriei!', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Delete error:', error);
+                    showMessage('Eroare la ștergerea categoriei!', 'danger');
+                });
+            });
+        });
+    }
+
     // Gestionare formular adăugare categorie
     document.getElementById('addCategoryForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -164,18 +213,23 @@
         
         fetch('/Categories/New', {
             method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: formData
         })
-        .then(response => {
-            if (response.ok || response.redirected) {
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 loadCategories();
                 document.getElementById('newCategoryName').value = '';
-                showMessage('Categoria a fost adăugată cu succes!', 'success');
+                showMessage(data.message || 'Categoria a fost adăugată cu succes!', 'success');
             } else {
-                showMessage('Eroare la adăugarea categoriei!', 'danger');
+                showMessage(data.message || 'Eroare la adăugarea categoriei!', 'danger');
             }
         })
         .catch(error => {
+            console.error('Add category error:', error);
             showMessage('Eroare la adăugarea categoriei!', 'danger');
         });
     });
@@ -188,18 +242,23 @@
         
         fetch('/Categories/Edit/' + categoryId, {
             method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: formData
         })
-        .then(response => {
-            if (response.ok || response.redirected) {
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
                 loadCategories();
-                showMessage('Categoria a fost actualizată cu succes!', 'success');
+                showMessage(data.message || 'Categoria a fost actualizată cu succes!', 'success');
             } else {
-                showMessage('Eroare la editarea categoriei!', 'danger');
+                showMessage(data.message || 'Eroare la editarea categoriei!', 'danger');
             }
         })
         .catch(error => {
+            console.error('Edit category error:', error);
             showMessage('Eroare la editarea categoriei!', 'danger');
         });
     });

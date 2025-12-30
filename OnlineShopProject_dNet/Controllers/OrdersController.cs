@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +29,18 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (cart != null)
             {
+                // Daca exista linii fara produs (ex: produs sters), le eliminam din cos
+                var orphanLines = cart.OrderDetails.Where(od => od.Product == null && od.ProductId == null).ToList();
+                if (orphanLines.Any())
+                {
+                    db.OrderDetails.RemoveRange(orphanLines);
+                    await db.SaveChangesAsync();
+                    cart = await db.Orders
+                                   .Include(o => o.OrderDetails)
+                                   .ThenInclude(od => od.Product)
+                                   .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
+                }
+
                 // Calculăm totalul folosind prețul salvat (UnitPrice), ignorând modificările din magazin
                 cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
 
@@ -212,6 +224,14 @@ namespace OnlineShopProject_dNet.Controllers
             // ULTIMA VERIFICARE DE STOC (Security Check)
             foreach (var item in cart.OrderDetails)
             {
+                if (item.Product != null)
+                {
+                    // Ne asiguram ca snapshot-ul este complet pentru istoricul comenzilor
+                    item.ProductTitleSnapshot ??= item.Product.Title;
+                    item.ProductImageSnapshot ??= item.Product.Image;
+                    item.ProductCategorySnapshot ??= item.Product.Category?.Name;
+                }
+
                 if (item.Product == null || item.Quantity > item.Product.Stock)
                 {
                     TempData["message"] = $"Produsul nu mai este pe stoc. Actualizează coșul.";
@@ -224,7 +244,7 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 if (item.Product != null)
                 {
-                    item.Product.Stock -= item.Quantity;
+                    item.Product.Stock = (item.Product.Stock ?? 0) - item.Quantity;
                 }
             }
 
@@ -267,7 +287,11 @@ namespace OnlineShopProject_dNet.Controllers
             var userId = _userManager.GetUserId(User);
 
             // Luăm toate comenzile care NU mai sunt în stadiul de "Coș"
+            // Include OrderDetails și Product pentru a afișa corect informațiile
             var orders = await db.Orders
+                                 .Include(o => o.OrderDetails)
+                                 .ThenInclude(od => od.Product)
+                                 .ThenInclude(p => p.Category)
                                  .Where(o => o.UserId == userId && o.Status != "InCart")
                                  .OrderByDescending(o => o.Date) // Cele mai recente primele
                                  .ToListAsync();
@@ -281,17 +305,24 @@ namespace OnlineShopProject_dNet.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            // Căutăm comanda specifică (id) și încărcăm produsele
+            // Căutăm comanda specifică (id) și încărcăm produsele cu categoria
             // Verificăm și UserId pentru securitate (să nu vezi comenzile altuia)
             var order = await db.Orders
                                 .Include(o => o.OrderDetails)
                                 .ThenInclude(od => od.Product)
+                                .ThenInclude(p => p.Category)
                                 .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 
             if (order == null)
             {
                 // Dacă comanda nu există sau nu e a ta
                 return NotFound();
+            }
+
+            // Calculăm totalul dacă nu este setat
+            if (order.TotalAmount == 0 && order.OrderDetails.Any())
+            {
+                order.TotalAmount = order.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
             }
 
             return View(order);

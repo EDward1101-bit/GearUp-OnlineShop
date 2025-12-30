@@ -14,7 +14,7 @@ namespace OnlineShopProject_dNet.Models
         public DateTime Date { get; set; }
 
         // Statusul va fi folosit pentru a diferenția coșul de comanda plasată
-        // Ex: "InCos", "Plasata", "Finalizata"
+        // Ex: "InCart", "Placed", "Shipped", "Delivered"
         public string? Status { get; set; }
 
         // Adresa poate fi null cat timp e doar in stadiul de Cos
@@ -22,6 +22,7 @@ namespace OnlineShopProject_dNet.Models
         public string? ShippingAddress { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]
+        [Range(0, double.MaxValue, ErrorMessage = "Totalul nu poate fi negativ")]
         public decimal TotalAmount { get; set; }
 
         // Relatia cu produsele prin tabelul asociativ OrderDetail

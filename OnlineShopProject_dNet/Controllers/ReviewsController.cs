@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
+using OnlineShopProject_dNet.Services;
 
 namespace OnlineShopProject_dNet.Controllers
 {
@@ -11,11 +12,13 @@ namespace OnlineShopProject_dNet.Controllers
     {
         private readonly ApplicationDbContext db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly TextProcessingService _textProcessor;
 
-        public ReviewsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public ReviewsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, TextProcessingService textProcessor)
         {
             db = context;
             _userManager = userManager;
+            _textProcessor = textProcessor;
         }
 
         // POST: Adaugarea unui review (doar utilizatori înregistrați)
@@ -23,8 +26,20 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public IActionResult New(Review rev)
         {
+            if (rev == null)
+            {
+                TempData["message"] = "Datele review-ului sunt invalide.";
+                return Redirect(Request.Headers["Referer"].ToString() ?? "/Products/Index");
+            }
+
             rev.Date = DateTime.Now;
             rev.UserId = _userManager.GetUserId(User);
+
+            // Preserve formatting - sanitize HTML but keep structure
+            if (!string.IsNullOrWhiteSpace(rev.Content))
+            {
+                rev.Content = _textProcessor.ProcessForStorage(_textProcessor.SanitizeHtml(rev.Content));
+            }
 
             // Validare: Verifică dacă utilizatorul are deja un review pentru acest produs
             if (rev.ProductId.HasValue && !string.IsNullOrEmpty(rev.UserId))
@@ -35,6 +50,19 @@ namespace OnlineShopProject_dNet.Controllers
                 if (existingReview != null)
                 {
                     TempData["message"] = "Aveți deja un review pentru acest produs. Puteți edita review-ul existent.";
+                    return Redirect("/Products/Show/" + rev.ProductId);
+                }
+
+                // Validare IMPORTANTĂ: Verifică dacă utilizatorul a cumpărat produsul
+                var hasPurchased = db.OrderDetails
+                    .Any(od => od.ProductId == rev.ProductId.Value &&
+                              od.Order != null &&
+                              od.Order.UserId == rev.UserId &&
+                              od.Order.Status == "Placed");
+
+                if (!hasPurchased)
+                {
+                    TempData["message"] = "Puteți lăsa review-uri doar pentru produsele pe care le-ați cumpărat.";
                     return Redirect("/Products/Show/" + rev.ProductId);
                 }
             }
@@ -97,7 +125,11 @@ namespace OnlineShopProject_dNet.Controllers
 
             try
             {
-                rev.Content = requestReview.Content;
+                // Preserve formatting - sanitize HTML but keep structure
+                if (!string.IsNullOrWhiteSpace(requestReview.Content))
+                {
+                    rev.Content = _textProcessor.ProcessForStorage(_textProcessor.SanitizeHtml(requestReview.Content));
+                }
                 rev.Rating = requestReview.Rating;
 
                 db.SaveChanges();

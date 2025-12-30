@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.Text;
 using OnlineShopProject_dNet.Data; // Avem nevoie de asta pentru a accesa baza de date
 
 namespace OnlineShopProject_dNet.Models
@@ -22,18 +24,33 @@ namespace OnlineShopProject_dNet.Models
 
             if (_context != null)
             {
-                // Verificam daca mai exista o categorie cu acelasi nume in baza de date.
-                // SQL Server este implicit case-insensitive
-                // ne asiguram ca nu ne comparam cu noi insine.
-                var duplicateExists = _context.Categories.Any(c => c.Name == Name && c.Id != Id);
+                // Normalizăm pentru a evita duplicate cauzate de spații, majuscule/minuscule sau diacritice
+                string Normalize(string s)
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return string.Empty;
+                    s = s.Trim();
+                    // Remove diacritics
+                    var normalized = s.Normalize(NormalizationForm.FormD);
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var ch in normalized)
+                    {
+                        var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
+                        if (uc != UnicodeCategory.NonSpacingMark)
+                            sb.Append(ch);
+                    }
+                    return sb.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant();
+                }
+
+                var thisName = Normalize(Name);
+
+                // Încărcăm în memorie (set mic) și comparăm normalizat — suficient pentru numărul mic de categorii
+                var duplicateExists = _context.Categories
+                    .AsEnumerable()
+                    .Any(c => c.Id != Id && Normalize(c.Name) == thisName);
 
                 if (duplicateExists)
                 {
-                    // Returnam eroarea care va fi afisata in View in dreptul campului "Name"
-                    yield return new ValidationResult(
-                        "Acest nume de categorie există deja!",
-                        new[] { nameof(Name) }
-                    );
+                    yield return new ValidationResult("Acest nume de categorie există deja!", new[] { nameof(Name) });
                 }
             }
         }

@@ -21,5 +21,8 @@ namespace OnlineShopProject_dNet.Models
 
         // Relatia M-M cu Products (prin Wishlist)
         public virtual ICollection<Wishlist>? Wishlists { get; set; }
+
+        // Notificări in-app
+        public virtual ICollection<Notification>? Notifications { get; set; }
     }
 }

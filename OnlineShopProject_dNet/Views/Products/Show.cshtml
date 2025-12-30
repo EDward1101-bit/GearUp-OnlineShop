@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @using OnlineShopProject_dNet.Models
 @inject UserManager<ApplicationUser> UserManager
+@inject OnlineShopProject_dNet.Services.TextProcessingService _textProcessor
 
 @{
     ViewBag.Title = "Detalii Produs";
@@ -9,6 +10,7 @@
     var currentUserId = UserManager.GetUserId(User);
     bool isInWishlist = currentUserId != null && (Model.Wishlists?.Any(w => w.UserId == currentUserId) ?? false);
     string heartClass = isInWishlist ? "bi-heart-fill text-danger" : "bi-heart";
+    var reviewsTotal = ViewBag.ReviewsTotal as int? ?? Model.Reviews?.Count() ?? 0;
 }
 
 @if (TempData["message"] != null)
@@ -58,10 +60,10 @@ else
                                         <i class="bi bi-star-fill"></i>
                                         <strong>@Model.Rating.Value.ToString("0.0")</strong>
                                     </div>
-                                    @if (Model.Reviews != null && Model.Reviews.Any())
+                                    @if (reviewsTotal > 0)
                                     {
                                         <small class="text-muted">
-                                            (@Model.Reviews.Count() @(Model.Reviews.Count() == 1 ? "review" : "review-uri"))
+                                            (@reviewsTotal @(reviewsTotal == 1 ? "review" : "review-uri"))
                                         </small>
                                     }
                                 </div>
@@ -94,7 +96,9 @@ else
                             <hr class="my-3" />
 
                             @* 5. Descriere *@
-                            <p class="card-text text-secondary lh-lg mb-4">@Model.Description</p>
+                            <div class="card-text text-secondary lh-lg mb-4" style="white-space: normal;">
+                                @Html.Raw(_textProcessor.ProcessForDisplay(Model.Description))
+                            </div>
 
                             <hr class="my-3" />
 
@@ -139,26 +143,29 @@ else
                                     <a href="/Products/Edit/@Model.Id" class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil me-1"></i> Editează
                                     </a>
-                                    <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
+                                    <form method="post" asp-controller="Products" asp-action="Delete" asp-route-id="@Model.Id" class="d-inline">
+                                        @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur ștergi produsul?');">
                                             <i class="bi bi-trash me-1"></i> Șterge
                                         </button>
                                     </form>
                                     @if (Model.Status == "Pending")
                                     {
-                                        <form method="post" action="/Products/Approve/@Model.Id" class="d-inline">
+                                        <form method="post" asp-controller="Products" asp-action="Approve" asp-route-id="@Model.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-success btn-sm">
                                                 <i class="bi bi-check-circle me-1"></i> Aprobă
                                             </button>
                                         </form>
-                                        <form method="post" action="/Products/Reject/@Model.Id" class="d-inline">
+                                        <form method="post" asp-controller="Products" asp-action="Reject" asp-route-id="@Model.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?');">
                                                 <i class="bi bi-x-circle me-1"></i> Respinge
                                             </button>
                                         </form>
                                     }
                                 }
-                                else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User))
+                                else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User) && string.Equals(Model.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
                                 {
                                     <a href="/Products/Edit/@Model.Id" class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil me-1"></i> Editează
@@ -180,8 +187,46 @@ else
             </div>
         </div>
 
-        @* --- REVIEW-URI (sub card-ul principal) --- *@
+        @* --- AI ASSISTANT & REVIEW-URI --- *@
         <div class="row justify-content-center mt-5">
+            <div class="col-lg-4 mb-4">
+                @* AI PRODUCT ASSISTANT *@
+                <div class="card shadow-lg border-0 h-100">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-robot"></i> Asistent Produs AI
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="text-muted small mb-3">
+                            Întreabă-mă orice despre acest produs! Pot răspunde la întrebări despre specificații, utilizare, garanție și multe altele.
+                        </p>
+
+                        @* Zona conversație *@
+                        <div id="ai-chat-messages" class="flex-grow-1 mb-3" style="max-height: 300px; overflow-y: auto;">
+                            <div class="ai-message ai-welcome text-center text-muted py-3">
+                                <i class="bi bi-chat-dots fs-1 mb-2"></i>
+                                <p class="mb-0">Salut! Sunt asistentul tău pentru acest produs. Ce întrebare ai?</p>
+                            </div>
+                        </div>
+
+                        @* Formular întrebare *@
+                        <form id="ai-question-form" class="mt-auto">
+                            <div class="input-group">
+                                <input type="text" id="ai-question-input" class="form-control"
+                                       placeholder="Ex: Are garanție? Este potrivit pentru copii?" maxlength="500">
+                                <button class="btn btn-primary" type="submit" id="ai-submit-btn">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <small class="text-muted">Întrebarea va fi trimisă către asistentul AI</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-lg-8">
                 <partial name="_ProductReviews" model="Model" />
             </div>
@@ -208,6 +253,82 @@ else
                         const productId = this.getAttribute('data-product-id');
                         window.toggleWishlistDetailed(productId, this);
                     });
+                }
+
+                // AI Chat functionality
+                const aiForm = document.getElementById('ai-question-form');
+                const aiInput = document.getElementById('ai-question-input');
+                const aiMessages = document.getElementById('ai-chat-messages');
+                const aiSubmitBtn = document.getElementById('ai-submit-btn');
+
+                aiForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const question = aiInput.value.trim();
+
+                    if (!question) return;
+
+                    // Disable input while processing
+                    aiInput.disabled = true;
+                    aiSubmitBtn.disabled = true;
+                    aiSubmitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+                    // Add user question to chat
+                    addMessageToChat('user', question);
+
+                    try {
+                        // include anti-forgery token
+                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const token = tokenInput ? tokenInput.value : '';
+                        const bodyStr = `productId=@Model.Id&question=${encodeURIComponent(question)}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+
+                        const response = await fetch('/ProductAI/AskQuestion', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: bodyStr
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            addMessageToChat('ai', data.answer);
+                        } else {
+                            addMessageToChat('ai', 'Îmi pare rău, a apărut o eroare. Vă rugăm să încercați din nou.');
+                        }
+                    } catch (error) {
+                        console.error('AI Chat Error:', error);
+                        addMessageToChat('ai', 'A apărut o eroare de rețea. Vă rugăm să verificați conexiunea și să încercați din nou.');
+                    } finally {
+                        // Re-enable input
+                        aiInput.disabled = false;
+                        aiSubmitBtn.disabled = false;
+                        aiSubmitBtn.innerHTML = '<i class="bi bi-send"></i>';
+                        aiInput.value = '';
+                        aiInput.focus();
+                    }
+                });
+
+                function addMessageToChat(sender, message) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `ai-message ai-${sender} mb-3 p-2 rounded`;
+
+                    if (sender === 'user') {
+                        messageDiv.classList.add('bg-primary', 'text-white', 'ms-3');
+                        messageDiv.innerHTML = `<strong>Tu:</strong> ${message}`;
+                    } else {
+                        messageDiv.classList.add('bg-light', 'border', 'me-3');
+                        messageDiv.innerHTML = `<strong><i class="bi bi-robot"></i> Asistent:</strong> ${message}`;
+                    }
+
+                    // Remove welcome message if it exists
+                    const welcomeMsg = aiMessages.querySelector('.ai-welcome');
+                    if (welcomeMsg) {
+                        welcomeMsg.remove();
+                    }
+
+                    aiMessages.appendChild(messageDiv);
+                    aiMessages.scrollTop = aiMessages.scrollHeight;
                 }
             });
         </script>

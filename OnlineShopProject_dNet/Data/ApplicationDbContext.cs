@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Models;
 
@@ -10,10 +10,12 @@ namespace OnlineShopProject_dNet.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<FAQ> FAQs { get; set; }
 
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,25 +25,30 @@ namespace OnlineShopProject_dNet.Data
 
             // DEFINIRE RELATII SI CASCADE DELETE
 
-            // 1. Cand stergem un Produs, se sterg automat toate Review-urile asociate
+            // 1. CAND STERGEM O CATEGORIE -> SE STERG PRODUSELE -> SE STERG REVIEW-URILE
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade); // Categoria ștearsă -> Produsele șterse
+
+            // 2. Cand stergem un Produs, se sterg automat toate Review-urile asociate
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Product)
                 .WithMany(p => p.Reviews)
                 .HasForeignKey(r => r.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 2. Cand stergem un User, se sterg automat Review-urile lui
-            // (Sau putem pune Restrict daca vrem sa pastram review-urile dar sa facem User null, 
-            // dar Cascade e mai curat pentru inceput)
+            // 3. Cand stergem un User, se sterg automat Review-urile lui
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 1. ORDER_DETAIL (Cheie primara compusa)
+            // 1. ORDER_DETAIL (Cheie simplă + snapshot produs)
             modelBuilder.Entity<OrderDetail>()
-                .HasKey(od => new { od.OrderId, od.ProductId });
+                .HasKey(od => od.Id);
 
             // Relatiile pentru OrderDetail
             modelBuilder.Entity<OrderDetail>()
@@ -55,8 +62,8 @@ namespace OnlineShopProject_dNet.Data
                 .HasOne(od => od.Product)
                 .WithMany(p => p.OrderDetails)
                 .HasForeignKey(od => od.ProductId)
-                .OnDelete(DeleteBehavior.Restrict); 
-            // Nu stergem produsul din magazin daca e intr-o comanda
+                .OnDelete(DeleteBehavior.SetNull); 
+            // Produsul poate fi sters, pastram snapshotul in OrderDetail
 
             // 2. WISHLIST (Cheie primara compusa)
             modelBuilder.Entity<Wishlist>()
@@ -73,6 +80,12 @@ namespace OnlineShopProject_dNet.Data
                 .HasOne(w => w.Product)
                 .WithMany(p => p.Wishlists)
                 .HasForeignKey(w => w.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
