@@ -375,6 +375,28 @@
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             }
         </style>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            var currentPage = (int)ViewBag.Page;
+            var totalPages = (int)ViewBag.TotalPages;
+            <nav aria-label="Paginare produse" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, category = ViewBag.SelectedCategory, search = ViewBag.Search, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder })">&laquo;</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = i, category = ViewBag.SelectedCategory, search = ViewBag.Search, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, category = ViewBag.SelectedCategory, search = ViewBag.Search, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder })">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        }
     }
 
     @section Scripts {

@@ -16,7 +16,9 @@ namespace OnlineShopProject_dNet.Services
         public async Task<bool> AddItemToCart(string userId, int productId, int quantity)
         {
             // 1. Validare de bază a produsului
-            var product = await _context.Products.FindAsync(productId);
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.Id == productId);
 
             // Dacă produsul nu există sau stocul e epuizat din start
             if (product == null || product.Stock < 1)
@@ -53,6 +55,10 @@ namespace OnlineShopProject_dNet.Services
                 if (detail.Quantity + quantity <= product.Stock)
                 {
                     detail.Quantity += quantity;
+                    // Asigurăm snapshot-ul pentru istoricul comenzilor
+                    detail.ProductTitleSnapshot ??= product.Title;
+                    detail.ProductImageSnapshot ??= product.Image;
+                    detail.ProductCategorySnapshot ??= product.Category?.Name;
                 }
                 else
                 {
@@ -70,7 +76,10 @@ namespace OnlineShopProject_dNet.Services
                         OrderId = order.Id,
                         ProductId = productId,
                         Quantity = quantity,
-                        UnitPrice = product.Price // Înghețăm prețul aici!
+                        UnitPrice = product.Price, // Înghețăm prețul aici!
+                        ProductTitleSnapshot = product.Title,
+                        ProductImageSnapshot = product.Image,
+                        ProductCategorySnapshot = product.Category?.Name
                     };
                     _context.OrderDetails.Add(newDetail);
                 }

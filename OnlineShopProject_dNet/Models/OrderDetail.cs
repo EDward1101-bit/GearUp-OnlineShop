@@ -5,12 +5,22 @@ namespace OnlineShopProject_dNet.Models
 {
     public class OrderDetail
     {
-        // Cheia primara compusa va fi definita in Context, aici avem doar proprietatile
+        [Key]
+        public int Id { get; set; }
+
+        // Legatura catre comanda
+        [Required]
         public int OrderId { get; set; }
         public virtual Order? Order { get; set; }
 
-        public int ProductId { get; set; }
+        // Legatura catre produs devine optionala pentru a putea sterge produsele
+        public int? ProductId { get; set; }
         public virtual Product? Product { get; set; }
+
+        // Copie locala a datelor produsului pentru istoricul comenzilor
+        public string? ProductTitleSnapshot { get; set; }
+        public string? ProductImageSnapshot { get; set; }
+        public string? ProductCategorySnapshot { get; set; }
 
         [Required(ErrorMessage = "Cantitatea este obligatorie")]
         [Range(1, int.MaxValue, ErrorMessage = "Cantitatea trebuie să fie cel puțin 1")]

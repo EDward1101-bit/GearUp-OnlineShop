@@ -1,6 +1,10 @@
 @model IEnumerable<OnlineShopProject_dNet.Models.Product>
+@using Microsoft.AspNetCore.Identity
+@using OnlineShopProject_dNet.Models
+@inject UserManager<ApplicationUser> UserManager
 @{
     ViewData["Title"] = "Acasă";
+    var currentUserId = User.Identity?.IsAuthenticated == true ? UserManager.GetUserId(User) : null;
 }
 
 <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 5rem 0; margin-bottom: 3rem;">
@@ -46,6 +50,8 @@
             <div class="row g-4">
                 @foreach (var p in Model.Take(8))
                 {
+                    bool isInWishlist = currentUserId != null && (p.Wishlists?.Any(w => w.UserId == currentUserId) ?? false);
+                    string heartClass = isInWishlist ? "bi-heart-fill text-danger" : "bi-heart";
                     <div class="col-12 col-sm-6 col-lg-3">
                         <div class="card border-0 shadow-sm h-100 overflow-hidden">
                             <a href="/Products/Show/@p.Id" class="text-decoration-none text-dark d-block">
@@ -82,7 +88,7 @@
                                         <button class="btn btn-sm btn-secondary flex-grow-1 py-2" disabled>Indisponibil</button>
                                     }
                                     <button class="btn btn-sm btn-outline-danger py-2 wishlist-btn" data-product-id="@p.Id" style="min-width:44px;">
-                                        <i class="bi bi-heart"></i>
+                                        <i class="bi @heartClass"></i>
                                     </button>
                                 </div>
                             </div>

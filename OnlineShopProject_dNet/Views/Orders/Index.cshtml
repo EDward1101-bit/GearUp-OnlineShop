@@ -37,16 +37,12 @@
                                         <tr>
                                             <td class="ps-4">
                                                 <div class="d-flex align-items-center">
-                                                    @if (!string.IsNullOrEmpty(item.Product?.Image))
-                                                    {
-                                                        <img src="@item.Product.Image" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    @{
+                                                        var imgSrc = item.Product != null
+                                                            ? (!string.IsNullOrEmpty(item.Product.Image) ? item.Product.Image : "/images/default-product.jpeg")
+                                                            : (!string.IsNullOrEmpty(item.ProductImageSnapshot) ? item.ProductImageSnapshot : "/images/default-product.jpeg");
                                                     }
-                                                    else
-                                                    {
-                                                        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                                            <i class="bi bi-image text-muted"></i>
-                                                        </div>
-                                                    }
+                                                    <img src="@imgSrc" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
                                                     <div>
                                                         <h6 class="mb-0 text-dark fw-semibold">
                                                             @if (item.Product != null)
@@ -57,7 +53,7 @@
                                                             }
                                                             else
                                                             {
-                                                                <span class="text-muted">Produs șters</span>
+                                                                <span class="text-muted">@(!string.IsNullOrEmpty(item.ProductTitleSnapshot) ? item.ProductTitleSnapshot : "Produs șters")</span>
                                                             }
                                                         </h6>
                                                     </div>

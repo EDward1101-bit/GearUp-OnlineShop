@@ -29,6 +29,18 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (cart != null)
             {
+                // Daca exista linii fara produs (ex: produs sters), le eliminam din cos
+                var orphanLines = cart.OrderDetails.Where(od => od.Product == null && od.ProductId == null).ToList();
+                if (orphanLines.Any())
+                {
+                    db.OrderDetails.RemoveRange(orphanLines);
+                    await db.SaveChangesAsync();
+                    cart = await db.Orders
+                                   .Include(o => o.OrderDetails)
+                                   .ThenInclude(od => od.Product)
+                                   .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
+                }
+
                 // Calculăm totalul folosind prețul salvat (UnitPrice), ignorând modificările din magazin
                 cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
 
@@ -212,6 +224,14 @@ namespace OnlineShopProject_dNet.Controllers
             // ULTIMA VERIFICARE DE STOC (Security Check)
             foreach (var item in cart.OrderDetails)
             {
+                if (item.Product != null)
+                {
+                    // Ne asiguram ca snapshot-ul este complet pentru istoricul comenzilor
+                    item.ProductTitleSnapshot ??= item.Product.Title;
+                    item.ProductImageSnapshot ??= item.Product.Image;
+                    item.ProductCategorySnapshot ??= item.Product.Category?.Name;
+                }
+
                 if (item.Product == null || item.Quantity > item.Product.Stock)
                 {
                     TempData["message"] = $"Produsul nu mai este pe stoc. Actualizează coșul.";

@@ -10,6 +10,7 @@
         @if (Model != null && Model.Any())
         {
             <form asp-action="AddAllToCart" method="post">
+                @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-success fw-bold shadow-sm">
                     <i class="bi bi-cart-plus-fill"></i> Mută tot în Coș
                 </button>
@@ -89,6 +90,7 @@
 
                             @* 1. Buton ȘTERGE (Gunoi) *@
                             <form asp-action="Delete" method="post" class="flex-shrink-0">
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
                                 <button type="submit" class="btn btn-outline-danger" title="Șterge din favorite">
                                     <i class="bi bi-trash"></i>
@@ -97,6 +99,7 @@
 
                             @* 2. Buton ADAUGĂ ÎN COȘ *@
                             <form asp-action="AddToCartFromWishlist" method="post" class="flex-grow-1">
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" name="productId" value="@item.ProductId" />
 
                                 @if (item.Product != null && item.Product.Stock > 0)

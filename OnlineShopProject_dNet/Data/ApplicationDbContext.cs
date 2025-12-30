@@ -45,9 +45,9 @@ namespace OnlineShopProject_dNet.Data
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 1. ORDER_DETAIL (Cheie primara compusa)
+            // 1. ORDER_DETAIL (Cheie simplă + snapshot produs)
             modelBuilder.Entity<OrderDetail>()
-                .HasKey(od => new { od.OrderId, od.ProductId });
+                .HasKey(od => od.Id);
 
             // Relatiile pentru OrderDetail
             modelBuilder.Entity<OrderDetail>()
@@ -61,8 +61,8 @@ namespace OnlineShopProject_dNet.Data
                 .HasOne(od => od.Product)
                 .WithMany(p => p.OrderDetails)
                 .HasForeignKey(od => od.ProductId)
-                .OnDelete(DeleteBehavior.Restrict); 
-            // Nu stergem produsul din magazin daca e intr-o comanda
+                .OnDelete(DeleteBehavior.SetNull); 
+            // Produsul poate fi sters, pastram snapshotul in OrderDetail
 
             // 2. WISHLIST (Cheie primara compusa)
             modelBuilder.Entity<Wishlist>()

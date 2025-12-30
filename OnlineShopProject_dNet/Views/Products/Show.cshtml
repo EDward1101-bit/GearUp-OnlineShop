@@ -9,6 +9,7 @@
     var currentUserId = UserManager.GetUserId(User);
     bool isInWishlist = currentUserId != null && (Model.Wishlists?.Any(w => w.UserId == currentUserId) ?? false);
     string heartClass = isInWishlist ? "bi-heart-fill text-danger" : "bi-heart";
+    var reviewsTotal = ViewBag.ReviewsTotal as int? ?? Model.Reviews?.Count() ?? 0;
 }
 
 @if (TempData["message"] != null)
@@ -58,10 +59,10 @@ else
                                         <i class="bi bi-star-fill"></i>
                                         <strong>@Model.Rating.Value.ToString("0.0")</strong>
                                     </div>
-                                    @if (Model.Reviews != null && Model.Reviews.Any())
+                                    @if (reviewsTotal > 0)
                                     {
                                         <small class="text-muted">
-                                            (@Model.Reviews.Count() @(Model.Reviews.Count() == 1 ? "review" : "review-uri"))
+                                            (@reviewsTotal @(reviewsTotal == 1 ? "review" : "review-uri"))
                                         </small>
                                     }
                                 </div>

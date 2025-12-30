@@ -24,8 +24,11 @@ namespace OnlineShopProject_dNet.Controllers
 
         // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu căutare, filtrare și sortare
         [HttpGet]
-        public IActionResult Index(int? category, string search, string sortBy = "name", string sortOrder = "asc")
+        public IActionResult Index(int? category, string search, string sortBy = "name", string sortOrder = "asc", int page = 1, int pageSize = 12)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1 || pageSize > 50) pageSize = 12;
+
             var query = db.Products
                          .Include(p => p.Category)
                          .Include(p => p.Wishlists)
@@ -65,7 +68,11 @@ namespace OnlineShopProject_dNet.Controllers
                     break;
             }
 
-            var products = query.ToList();
+            var totalCount = query.Count();
+            var products = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             ViewBag.Products = products;
             ViewBag.SelectedCategory = category;
@@ -73,6 +80,9 @@ namespace OnlineShopProject_dNet.Controllers
             ViewBag.Search = search;
             ViewBag.SortBy = sortBy;
             ViewBag.SortOrder = sortOrder;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
             // Pentru Admin: adăugăm produsele Pending într-o zonă separată
             if (User.IsInRole("Admin"))
@@ -108,12 +118,13 @@ namespace OnlineShopProject_dNet.Controllers
 
         // 2. SHOW - Detalii produs
         [HttpGet]
-        public IActionResult Show(int id)
+        public IActionResult Show(int id, int reviewPage = 1, int reviewPageSize = 5)
         {
+            if (reviewPage < 1) reviewPage = 1;
+            if (reviewPageSize < 1 || reviewPageSize > 20) reviewPageSize = 5;
+
             var product = db.Products
                             .Include(p => p.Category)
-                            .Include(p => p.Reviews)
-                            .ThenInclude(r => r.User)
                             .Include(p => p.User)
                             .Include(p => p.Wishlists)
                             .FirstOrDefault(p => p.Id == id);
@@ -128,6 +139,29 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 return Forbid();
             }
+
+            var currentUserId = _userManager.GetUserId(User);
+
+            // Paginare review-uri
+            var reviewsQuery = db.Reviews
+                .Include(r => r.User)
+                .Where(r => r.ProductId == id)
+                .OrderByDescending(r => r.Date);
+
+            var reviewsTotal = reviewsQuery.Count();
+            var pagedReviews = reviewsQuery
+                .Skip((reviewPage - 1) * reviewPageSize)
+                .Take(reviewPageSize)
+                .ToList();
+
+            ViewBag.ReviewsPaged = pagedReviews;
+            ViewBag.ReviewsPage = reviewPage;
+            ViewBag.ReviewsTotalPages = (int)Math.Ceiling(reviewsTotal / (double)reviewPageSize);
+            ViewBag.ReviewsTotal = reviewsTotal;
+            ViewBag.UserHasReview = currentUserId != null && db.Reviews.Any(r => r.ProductId == id && r.UserId == currentUserId);
+
+            // Pentru compatibilitate cu partialul
+            product.Reviews = pagedReviews;
 
             return View(product);
         }
@@ -361,6 +395,17 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 var imagePath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
                 if (System.IO.File.Exists(imagePath)) System.IO.File.Delete(imagePath);
+            }
+
+            // Curatam cosurile in lucru (InCart) care contin produsul
+            var cartsWithProduct = db.OrderDetails
+                .Include(od => od.Order)
+                .Where(od => od.ProductId == id && od.Order != null && od.Order.Status == "InCart")
+                .ToList();
+
+            if (cartsWithProduct.Any())
+            {
+                db.OrderDetails.RemoveRange(cartsWithProduct);
             }
 
             db.Products.Remove(product);

@@ -29,7 +29,7 @@ else
                     }
                 </div>
                 <div class="ms-2 flex-grow-1">
-                    <div class="fw-semibold text-dark" style="font-size:0.9rem;">@item.Product?.Title</div>
+                    <div class="fw-semibold text-dark" style="font-size:0.9rem;">@(item.Product?.Title ?? item.ProductTitleSnapshot ?? "Produs șters")</div>
                     <div class="text-muted small">@item.Quantity x @item.UnitPrice RON</div>
                 </div>
                 <div class="ms-2 text-end small fw-bold">@(@item.Quantity * item.UnitPrice) RON</div>
