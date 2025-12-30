@@ -1,0 +1,61 @@
+﻿@model IEnumerable<OnlineShopProject_dNet.Models.Review>
+@using OnlineShopProject_dNet.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@foreach (var review in Model)
+{
+    string displayName = !string.IsNullOrEmpty(review.User?.FirstName)
+        ? review.User.FirstName
+        : (review.User?.UserName ?? "Anonim");
+
+    <div class="card border-0 shadow-sm" id="review-container-@review.Id">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="user-avatar rounded-circle d-flex justify-content-center align-items-center shadow-sm">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark">@displayName</div>
+                        <small class="text-muted">@review.Date.ToString("dd MMMM yyyy, HH:mm")</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="review-stars-display d-flex gap-1">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (review.Rating.HasValue && i <= review.Rating.Value)
+                        {
+                            <i class="bi bi-star-fill"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-star"></i>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="text-break mb-3">
+                <p class="mb-0">@review.Content</p>
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true && (review.UserId == UserManager.GetUserId(User) || User.IsInRole("Admin")))
+            {
+                <div class="d-flex align-items-center gap-3 pt-2 border-top">
+                    <a href="javascript:void(0)" onclick="toggleEditMode(@review.Id)" class="text-decoration-none text-primary small d-flex align-items-center gap-1">
+                        <i class="bi bi-pencil"></i> Editează
+                    </a>
+                    <form method="post" action="/Reviews/Delete/@review.Id" class="d-inline-block m-0 p-0">
+                        <button type="submit" class="btn btn-link p-0 text-decoration-none text-danger small d-flex align-items-center gap-1" style="border: none; vertical-align: baseline;" onclick="return confirm('Ștergi review-ul?');">
+                            <i class="bi bi-trash"></i> Șterge
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+}
