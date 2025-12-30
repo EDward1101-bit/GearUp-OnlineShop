@@ -98,6 +98,9 @@
                                         <li><a class="dropdown-item" asp-controller="Wishlist" asp-action="Index">
                                             <i class="bi bi-heart"></i> Favorite
                                         </a></li>
+                                        <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index">
+                                            <i class="bi bi-bell"></i> Notificări
+                                        </a></li>
 
                                         @* ADMIN SECTION - Doar pentru administratori *@
                                         @if (User.IsInRole("Admin"))
@@ -112,6 +115,9 @@
                                             <li><a class="dropdown-item" href="/Products/Index#pending-products">
                                                 <i class="bi bi-clock-history"></i> Produse în Așteptare 
                                                 <span id="pendingCountNav" class="badge bg-warning text-dark ms-2">0</span>
+                                            </a></li>
+                                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">
+                                                <i class="bi bi-people"></i> Utilizatori & rol Proposer
                                             </a></li>
                                         }
 

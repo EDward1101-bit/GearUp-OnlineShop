@@ -287,6 +287,12 @@ namespace OnlineShopProject_dNet.Controllers
                 return RedirectToAction("Index");
             }
 
+            if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["message"] = "Poți edita produsul doar după ce a fost respins de admin (cu feedback).";
+                return RedirectToAction("Index");
+            }
+
             ViewBag.Categories = db.Categories;
             return View(product);
         }
@@ -301,6 +307,12 @@ namespace OnlineShopProject_dNet.Controllers
             if (product.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
             {
                 return Forbid();
+            }
+
+            if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["message"] = "Poți edita produsul doar după ce a fost respins de admin (cu feedback).";
+                return RedirectToAction("Index");
             }
 
             // Remove fields from validation that we handle manually
@@ -388,6 +400,12 @@ namespace OnlineShopProject_dNet.Controllers
             if (product.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
             {
                 TempData["message"] = "Nu ai dreptul să ștergi acest produs!";
+                return RedirectToAction("Index");
+            }
+
+            if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["message"] = "Poți șterge produsul doar dacă a fost respins de admin.";
                 return RedirectToAction("Index");
             }
 

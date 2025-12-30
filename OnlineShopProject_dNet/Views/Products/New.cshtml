@@ -35,7 +35,7 @@
 
     <div class="mb-3">
         <label for="Price" class="form-label">Preț (RON)</label>
-        <input type="number" name="Price" id="Price" class="form-control" step="1" value="@(Model?.Price)" min="0" />
+        <input type="number" name="Price" id="Price" class="form-control" step="0.01" value="@(Model?.Price)" min="0.01" />
         @Html.ValidationMessage("Price", new { @class = "text-danger" })
     </div>
 
@@ -48,7 +48,7 @@
     <div class="mb-3">
         <label for="CategoryId" class="form-label">Selectați Categoria</label>
         <select name="CategoryId" id="CategoryId" class="form-select">
-            <option value="">--- Selectează Categoria ---</option>
+            <option value="0">--- Selectează Categoria ---</option>
             @foreach (var item in ViewBag.Categories)
             {
                 <option value="@item.Id" selected="@(Model?.CategoryId == item.Id ? "selected" : null)">

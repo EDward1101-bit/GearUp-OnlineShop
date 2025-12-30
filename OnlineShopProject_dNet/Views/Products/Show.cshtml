@@ -165,7 +165,7 @@ else
                                         </form>
                                     }
                                 }
-                                else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User))
+                                else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User) && string.Equals(Model.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
                                 {
                                     <a href="/Products/Edit/@Model.Id" class="btn btn-warning btn-sm">
                                         <i class="bi bi-pencil me-1"></i> Editează

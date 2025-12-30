@@ -1,0 +1,72 @@
+@model IEnumerable<OnlineShopProject_dNet.Controllers.AdminUserVm>
+@{
+    ViewBag.Title = "Gestionare utilizatori";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">Gestionare rol Proposer</h2>
+
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @TempData["message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nume</th>
+                            <th>Email</th>
+                            <th>Admin</th>
+                            <th>Proposer</th>
+                            <th>Ac?iuni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in Model)
+                        {
+                            <tr>
+                                <td>@(string.IsNullOrWhiteSpace(u.Name) ? "-" : u.Name)</td>
+                                <td>@u.Email</td>
+                                <td>
+                                    @if (u.IsAdmin)
+                                    {
+                                        <span class="badge bg-primary">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">User</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (u.IsProposer)
+                                    {
+                                        <span class="badge bg-success">Da</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Nu</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="ToggleProposer" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@u.Id" />
+                                        <button type="submit" class="btn btn-sm @(u.IsProposer ? "btn-outline-danger" : "btn-outline-success")">
+                                            @(u.IsProposer ? "Revoc?" : "Acord?") rol Proposer
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

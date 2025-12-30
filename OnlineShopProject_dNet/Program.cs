@@ -51,6 +51,7 @@ builder.Services.AddLogging(logging =>
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.CartService>();
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.TextProcessingService>();
 builder.Services.AddScoped<OnlineShopProject_dNet.Services.ProductAIService>();
+builder.Services.AddScoped<OnlineShopProject_dNet.Services.NotificationService>();
 // HTML sanitization service (prevent XSS / clean inputs)
 builder.Services.AddScoped<IHtmlSanitizationService, HtmlSanitizationService>();
 

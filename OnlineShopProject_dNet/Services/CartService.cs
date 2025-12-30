@@ -21,7 +21,7 @@ namespace OnlineShopProject_dNet.Services
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
             // Dacă produsul nu există sau stocul e epuizat din start
-            if (product == null || product.Stock < 1)
+            if (product == null || (product.Stock ?? 0) < 1)
             {
                 return false;
             }
@@ -52,7 +52,7 @@ namespace OnlineShopProject_dNet.Services
             {
                 // SCENARIUL A: Produsul e deja în coș -> Verificăm stocul cumulat
                 // (Cantitatea actuală din coș + ce vrea să adauge acum <= Stocul Real)
-                if (detail.Quantity + quantity <= product.Stock)
+                if (detail.Quantity + quantity <= (product.Stock ?? 0))
                 {
                     detail.Quantity += quantity;
                     // Asigurăm snapshot-ul pentru istoricul comenzilor
@@ -69,14 +69,14 @@ namespace OnlineShopProject_dNet.Services
             else
             {
                 // SCENARIUL B: Produs nou în coș -> Verificăm stocul pentru cantitatea cerută
-                if (product.Stock >= quantity)
+                if ((product.Stock ?? 0) >= quantity)
                 {
                     var newDetail = new OrderDetail
                     {
                         OrderId = order.Id,
                         ProductId = productId,
                         Quantity = quantity,
-                        UnitPrice = product.Price, // Înghețăm prețul aici!
+                        UnitPrice = product.Price ?? 0, // Înghețăm prețul aici!
                         ProductTitleSnapshot = product.Title,
                         ProductImageSnapshot = product.Image,
                         ProductCategorySnapshot = product.Category?.Name

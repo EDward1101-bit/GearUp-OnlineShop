@@ -244,7 +244,7 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 if (item.Product != null)
                 {
-                    item.Product.Stock -= item.Quantity;
+                    item.Product.Stock = (item.Product.Stock ?? 0) - item.Quantity;
                 }
             }
 
