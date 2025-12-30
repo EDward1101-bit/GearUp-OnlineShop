@@ -49,11 +49,17 @@
                                                     }
                                                     <div>
                                                         <h6 class="mb-0 text-dark fw-semibold">
-                                                            <a href="/Products/Show/@item.ProductId" class="text-decoration-none text-dark">
-                                                                @item.Product?.Title
-                                                            </a>
+                                                            @if (item.Product != null)
+                                                            {
+                                                                <a href="/Products/Show/@item.ProductId" class="text-decoration-none text-dark">
+                                                                    @item.Product.Title
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted">Produs șters</span>
+                                                            }
                                                         </h6>
-                                                        <small class="text-muted">Cod: #@item.ProductId</small>
                                                     </div>
                                                 </div>
                                             </td>

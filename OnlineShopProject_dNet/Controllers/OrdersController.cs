@@ -267,7 +267,11 @@ namespace OnlineShopProject_dNet.Controllers
             var userId = _userManager.GetUserId(User);
 
             // Luăm toate comenzile care NU mai sunt în stadiul de "Coș"
+            // Include OrderDetails și Product pentru a afișa corect informațiile
             var orders = await db.Orders
+                                 .Include(o => o.OrderDetails)
+                                 .ThenInclude(od => od.Product)
+                                 .ThenInclude(p => p.Category)
                                  .Where(o => o.UserId == userId && o.Status != "InCart")
                                  .OrderByDescending(o => o.Date) // Cele mai recente primele
                                  .ToListAsync();
@@ -281,17 +285,24 @@ namespace OnlineShopProject_dNet.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            // Căutăm comanda specifică (id) și încărcăm produsele
+            // Căutăm comanda specifică (id) și încărcăm produsele cu categoria
             // Verificăm și UserId pentru securitate (să nu vezi comenzile altuia)
             var order = await db.Orders
                                 .Include(o => o.OrderDetails)
                                 .ThenInclude(od => od.Product)
+                                .ThenInclude(p => p.Category)
                                 .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 
             if (order == null)
             {
                 // Dacă comanda nu există sau nu e a ta
                 return NotFound();
+            }
+
+            // Calculăm totalul dacă nu este setat
+            if (order.TotalAmount == 0 && order.OrderDetails.Any())
+            {
+                order.TotalAmount = order.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
             }
 
             return View(order);

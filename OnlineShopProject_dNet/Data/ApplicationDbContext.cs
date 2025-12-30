@@ -24,16 +24,21 @@ namespace OnlineShopProject_dNet.Data
 
             // DEFINIRE RELATII SI CASCADE DELETE
 
-            // 1. Cand stergem un Produs, se sterg automat toate Review-urile asociate
+            // 1. CAND STERGEM O CATEGORIE -> SE STERG PRODUSELE -> SE STERG REVIEW-URILE
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade); // Categoria ștearsă -> Produsele șterse
+
+            // 2. Cand stergem un Produs, se sterg automat toate Review-urile asociate
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Product)
                 .WithMany(p => p.Reviews)
                 .HasForeignKey(r => r.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 2. Cand stergem un User, se sterg automat Review-urile lui
-            // (Sau putem pune Restrict daca vrem sa pastram review-urile dar sa facem User null, 
-            // dar Cascade e mai curat pentru inceput)
+            // 3. Cand stergem un User, se sterg automat Review-urile lui
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
