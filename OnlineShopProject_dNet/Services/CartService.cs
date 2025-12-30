@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
 
