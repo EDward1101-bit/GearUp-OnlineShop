@@ -34,25 +34,38 @@ namespace OnlineShopProject_dNet.Services
             if (string.IsNullOrEmpty(input))
                 return string.Empty;
 
-            // First, convert line breaks to <br> tags
-            var withBreaks = input.Replace("\r\n", "<br>").Replace("\n", "<br>").Replace("\r", "<br>");
+            // If input already contains HTML tags (from storage), sanitize it directly
+            // Otherwise, convert line breaks to <br> tags first
+            string withBreaks;
+            if (input.Contains("<br>") || input.Contains("<p>") || input.Contains("<ul>") || input.Contains("<li>"))
+            {
+                // Already has HTML, just sanitize
+                withBreaks = input;
+            }
+            else
+            {
+                // Convert line breaks to <br> tags
+                withBreaks = input.Replace("\r\n", "<br>").Replace("\n", "<br>").Replace("\r", "<br>");
+            }
 
-            // Sanitize the HTML
+            // Sanitize the HTML (preserves allowed tags like <br>, <p>, <strong>, <ul>, <li>)
             var sanitized = _sanitizer.Sanitize(withBreaks);
 
             return sanitized;
         }
 
         /// <summary>
-        /// Processes text for storage (reverse of display processing)
+        /// Processes text for storage (preserves HTML structure for allowed tags)
         /// </summary>
         public string ProcessForStorage(string? input)
         {
             if (string.IsNullOrEmpty(input))
                 return string.Empty;
 
-            // Convert <br> back to newlines for storage
-            return input.Replace("<br>", "\n").Replace("<br/>", "\n").Replace("<br />", "\n");
+            // Keep HTML structure - don't convert back to newlines
+            // The sanitized HTML will be stored as-is
+            // This preserves formatting when displayed with Html.Raw
+            return input;
         }
 
         /// <summary>

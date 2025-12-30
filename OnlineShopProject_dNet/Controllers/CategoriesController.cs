@@ -79,6 +79,48 @@ namespace OnlineShopProject_dNet.Controllers
         [HttpPost]
         public IActionResult New(Category cat)
         {
+            // Handle AJAX requests from modal
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (cat == null || string.IsNullOrWhiteSpace(cat.Name))
+                {
+                    return Json(new { success = false, message = "Numele categoriei este obligatoriu." });
+                }
+
+                // Sanitize category name
+                cat.Name = _textProcessor.SanitizeText(cat.Name);
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .SelectMany(x => x.Value.Errors)
+                        .Select(x => x.ErrorMessage)
+                        .ToList();
+                    
+                    return Json(new { success = false, message = string.Join(" ", errors) });
+                }
+
+                try
+                {
+                    db.Categories.Add(cat);
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "Categoria a fost adăugată!" });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error saving new category");
+                    return Json(new { success = false, message = "A apărut o eroare la salvarea categoriei." });
+                }
+            }
+
+            // Regular form submission
+            if (cat == null || string.IsNullOrWhiteSpace(cat.Name))
+            {
+                ModelState.AddModelError("Name", "Numele categoriei este obligatoriu.");
+                return View(cat);
+            }
+
             // Sanitize category name
             cat.Name = _textProcessor.SanitizeText(cat.Name);
 
@@ -131,7 +173,51 @@ namespace OnlineShopProject_dNet.Controllers
             Category? category = db.Categories.Find(id);
             if (category == null)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Categoria nu a fost găsită." });
                 return NotFound();
+            }
+
+            // Handle AJAX requests from modal
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                if (requestCategory == null || string.IsNullOrWhiteSpace(requestCategory.Name))
+                {
+                    return Json(new { success = false, message = "Numele categoriei este obligatoriu." });
+                }
+
+                // Sanitize category name
+                requestCategory.Name = _textProcessor.SanitizeText(requestCategory.Name);
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .SelectMany(x => x.Value.Errors)
+                        .Select(x => x.ErrorMessage)
+                        .ToList();
+                    
+                    return Json(new { success = false, message = string.Join(" ", errors) });
+                }
+
+                try
+                {
+                    category.Name = requestCategory.Name;
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "Categoria a fost modificată!" });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating category {CategoryId}", id);
+                    return Json(new { success = false, message = "A apărut o eroare la actualizarea categoriei." });
+                }
+            }
+
+            // Regular form submission
+            if (requestCategory == null || string.IsNullOrWhiteSpace(requestCategory.Name))
+            {
+                ModelState.AddModelError("Name", "Numele categoriei este obligatoriu.");
+                return View(requestCategory);
             }
 
             // Sanitize category name
@@ -170,7 +256,12 @@ namespace OnlineShopProject_dNet.Controllers
         public ActionResult Delete(int id)
         {
             var category = db.Categories.Find(id);
-            if (category == null) return NotFound();
+            if (category == null) 
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Categoria nu a fost găsită." });
+                return NotFound();
+            }
 
             // --- LOGICA TA DE STERGERE IMAGINI (PASTRATA) ---
             var associatedProducts = db.Products.Where(p => p.CategoryId == id).ToList();
@@ -193,12 +284,25 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 db.Categories.Remove(category);
                 db.SaveChanges();
+                
+                // Return JSON for AJAX requests (modal stays open)
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, message = "Categoria și produsele aferente au fost șterse!" });
+                }
+                
                 TempData["message"] = "Categoria și produsele aferente au fost șterse!";
                 return RedirectToAction("Index", "Products");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting category {CategoryId}", id);
+                
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "A apărut o eroare la ștergerea categoriei." });
+                }
+                
                 TempData["message"] = "A apărut o eroare la ștergerea categoriei.";
                 return RedirectToAction("Index", "Products");
             }

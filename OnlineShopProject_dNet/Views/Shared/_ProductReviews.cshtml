@@ -1,8 +1,10 @@
 @model OnlineShopProject_dNet.Models.Product
 @using Microsoft.AspNetCore.Identity
 @using OnlineShopProject_dNet.Models
+@using OnlineShopProject_dNet.Services
 
 @inject UserManager<ApplicationUser> UserManager
+@inject TextProcessingService _textProcessor
 
 @{
     var currentUserId = User.Identity?.IsAuthenticated == true ? UserManager.GetUserId(User) : null;
@@ -103,7 +105,7 @@
 
                                 @* CONTINUT *@
                                 <div class="text-break mb-3">
-                                    <p class="mb-0">@review.Content</p>
+                                    <div class="mb-0">@Html.Raw(_textProcessor.ProcessForDisplay(review.Content))</div>
                                 </div>
 
                                 @* BUTOANE ACTIUNE *@

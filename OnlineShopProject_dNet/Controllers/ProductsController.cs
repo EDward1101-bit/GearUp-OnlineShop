@@ -146,23 +146,18 @@ namespace OnlineShopProject_dNet.Controllers
         public async Task<IActionResult> New(Product product, IFormFile? Image)
         {
             var userId = _userManager.GetUserId(User);
+            
+            // Handle null product or empty fields before validation
+            if (product == null)
+            {
+                ModelState.AddModelError(string.Empty, "Datele produsului sunt invalide.");
+                ViewBag.Categories = db.Categories;
+                return View(new Product());
+            }
+
             product.UserId = userId;
 
             _logger.LogInformation("User {UserId} is creating a new product: {ProductTitle}", userId, product.Title);
-
-            // Sanitize inputs for security
-            product.Title = _text_processor.SanitizeText(product.Title);
-            product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(product.Description));
-
-            // LOGICA STATUS: Admin -> Approved direct / Colaborator -> Pending
-            if (User.IsInRole("Admin"))
-            {
-                product.Status = "Approved";
-            }
-            else
-            {
-                product.Status = "Pending";
-            }
 
             // --- Logica Imagine ---
             if (Image != null && Image.Length > 0)
@@ -172,7 +167,7 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (!allowedExtensions.Contains(fileExtension) || Image.Length > 5 * 1024 * 1024)
                 {
-                    ModelState.AddModelError("Image", "Fișier invalid.");
+                    ModelState.AddModelError("Image", "Fișier invalid. Doar JPG, PNG, GIF, max 5MB.");
                     ViewBag.Categories = db.Categories;
                     return View(product);
                 }
@@ -190,19 +185,54 @@ namespace OnlineShopProject_dNet.Controllers
                 product.Image = "/images/default-product.jpeg";
             }
 
+            // Remove Image from validation since it's optional
             ModelState.Remove(nameof(product.Image));
+            ModelState.Remove(nameof(product.UserId));
+            ModelState.Remove(nameof(product.Status));
+            ModelState.Remove(nameof(product.Rating));
 
-            if (TryValidateModel(product))
+            // Sanitize inputs for security AFTER validation check
+            if (!string.IsNullOrWhiteSpace(product.Title))
             {
-                db.Products.Add(product);
-                await db.SaveChangesAsync();
+                product.Title = _text_processor.SanitizeText(product.Title);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(product.Description))
+            {
+                // Preserve formatting - sanitize HTML but keep structure
+                product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(product.Description));
+            }
 
-                if (product.Status == "Pending")
-                    TempData["message"] = "Produsul a fost trimis spre aprobare!";
-                else
-                    TempData["message"] = "Produsul a fost adăugat!";
+            // LOGICA STATUS: Admin -> Approved direct / Colaborator -> Pending
+            if (User.IsInRole("Admin"))
+            {
+                product.Status = "Approved";
+            }
+            else
+            {
+                product.Status = "Pending";
+            }
 
-                return RedirectToAction("Index");
+            // Validate model
+            if (ModelState.IsValid && TryValidateModel(product))
+            {
+                try
+                {
+                    db.Products.Add(product);
+                    await db.SaveChangesAsync();
+
+                    if (product.Status == "Pending")
+                        TempData["message"] = "Produsul a fost trimis spre aprobare!";
+                    else
+                        TempData["message"] = "Produsul a fost adăugat!";
+
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error saving product");
+                    ModelState.AddModelError(string.Empty, "A apărut o eroare la salvarea produsului. Verifică datele introduse.");
+                }
             }
 
             ViewBag.Categories = db.Categories;
@@ -239,9 +269,32 @@ namespace OnlineShopProject_dNet.Controllers
                 return Forbid();
             }
 
+            // Remove fields from validation that we handle manually
+            ModelState.Remove(nameof(product.Image));
+            ModelState.Remove(nameof(product.UserId));
+            ModelState.Remove(nameof(product.Status));
+            ModelState.Remove(nameof(product.Rating));
+
             // Sanitize inputs for security
-            product.Title = _text_processor.SanitizeText(requestProduct.Title);
-            product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(requestProduct.Description));
+            if (!string.IsNullOrWhiteSpace(requestProduct.Title))
+            {
+                product.Title = _text_processor.SanitizeText(requestProduct.Title);
+            }
+            else
+            {
+                product.Title = product.Title; // Keep existing if empty
+            }
+            
+            if (!string.IsNullOrWhiteSpace(requestProduct.Description))
+            {
+                // Preserve formatting - sanitize HTML but keep structure
+                product.Description = _text_processor.ProcessForStorage(_text_processor.SanitizeHtml(requestProduct.Description));
+            }
+            else
+            {
+                product.Description = product.Description; // Keep existing if empty
+            }
+            
             product.Price = requestProduct.Price;
             product.Stock = requestProduct.Stock;
             product.CategoryId = requestProduct.CategoryId;
