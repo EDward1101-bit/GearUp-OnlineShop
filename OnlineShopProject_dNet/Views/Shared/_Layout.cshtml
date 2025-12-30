@@ -69,17 +69,26 @@
                     @* --- GRUP 2: MENIUL DREAPTA (Iconițe + User) --- *@
                     <div class="d-flex align-items-center">
 
-                        @* USER MENU - Pentru toți utilizatorii autentificați *@
+                        @* 1. COȘ & WISHLIST (Iconițe cu badge-uri) *@
+                        <ul class="navbar-nav align-items-center me-2">
+                            @await Component.InvokeAsync("NavbarSummary")
+                        </ul>
+
+                        @* 2. USER MENU - Pentru toți utilizatorii autentificați *@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <ul class="navbar-nav align-items-center">
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-person-circle"></i> @displayName
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-person-circle fs-5 me-2"></i>
+                                        <span class="d-none d-lg-inline">@displayName</span>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuDropdown">
-                                        <li><h6 class="dropdown-header">Contul meu</h6></li>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenuDropdown" style="min-width: 250px;">
+                                        <li><h6 class="dropdown-header text-uppercase fw-bold">
+                                            <i class="bi bi-person-circle"></i> @displayName
+                                        </h6></li>
                                         <li><hr class="dropdown-divider"></li>
+                                        
                                         <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
                                             <i class="bi bi-person-gear"></i> Profil
                                         </a></li>
@@ -94,21 +103,23 @@
                                         @if (User.IsInRole("Admin"))
                                         {
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><h6 class="dropdown-header">Panou Admin</h6></li>
-                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header text-uppercase fw-bold text-warning">
+                                                <i class="bi bi-shield-check"></i> Panou Admin
+                                            </h6></li>
                                             <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#categoriesModal">
                                                 <i class="bi bi-tags"></i> Gestionare Categorii
                                             </a></li>
                                             <li><a class="dropdown-item" href="/Products/Index#pending-products">
-                                                <i class="bi bi-clock-history"></i> Produse în Așteptare <span id="pendingCountNav" class="badge bg-warning text-dark ms-2">0</span>
+                                                <i class="bi bi-clock-history"></i> Produse în Așteptare 
+                                                <span id="pendingCountNav" class="badge bg-warning text-dark ms-2">0</span>
                                             </a></li>
                                         }
 
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form class="dropdown-item p-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                                                <button type="submit" class="btn btn-link text-decoration-none w-100 text-start p-2">
-                                                    <i class="bi bi-box-arrow-right"></i> Ieșire
+                                                <button type="submit" class="btn btn-link text-decoration-none w-100 text-start text-danger p-2">
+                                                    <i class="bi bi-box-arrow-right"></i> Deconectare
                                                 </button>
                                             </form>
                                         </li>
@@ -116,17 +127,22 @@
                                 </li>
                             </ul>
                         }
-
-                        @* B. COȘ & WISHLIST (Sunt grupate aici, apropiate între ele) *@
-                        <ul class="navbar-nav align-items-center me-3 pe-3">
-                            @* border-end pune o linie verticală între iconițe și user *@
-                            @await Component.InvokeAsync("NavbarSummary")
-                        </ul>
-
-                        @* B. USER (Separat, mai la dreapta) *@
-                        <ul class="navbar-nav">
-                            <partial name="_LoginPartial" />
-                        </ul>
+                        else
+                        {
+                            @* Pentru utilizatori neautentificați - butoane Înregistrare / Autentificare *@
+                            <ul class="navbar-nav align-items-center">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">
+                                        <i class="bi bi-person-plus"></i> <span class="d-none d-lg-inline">Înregistrare</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link btn btn-outline-light btn-sm ms-2" asp-area="Identity" asp-page="/Account/Login">
+                                        <i class="bi bi-box-arrow-in-right"></i> <span class="d-none d-lg-inline">Autentificare</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        }
                     </div>
                 </div>
             </div>
