@@ -60,7 +60,8 @@
                                             <td>@item.UnitPrice Lei</td>
                                             <td>
                                                 @* Formular modificare cantitate *@
-                                                <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center gap-2">
+                                                <form asp-controller="Orders" asp-action="UpdateQuantity" method="post" class="d-flex align-items-center gap-2">
+                                                    @Html.AntiForgeryToken()
                                                     <input type="hidden" name="productId" value="@item.ProductId" />
                                                     <input type="number" name="quantity" value="@item.Quantity" min="1" max="99"
                                                            class="form-control form-control-sm text-center" style="width: 60px;"
@@ -71,7 +72,8 @@
                                                 @(item.Quantity* item.UnitPrice) Lei
                                             </td>
                                             <td>
-                                                <form asp-action="RemoveFromCart" method="post">
+                                                <form asp-controller="Orders" asp-action="RemoveFromCart" method="post">
+                                                    @Html.AntiForgeryToken()
                                                     <input type="hidden" name="productId" value="@item.ProductId" />
                                                     <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Șterge">
                                                         <i class="bi bi-trash"></i>

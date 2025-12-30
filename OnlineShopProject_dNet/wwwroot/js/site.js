@@ -82,19 +82,37 @@ window.addToCartDetailed = function(productId, qty, btn) {
         try {
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
             const token = tokenInput ? tokenInput.value : '';
+            
+            if (!token) {
+                console.error('[CartDebug] Anti-forgery token not found');
+                showToast('Eroare de securitate. Te rugăm să reîncarci pagina.', 'danger');
+                return;
+            }
 
-            const bodyStr = `productId=${productId}&quantity=${qty}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+            const bodyStr = `productId=${productId}&quantity=${qty}&__RequestVerificationToken=${encodeURIComponent(token)}`;
 
             fetch('/Orders/AddToCart', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
                 body: bodyStr
             })
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) {
+                if (r.status === 400) {
+                    return r.text().then(text => {
+                        throw new Error('HTTP 400: ' + text);
+                    });
+                }
+                throw new Error(`HTTP error! status: ${r.status}`);
+            }
+            return r.json();
+        })
         .then(d => {
             console.log('[CartDebug] Server response:', d);
             if (d.success) { 
-                loadMiniCart(); 
+                if (typeof loadMiniCart === 'function') {
+                    loadMiniCart(); 
+                }
                 showToast('Produs adăugat în coș', 'success'); 
             } else {
                 showToast(d.message || 'Eroare la adăugare', 'danger');
@@ -102,12 +120,24 @@ window.addToCartDetailed = function(productId, qty, btn) {
         })
         .catch(e=> { 
             console.error('[CartDebug] Error:', e); 
-            showToast('Eroare rețea', 'danger'); 
+            if (e.message && e.message.includes('400')) {
+                showToast('Eroare de validare. Te rugăm să reîncarci pagina și să încerci din nou.', 'danger');
+            } else {
+                showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+            }
         });
+        } catch (e) {
+            console.error('[CartDebug] Outer error:', e);
+            showToast('Eroare la adăugarea produsului.', 'danger');
+        }
     } else {
         console.log('[CartDebug] User not authenticated, using localStorage');
-        addToLocalCart(productId, qty, btn || document.querySelector('[onclick*="addToCartDetailed"]'));
-        showToast('Produs adăugat în coș (local)', 'success');
+        if (typeof addToLocalCart === 'function') {
+            addToLocalCart(productId, qty, btn || document.querySelector('[onclick*="addToCartDetailed"]'));
+            showToast('Produs adăugat în coș (local)', 'success');
+        } else {
+            showToast('Te rugăm să te autentifici pentru a adăuga produse în coș.', 'warning');
+        }
     }
 };
 
@@ -118,28 +148,46 @@ window.toggleWishlistDetailed = function(productId, btn) {
     try {
         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
         const token = tokenInput ? tokenInput.value : '';
-        const bodyStr = `productId=${productId}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
+        
+        if (!token) {
+            console.error('[WishlistDebug] Anti-forgery token not found');
+            showToast('Eroare de securitate. Te rugăm să reîncarci pagina.', 'danger');
+            return;
+        }
+        
+        const bodyStr = `productId=${productId}&__RequestVerificationToken=${encodeURIComponent(token)}`;
 
         fetch('/Wishlist/Toggle', { 
             method: 'POST', 
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
             body: bodyStr 
         })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) {
+            if (r.status === 400) {
+                return r.text().then(text => {
+                    throw new Error('HTTP 400: ' + text);
+                });
+            }
+            throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
+    })
     .then(d => {
         console.log('[WishlistDebug] Server response:', d);
         if (d.success) {
-            const icon = btn.querySelector('i');
-            if (!icon) {
-                console.error('[WishlistDebug] Icon element not found in button');
-                return;
+            const icon = btn ? btn.querySelector('i') : null;
+            if (icon) {
+                if (d.action === 'added') { 
+                    icon.className = 'bi bi-heart-fill text-danger'; 
+                } else { 
+                    icon.className = 'bi bi-heart'; 
+                }
             }
             
             if (d.action === 'added') { 
-                icon.className = 'bi bi-heart-fill text-danger'; 
                 showToast('Adăugat la favorite', 'success'); 
             } else { 
-                icon.className = 'bi bi-heart'; 
                 showToast('Eliminat din favorite', 'info'); 
             }
             
@@ -160,15 +208,25 @@ window.toggleWishlistDetailed = function(productId, btn) {
                     wb.style.display = val>0 ? 'inline-block' : 'none';
                 }
             }
-            loadMiniCart();
+            if (typeof loadMiniCart === 'function') {
+                loadMiniCart();
+            }
         } else {
             showToast(d.message || 'Eroare', 'danger');
         }
     })
     .catch(e => { 
         console.error('[WishlistDebug] Error:', e); 
-        showToast('Eroare rețea', 'danger'); 
+        if (e.message && e.message.includes('400')) {
+            showToast('Eroare de validare. Te rugăm să reîncarci pagina și să încerci din nou.', 'danger');
+        } else {
+            showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+        }
     });
+    } catch (e) {
+        console.error('[WishlistDebug] Outer error:', e);
+        showToast('Eroare la actualizarea favorite.', 'danger');
+    }
 };
 
 window.saveLocalCart = function (cart) {

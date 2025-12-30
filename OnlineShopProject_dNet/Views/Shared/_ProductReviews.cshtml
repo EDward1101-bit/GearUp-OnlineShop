@@ -184,8 +184,12 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form method="post" action="/Reviews/New">
+                            <form method="post" asp-controller="Reviews" asp-action="New">
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" name="ProductId" value="@Model.Id" />
+                                
+                                @* Validation Summary *@
+                                <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Rating:</label>
