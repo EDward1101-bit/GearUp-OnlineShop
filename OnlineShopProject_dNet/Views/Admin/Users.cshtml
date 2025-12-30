@@ -1,10 +1,19 @@
-@model IEnumerable<OnlineShopProject_dNet.Controllers.AdminUserVm>
+@model OnlineShopProject_dNet.Controllers.AdminUsersPageVm
 @{
     ViewBag.Title = "Gestionare utilizatori";
 }
 
 <div class="container py-4">
-    <h2 class="mb-4">Gestionare rol Proposer</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+        <div>
+            <h2 class="mb-1">Gestionare rol Proposer</h2>
+            <div class="text-muted small">Se afi?eaz? doar utilizatorii cu rol Proposer. Folose?te c?utarea pentru a g?si orice utilizator ?i a-i acorda / revoca rolul.</div>
+        </div>
+        <form method="get" class="d-flex gap-2" role="search">
+            <input type="text" name="search" class="form-control" placeholder="Caut? dup? email, user, nume" value="@Model.Search" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Caut?</button>
+        </form>
+    </div>
 
     @if (TempData["message"] != null)
     {
@@ -28,45 +37,74 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var u in Model)
+                        @if (!Model.Items.Any())
                         {
                             <tr>
-                                <td>@(string.IsNullOrWhiteSpace(u.Name) ? "-" : u.Name)</td>
-                                <td>@u.Email</td>
-                                <td>
-                                    @if (u.IsAdmin)
-                                    {
-                                        <span class="badge bg-primary">Admin</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">User</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (u.IsProposer)
-                                    {
-                                        <span class="badge bg-success">Da</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Nu</span>
-                                    }
-                                </td>
-                                <td>
-                                    <form asp-action="ToggleProposer" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="userId" value="@u.Id" />
-                                        <button type="submit" class="btn btn-sm @(u.IsProposer ? "btn-outline-danger" : "btn-outline-success")">
-                                            @(u.IsProposer ? "Revoc?" : "Acord?") rol Proposer
-                                        </button>
-                                    </form>
-                                </td>
+                                <td colspan="5" class="text-center text-muted py-4">Nu exist? rezultate.</td>
                             </tr>
+                        }
+                        else
+                        {
+                            foreach (var u in Model.Items)
+                            {
+                                <tr>
+                                    <td>@(string.IsNullOrWhiteSpace(u.Name) ? "-" : u.Name)</td>
+                                    <td>@u.Email</td>
+                                    <td>
+                                        @if (u.IsAdmin)
+                                        {
+                                            <span class="badge bg-primary">Admin</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">User</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (u.IsProposer)
+                                        {
+                                            <span class="badge bg-success">Da</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Nu</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form asp-action="ToggleProposer" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@u.Id" />
+                                            <button type="submit" class="btn btn-sm @(u.IsProposer ? "btn-outline-danger" : "btn-outline-success")">
+                                                @(u.IsProposer ? "Revoc?" : "Acord?") rol Proposer
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Pagina utilizatori" class="mt-3">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                    <a class="page-link" href="@Url.Action("Users", new { page = Model.Page - 1, search = Model.Search })">&laquo;</a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Users", new { page = i, search = Model.Search })">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="@Url.Action("Users", new { page = Model.Page + 1, search = Model.Search })">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>
