@@ -229,6 +229,46 @@ body {
 .dropdown-menu { 
   padding-bottom: .75rem; 
 }
+
+/* Mobile navbar refinements */
+@media (max-width: 991.98px) {
+  /* Keep icon row compact */
+  .navbar .navbar-nav.align-items-center {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .navbar .navbar-nav.align-items-center .nav-item {
+    margin: 0;
+  }
+
+  /* Keep dropdowns as overlays so navbar height doesn't explode */
+  .navbar .nav-item.dropdown { position: static; }
+
+  .navbar .dropdown-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 0.35rem;
+    width: 100vw;
+    max-height: 60vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border-radius: 12px;
+  }
+
+  .navbar .dropdown-header {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+  }
+
+  .navbar .dropdown-item {
+    padding: 0.6rem 0.75rem;
+  }
+}
     </style>
 </head>
 <body>
