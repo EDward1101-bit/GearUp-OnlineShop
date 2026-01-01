@@ -1,23 +1,23 @@
-@model IEnumerable<OnlineShopProject_dNet.Models.Notification>
+﻿@model IEnumerable<OnlineShopProject_dNet.Models.Notification>
 @{
     ViewBag.Title = "Notific?rile mele";
 }
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Notific?rile mele</h2>
+        <h2 class="mb-0">Notificările mele</h2>
         @if (Model.Any())
         {
             <form asp-action="MarkAll" method="post">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-outline-secondary btn-sm">Marcheaz? tot ca citit</button>
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Marchează tot ca citit</button>
             </form>
         }
     </div>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">Nu ave?i notific?ri.</div>
+        <div class="alert alert-info">Nu aveți notificări.</div>
     }
     else
     {
@@ -35,7 +35,7 @@
                             <form asp-action="MarkRead" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@n.Id" />
-                                <button type="submit" class="btn btn-sm btn-outline-primary">Marcheaz? citit</button>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Marchează citit</button>
                             </form>
                         }
                     </div>
