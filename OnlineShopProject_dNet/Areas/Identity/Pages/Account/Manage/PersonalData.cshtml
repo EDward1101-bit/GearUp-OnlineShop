@@ -1,0 +1,125 @@
+@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Date Personale";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            @* Header Section *@
+            <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center text-white">
+                        <div class="avatar-circle bg-white text-primary me-3" 
+                             style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                            <i class="bi bi-file-person-fill"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-1 fw-bold">Datele Tale Personale</h2>
+                            <p class="mb-0 opacity-75">Descarca sau sterge datele tale</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Quick Navigation Tabs *@
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-3">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <a href="/Identity/Account/Manage" class="btn btn-outline-primary">
+                            <i class="bi bi-person-circle me-1"></i> Profil
+                        </a>
+                        <a href="/Identity/Account/Manage/Email" class="btn btn-outline-primary">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </a>
+                        <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
+                            <i class="bi bi-key me-1"></i> Schimba Parola
+                        </a>
+                        <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
+                            <i class="bi bi-shield-lock me-1"></i> 2FA
+                        </a>
+                        <a href="/Identity/Account/Manage/PersonalData" class="btn btn-primary">
+                            <i class="bi bi-file-person me-1"></i> Date Personale
+                        </a>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
+                        <a href="/Orders/MyOrders" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-box-seam me-1"></i> Comenzile Mele
+                        </a>
+                        <a href="/Wishlist/Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-heart me-1"></i> Favorite
+                        </a>
+                        <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-bell me-1"></i> Notificari
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @* Main Content *@
+            <div>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4 fw-bold">
+                            <i class="bi bi-download text-primary"></i> Descarca Datele Tale
+                        </h4>
+
+                        <p class="text-muted mb-4">
+                            Contul tau contine date personale pe care ni le-ai furnizat. Aceasta pagina iti permite sa descarci aceste date.
+                        </p>
+
+                        <div class="alert alert-info rounded-3 border-0" style="background-color: #e3f2fd;">
+                            <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                            <strong>Ce date pot fi descarcate?</strong>
+                            <ul class="mb-0 mt-2 small">
+                                <li>Informatii de profil (nume, prenume, email, telefon)</li>
+                                <li>Istoricul comenzilor</li>
+                                <li>Lista de favorite</li>
+                                <li>Recenzii scrise</li>
+                            </ul>
+                        </div>
+
+                        <form method="post" asp-page="DownloadPersonalData" class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3">
+                                <i class="bi bi-download me-2"></i> Descarca Datele Mele
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm border-danger">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4 fw-bold text-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Sterge Cont
+                        </h4>
+
+                        <div class="alert alert-danger rounded-3">
+                            <i class="bi bi-shield-exclamation text-danger me-2"></i>
+                            <strong>Atentie!</strong> Stergerea contului tau este permanenta si nu poate fi anulata.
+                        </div>
+
+                        <p class="text-muted mb-4">
+                            Cand stergi contul, toate datele tale personale vor fi eliminate permanent din sistemul nostru, inclusiv:
+                        </p>
+
+                        <ul class="text-muted mb-4">
+                            <li>Informatii de profil</li>
+                            <li>Istoricul comenzilor</li>
+                            <li>Lista de favorite</li>
+                            <li>Recenzii scrise</li>
+                            <li>Notificari</li>
+                        </ul>
+
+                        <form method="post" asp-page="DeletePersonalData">
+                            <button type="submit" class="btn btn-danger btn-lg px-5 rounded-3" 
+                                    onclick="return confirm('Esti sigur ca vrei sa stergi contul? Aceasta actiune nu poate fi anulata!');">
+                                <i class="bi bi-trash me-2"></i> Sterge Contul Meu
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
