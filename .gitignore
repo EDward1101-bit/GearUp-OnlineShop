@@ -302,6 +302,10 @@ node_modules/
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
 
+# Application settings (secrets and keys)
+appsettings.json
+appsettings.Development.json
+
 # Paket dependency manager
 .paket/paket.exe
 paket-files/

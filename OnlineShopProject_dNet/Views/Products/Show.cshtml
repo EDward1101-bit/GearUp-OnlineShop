@@ -212,6 +212,7 @@ else
 
                         @* Formular întrebare *@
                         <form id="ai-question-form" class="mt-auto">
+                            @Html.AntiForgeryToken()
                             <div class="input-group">
                                 <input type="text" id="ai-question-input" class="form-control"
                                        placeholder="Ex: Are garanție? Este potrivit pentru copii?" maxlength="500">
@@ -260,47 +261,54 @@ else
                 const aiInput = document.getElementById('ai-question-input');
                 const aiMessages = document.getElementById('ai-chat-messages');
                 const aiSubmitBtn = document.getElementById('ai-submit-btn');
+                const fallbackAnswer = 'Momentan nu avem detalii despre acest aspect.';
+                const productId = '@Model.Id';
 
                 aiForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     const question = aiInput.value.trim();
 
-                    if (!question) return;
+                    if (!question) {
+                        addMessageToChat('ai', fallbackAnswer);
+                        return;
+                    }
 
-                    // Disable input while processing
                     aiInput.disabled = true;
                     aiSubmitBtn.disabled = true;
                     aiSubmitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
 
-                    // Add user question to chat
                     addMessageToChat('user', question);
+                    const loadingMessage = addLoadingMessage();
 
                     try {
-                        // include anti-forgery token
-                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        const tokenInput = aiForm.querySelector('input[name="__RequestVerificationToken"]');
                         const token = tokenInput ? tokenInput.value : '';
-                        const bodyStr = `productId=@Model.Id&question=${encodeURIComponent(question)}` + (token ? `&__RequestVerificationToken=${encodeURIComponent(token)}` : '');
 
-                        const response = await fetch('/ProductAI/AskQuestion', {
+                        const body = new URLSearchParams();
+                        body.append('productId', productId);
+                        body.append('question', question);
+                        if (token) {
+                            body.append('__RequestVerificationToken', token);
+                        }
+
+                        const response = await fetch('/Products/AskProductAssistant', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Content-Type': 'application/x-www-form-urlencoded'
                             },
-                            body: bodyStr
+                            body: body.toString()
                         });
 
-                        const data = await response.json();
+                        const data = await response.json().catch(() => null);
+                        const answer = (data && typeof data.answer === 'string' && data.answer.trim().length > 0)
+                            ? data.answer.trim()
+                            : fallbackAnswer;
 
-                        if (data.success) {
-                            addMessageToChat('ai', data.answer);
-                        } else {
-                            addMessageToChat('ai', 'Îmi pare rău, a apărut o eroare. Vă rugăm să încercați din nou.');
-                        }
+                        updateLoadingMessage(loadingMessage, answer);
                     } catch (error) {
                         console.error('AI Chat Error:', error);
-                        addMessageToChat('ai', 'A apărut o eroare de rețea. Vă rugăm să verificați conexiunea și să încercați din nou.');
+                        updateLoadingMessage(loadingMessage, fallbackAnswer);
                     } finally {
-                        // Re-enable input
                         aiInput.disabled = false;
                         aiSubmitBtn.disabled = false;
                         aiSubmitBtn.innerHTML = '<i class="bi bi-send"></i>';
@@ -321,14 +329,37 @@ else
                         messageDiv.innerHTML = `<strong><i class="bi bi-robot"></i> Asistent:</strong> ${message}`;
                     }
 
-                    // Remove welcome message if it exists
+                    removeWelcomeMessage();
+                    aiMessages.appendChild(messageDiv);
+                    aiMessages.scrollTop = aiMessages.scrollHeight;
+                }
+
+                function addLoadingMessage() {
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'ai-message ai-loading mb-3 p-2 rounded bg-light border me-3 d-flex align-items-center gap-2';
+                    loadingDiv.innerHTML = `<span class="spinner-border spinner-border-sm text-secondary" role="status" aria-hidden="true"></span><span><strong><i class="bi bi-robot"></i> Asistent:</strong> AI scrie...</span>`;
+                    removeWelcomeMessage();
+                    aiMessages.appendChild(loadingDiv);
+                    aiMessages.scrollTop = aiMessages.scrollHeight;
+                    return loadingDiv;
+                }
+
+                function updateLoadingMessage(target, message) {
+                    if (!target) {
+                        addMessageToChat('ai', message);
+                        return;
+                    }
+
+                    target.className = 'ai-message ai-ai mb-3 p-2 rounded bg-light border me-3';
+                    target.innerHTML = `<strong><i class="bi bi-robot"></i> Asistent:</strong> ${message}`;
+                    aiMessages.scrollTop = aiMessages.scrollHeight;
+                }
+
+                function removeWelcomeMessage() {
                     const welcomeMsg = aiMessages.querySelector('.ai-welcome');
                     if (welcomeMsg) {
                         welcomeMsg.remove();
                     }
-
-                    aiMessages.appendChild(messageDiv);
-                    aiMessages.scrollTop = aiMessages.scrollHeight;
                 }
             });
         </script>

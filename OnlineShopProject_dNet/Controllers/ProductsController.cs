@@ -14,13 +14,16 @@ namespace OnlineShopProject_dNet.Controllers
         IWebHostEnvironment env,
         UserManager<ApplicationUser> userManager,
         TextProcessingService textProcessor,
-        ILogger<ProductsController> logger) : Controller
+        ILogger<ProductsController> logger,
+        IProductAiService productAiService) : Controller
     {
+        private const string AiFallbackAnswer = "Momentan nu avem detalii despre acest aspect.";
         private readonly ApplicationDbContext db = context;
         private readonly IWebHostEnvironment _env = env;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly TextProcessingService _text_processor = textProcessor;
         private readonly ILogger<ProductsController> _logger = logger;
+        private readonly IProductAiService _productAiService = productAiService;
 
         // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu căutare, filtrare și sortare
         [HttpGet]
@@ -164,6 +167,48 @@ namespace OnlineShopProject_dNet.Controllers
             product.Reviews = pagedReviews;
 
             return View(product);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AskProductAssistant(int productId, string question)
+        {
+            if (string.IsNullOrWhiteSpace(question))
+            {
+                return Json(new { answer = AiFallbackAnswer });
+            }
+
+            var product = await db.Products
+                .Include(p => p.Category)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                return Json(new { answer = AiFallbackAnswer });
+            }
+
+            var currentUserId = _userManager.GetUserId(User);
+            bool isOwner = currentUserId == product.UserId;
+            bool isAdmin = User.IsInRole("Admin");
+
+            if (product.Status != "Approved" && !isOwner && !isAdmin)
+            {
+                return Json(new { answer = AiFallbackAnswer });
+            }
+
+            var faqs = await db.FAQs
+                .Where(f => f.ProductId == productId || f.ProductId == null)
+                .ToListAsync();
+
+            try
+            {
+                var answer = await _productAiService.AskProductAssistantAsync(product, faqs, question);
+                return Json(new { answer });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AI assistant failed for product {ProductId}", productId);
+                return Json(new { answer = AiFallbackAnswer });
+            }
         }
 
         // 3. NEW - Adaugare (Doar Admin si Proposer)
