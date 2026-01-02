@@ -1,7 +1,8 @@
-using System;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Text;
 
 namespace OnlineShopProject_dNet.Services
 {
@@ -9,9 +10,30 @@ namespace OnlineShopProject_dNet.Services
     {
         private readonly ApplicationDbContext _context = context;
 
+        public static string SanitizeMessage(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message)) return string.Empty;
+
+            var normalized = message.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var c in normalized)
+            {
+                var uc = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (uc != UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            var cleaned = sb.ToString().Normalize(NormalizationForm.FormC);
+            return cleaned.Replace('?', '?');
+        }
+
         public async Task AddNotificationAsync(string userId, string message, string? type = null)
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(message)) return;
+
+            message = SanitizeMessage(message);
 
             var notif = new Notification
             {

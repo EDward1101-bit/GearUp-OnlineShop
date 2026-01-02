@@ -81,9 +81,25 @@ else
                                 </span>
                                 @if (Model.Stock.GetValueOrDefault() > 0)
                                 {
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> În stoc (@Model.Stock.GetValueOrDefault() bucăți)
-                                    </span>
+                                    var stockValue = Model.Stock.GetValueOrDefault();
+                                    if (stockValue == 1)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-exclamation-circle"></i> Ultimul produs
+                                        </span>
+                                    }
+                                    else if (stockValue <= 10)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> În stoc (@stockValue bucăți)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> În stoc
+                                        </span>
+                                    }
                                 }
                                 else
                                 {
@@ -106,11 +122,15 @@ else
                             @if (User.Identity?.IsAuthenticated == true)
                             {
                                 <div class="d-flex align-items-end gap-3 mb-4 flex-wrap">
-                                    @if (Model.Stock.GetValueOrDefault() > 0)
+                                    @{
+                                        var availableStock = Model.Stock.GetValueOrDefault();
+                                    }
+
+                                    @if (availableStock > 0)
                                     {
                                         <div>
                                             <label class="form-label small fw-bold d-block mb-2">Cantitate</label>
-                                            <input type="number" id="qtyInput" class="form-control" value="1" min="1" max="@Model.Stock.GetValueOrDefault()" style="width: 80px;">
+                                            <input type="number" id="qtyInput" class="form-control" value="1" min="1" @(availableStock <= 10 ? $"max=\"{availableStock}\"" : "") style="width: 80px;">
                                         </div>
                                         <button class="btn btn-primary btn-lg fw-bold flex-grow-1" id="addToCartBtn" data-product-id="@Model.Id">
                                             <i class="bi bi-cart-plus me-2"></i> Adaugă în coș
