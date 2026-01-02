@@ -171,18 +171,14 @@ else
                                     </form>
                                     @if (Model.Status == "Pending")
                                     {
-                                        <form method="post" asp-controller="Products" asp-action="Approve" asp-route-id="@Model.Id" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-success btn-sm">
-                                                <i class="bi bi-check-circle me-1"></i> Aprobă
-                                            </button>
-                                        </form>
-                                        <form method="post" asp-controller="Products" asp-action="Reject" asp-route-id="@Model.Id" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?');">
-                                                <i class="bi bi-x-circle me-1"></i> Respinge
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-success btn-sm" 
+                                                onclick="openFeedbackModal(@Model.Id, '@Model.Title', 'approve')">
+                                            <i class="bi bi-check-circle me-1"></i> Aprobă
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm" 
+                                                onclick="openFeedbackModal(@Model.Id, '@Model.Title', 'reject')">
+                                            <i class="bi bi-x-circle me-1"></i> Respinge
+                                        </button>
                                     }
                                 }
                                 else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User) && string.Equals(Model.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
@@ -254,8 +250,61 @@ else
         </div>
     </div>
 
+    @* Modal pentru Feedback *@
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedbackModalLabel">Feedback pentru Produs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="feedbackForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <p id="feedbackProductInfo" class="mb-3"></p>
+                        <div class="mb-3">
+                            <label for="feedbackMessage" class="form-label">
+                                Mesaj de feedback (opțional)
+                            </label>
+                            <textarea class="form-control" id="feedbackMessage" name="feedbackMessage" 
+                                      rows="4" maxlength="1000" 
+                                      placeholder="Adaugă un mesaj pentru proposer despre decizia ta..."></textarea>
+                            <div class="form-text">Acest mesaj va fi trimis către proposer împreună cu notificarea.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                        <button type="submit" class="btn btn-primary" id="feedbackSubmitBtn">Confirmă</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @section Scripts {
         <script>
+            function openFeedbackModal(productId, productTitle, action) {
+                const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+                const productInfo = document.getElementById('feedbackProductInfo');
+                const submitBtn = document.getElementById('feedbackSubmitBtn');
+                const form = document.getElementById('feedbackForm');
+                
+                if (action === 'approve') {
+                    productInfo.innerHTML = `<strong>Aprobare produs:</strong> ${productTitle}`;
+                    submitBtn.textContent = 'Aprobă Produs';
+                    submitBtn.className = 'btn btn-success';
+                    form.action = '/Products/Approve/' + productId;
+                } else {
+                    productInfo.innerHTML = `<strong>Respingere produs:</strong> ${productTitle}`;
+                    submitBtn.textContent = 'Respinge Produs';
+                    submitBtn.className = 'btn btn-danger';
+                    form.action = '/Products/Reject/' + productId;
+                }
+                
+                document.getElementById('feedbackMessage').value = '';
+                modal.show();
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 const addBtn = document.getElementById('addToCartBtn');
                 const wishlistBtn = document.getElementById('wishlistBtn');

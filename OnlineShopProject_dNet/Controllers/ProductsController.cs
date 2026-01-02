@@ -15,7 +15,8 @@ namespace OnlineShopProject_dNet.Controllers
         UserManager<ApplicationUser> userManager,
         TextProcessingService textProcessor,
         ILogger<ProductsController> logger,
-        IProductAiService productAiService) : Controller
+        IProductAiService productAiService,
+        NotificationService notificationService) : Controller
     {
         private const string AiFallbackAnswer = "Momentan nu avem detalii despre acest aspect.";
         private readonly ApplicationDbContext db = context;
@@ -24,6 +25,7 @@ namespace OnlineShopProject_dNet.Controllers
         private readonly TextProcessingService _text_processor = textProcessor;
         private readonly ILogger<ProductsController> _logger = logger;
         private readonly IProductAiService _productAiService = productAiService;
+        private readonly NotificationService _notificationService = notificationService;
 
         // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu căutare, filtrare și sortare
         [HttpGet]
@@ -480,13 +482,25 @@ namespace OnlineShopProject_dNet.Controllers
         // 6. APPROVE - Doar Admin poate aproba produse
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Approve(int id)
+        public async Task<IActionResult> Approve(int id, string? feedbackMessage)
         {
-            var product = db.Products.Find(id);
+            var product = db.Products.Include(p => p.User).FirstOrDefault(p => p.Id == id);
             if (product == null) return NotFound();
 
             product.Status = "Approved";
             db.SaveChanges();
+
+            // Trimite notificare către proposer
+            if (!string.IsNullOrEmpty(product.UserId))
+            {
+                var message = $"Produsul tău '{product.Title}' a fost aprobat!";
+                await _notificationService.AddNotificationAsync(
+                    product.UserId, 
+                    message, 
+                    "product_approved",
+                    product.Id,
+                    feedbackMessage);
+            }
 
             TempData["message"] = "Produsul a fost aprobat cu succes!";
             return RedirectToAction("Index");
@@ -495,13 +509,25 @@ namespace OnlineShopProject_dNet.Controllers
         // 7. REJECT - Doar Admin poate respinge produse
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Reject(int id)
+        public async Task<IActionResult> Reject(int id, string? feedbackMessage)
         {
-            var product = db.Products.Find(id);
+            var product = db.Products.Include(p => p.User).FirstOrDefault(p => p.Id == id);
             if (product == null) return NotFound();
 
             product.Status = "Rejected";
             db.SaveChanges();
+
+            // Trimite notificare către proposer
+            if (!string.IsNullOrEmpty(product.UserId))
+            {
+                var message = $"Produsul tău '{product.Title}' a fost respins.";
+                await _notificationService.AddNotificationAsync(
+                    product.UserId, 
+                    message, 
+                    "product_rejected",
+                    product.Id,
+                    feedbackMessage);
+            }
 
             TempData["message"] = "Produsul a fost respins.";
             return RedirectToAction("Index");
