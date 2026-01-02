@@ -1,4 +1,4 @@
-using OnlineShopProject_dNet.Data;
+﻿using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -26,7 +26,7 @@ namespace OnlineShopProject_dNet.Services
             }
 
             var cleaned = sb.ToString().Normalize(NormalizationForm.FormC);
-            return cleaned.Replace('?', '?');
+            return cleaned.Replace('�', '?');
         }
 
         public async Task AddNotificationAsync(string userId, string message, string? type = null)
