@@ -29,17 +29,23 @@ namespace OnlineShopProject_dNet.Services
             return cleaned.Replace('�', '?');
         }
 
-        public async Task AddNotificationAsync(string userId, string message, string? type = null)
+        public async Task AddNotificationAsync(string userId, string message, string? type = null, int? productId = null, string? feedbackMessage = null)
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(message)) return;
 
             message = SanitizeMessage(message);
+            if (!string.IsNullOrWhiteSpace(feedbackMessage))
+            {
+                feedbackMessage = SanitizeMessage(feedbackMessage);
+            }
 
             var notif = new Notification
             {
                 UserId = userId,
                 Message = message,
                 Type = type,
+                ProductId = productId,
+                FeedbackMessage = feedbackMessage,
                 CreatedAt = DateTime.Now,
                 IsRead = false
             };

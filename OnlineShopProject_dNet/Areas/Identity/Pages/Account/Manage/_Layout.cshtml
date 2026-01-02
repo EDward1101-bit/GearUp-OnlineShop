@@ -1,0 +1,10 @@
+@{
+    Layout = "/Views/Shared/_LayoutIdentity.cshtml";
+}
+
+@RenderBody()
+
+@if (IsSectionDefined("Scripts"))
+{
+    @RenderSection("Scripts", required: false)
+}

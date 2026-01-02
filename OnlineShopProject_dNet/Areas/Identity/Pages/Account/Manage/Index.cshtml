@@ -1,0 +1,188 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profilul Meu";
+}
+
+<div class="container py-5">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        @* Header Section *@
+        <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center text-white">
+                    <div class="avatar-circle bg-white text-primary me-3" 
+                         style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        @if (!string.IsNullOrEmpty(Model.Input.FirstName))
+                        {
+                            @Model.Input.FirstName[0]
+                        }
+                        else
+                        {
+                            @User.Identity.Name[0]
+                        }
+                    </div>
+                    <div>
+                        <h2 class="mb-1 fw-bold">
+                            @if (!string.IsNullOrEmpty(Model.Input.FirstName) && !string.IsNullOrEmpty(Model.Input.LastName))
+                            {
+                                @Model.Input.FirstName @Model.Input.LastName
+                            }
+                            else
+                            {
+                                @User.Identity.Name
+                            }
+                        </h2>
+                        <p class="mb-0 opacity-75">@Model.Input.Email</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            @* Quick Navigation Tabs *@
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-3">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <a href="/Identity/Account/Manage" class="btn btn-primary">
+                            <i class="bi bi-person-circle me-1"></i> Profil
+                        </a>
+                        <a href="/Identity/Account/Manage/Email" class="btn btn-outline-primary">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </a>
+                        <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
+                            <i class="bi bi-key me-1"></i> Schimba Parola
+                        </a>
+                        <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
+                            <i class="bi bi-shield-lock me-1"></i> 2FA
+                        </a>
+                        <a href="/Identity/Account/Manage/PersonalData" class="btn btn-outline-primary">
+                            <i class="bi bi-file-person me-1"></i> Date Personale
+                        </a>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
+                        <a href="/Orders/MyOrders" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-box-seam me-1"></i> Comenzile Mele
+                        </a>
+                        <a href="/Wishlist/Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-heart me-1"></i> Favorite
+                        </a>
+                        <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-bell me-1"></i> Notificari
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        @* Main Content *@
+        <div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4 fw-bold">
+                            <i class="bi bi-person-gear text-primary"></i> Editeaza Profilul
+                        </h4>
+
+                        @if (TempData["StatusMessage"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
+                                <i class="bi bi-check-circle-fill me-2"></i> @TempData["StatusMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <form id="profile-form" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Input.FirstName" class="form-label fw-semibold">
+                                        <i class="bi bi-person me-1 text-primary"></i> Prenume
+                                    </label>
+                                    <input asp-for="Input.FirstName" class="form-control form-control-lg rounded-3" placeholder="Prenumele tau" />
+                                    <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="Input.LastName" class="form-label fw-semibold">
+                                        <i class="bi bi-person me-1 text-primary"></i> Nume
+                                    </label>
+                                    <input asp-for="Input.LastName" class="form-control form-control-lg rounded-3" placeholder="Numele tau" />
+                                    <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="Input.Email" class="form-label fw-semibold">
+                                        <i class="bi bi-envelope me-1 text-primary"></i> Email
+                                    </label>
+                                    <input asp-for="Input.Email" class="form-control form-control-lg rounded-3" placeholder="email@exemplu.com" disabled />
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="bi bi-info-circle"></i> Pentru a schimba email-ul, contacteaza suportul.
+                                    </small>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="Input.PhoneNumber" class="form-label fw-semibold">
+                                        <i class="bi bi-telephone me-1 text-primary"></i> Numar de Telefon
+                                    </label>
+                                    <input asp-for="Input.PhoneNumber" class="form-control form-control-lg rounded-3" placeholder="+40 7XX XXX XXX" />
+                                    <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="submit" class="btn btn-primary btn-lg rounded-3 px-5">
+                                    <i class="bi bi-check-circle me-2"></i> Salveaza Modificarile
+                                </button>
+                                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg rounded-3">
+                                    <i class="bi bi-x-circle me-2"></i> Anuleaza
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                @* Account Statistics - Clickable Cards *@
+                <div class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <a href="/Orders/MyOrders" class="text-decoration-none">
+                            <div class="card border-0 shadow-sm h-100 stat-card">
+                                <div class="card-body text-center p-4">
+                                    <i class="bi bi-box-seam text-primary mb-3" style="font-size: 3.5rem;"></i>
+                                    <h5 class="card-title fw-bold text-dark">Comenzi</h5>
+                                    <p class="text-muted mb-0">Vezi istoric</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/Wishlist/Index" class="text-decoration-none">
+                            <div class="card border-0 shadow-sm h-100 stat-card">
+                                <div class="card-body text-center p-4">
+                                    <i class="bi bi-heart-fill text-danger mb-3" style="font-size: 3.5rem;"></i>
+                                    <h5 class="card-title fw-bold text-dark">Favorite</h5>
+                                    <p class="text-muted mb-0">Produse salvate</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/Products/Index" class="text-decoration-none">
+                            <div class="card border-0 shadow-sm h-100 stat-card">
+                                <div class="card-body text-center p-4">
+                                    <i class="bi bi-star-fill text-warning mb-3" style="font-size: 3.5rem;"></i>
+                                    <h5 class="card-title fw-bold text-dark">Recenzii</h5>
+                                    <p class="text-muted mb-0">Evaluari scrise</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

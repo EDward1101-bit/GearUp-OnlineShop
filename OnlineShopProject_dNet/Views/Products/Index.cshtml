@@ -135,19 +135,15 @@
                                     </p>
                                     <p class="text-danger fw-bold mb-3 fs-5">@(product.Price?.ToString("0.##") ?? "-") <small class="fs-6">RON</small></p>
                                     <div class="d-grid gap-2">
-                                        <form method="post" asp-controller="Products" asp-action="Approve" asp-route-id="@product.Id" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-success btn-sm w-100">
-                                                <i class="bi bi-check-circle"></i> Aprobă
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-success btn-sm w-100" 
+                                                onclick="openFeedbackModal(@product.Id, '@product.Title', 'approve')">
+                                            <i class="bi bi-check-circle"></i> Aprobă
+                                        </button>
                                         <div class="btn-group" role="group">
-                                            <form method="post" asp-controller="Products" asp-action="Reject" asp-route-id="@product.Id" class="d-inline">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur respingi acest produs?')">
-                                                    <i class="bi bi-x-circle"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="openFeedbackModal(@product.Id, '@product.Title', 'reject')">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
                                             <a href="/Products/Show/@product.Id" class="btn btn-outline-primary btn-sm">
                                                 <i class="bi bi-eye"></i>
                                             </a>
@@ -397,8 +393,67 @@
         }
     }
 
+    @* Modal pentru Feedback *@
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedbackModalLabel">Feedback pentru Produs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="feedbackForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <p id="feedbackProductInfo" class="mb-3"></p>
+                        <div class="mb-3">
+                            <label for="feedbackMessage" class="form-label">
+                                Mesaj de feedback (opțional)
+                            </label>
+                            <textarea class="form-control" id="feedbackMessage" name="feedbackMessage" 
+                                      rows="4" maxlength="1000" 
+                                      placeholder="Adaugă un mesaj pentru proposer despre decizia ta..."></textarea>
+                            <div class="form-text">Acest mesaj va fi trimis către proposer împreună cu notificarea.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                        <button type="submit" class="btn btn-primary" id="feedbackSubmitBtn">Confirmă</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @section Scripts {
         <script>
+            let currentProductId = null;
+            let currentAction = null;
+
+            function openFeedbackModal(productId, productTitle, action) {
+                currentProductId = productId;
+                currentAction = action;
+                
+                const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+                const productInfo = document.getElementById('feedbackProductInfo');
+                const submitBtn = document.getElementById('feedbackSubmitBtn');
+                const form = document.getElementById('feedbackForm');
+                
+                if (action === 'approve') {
+                    productInfo.innerHTML = `<strong>Aprobare produs:</strong> ${productTitle}`;
+                    submitBtn.textContent = 'Aprobă Produs';
+                    submitBtn.className = 'btn btn-success';
+                    form.action = '/Products/Approve/' + productId;
+                } else {
+                    productInfo.innerHTML = `<strong>Respingere produs:</strong> ${productTitle}`;
+                    submitBtn.textContent = 'Respinge Produs';
+                    submitBtn.className = 'btn btn-danger';
+                    form.action = '/Products/Reject/' + productId;
+                }
+                
+                document.getElementById('feedbackMessage').value = '';
+                modal.show();
+            }
+
             // Funcție AJAX pentru Wishlist
             function toggleWishlist(productId, btn) {
                 try {

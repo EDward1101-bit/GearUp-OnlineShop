@@ -1,0 +1,440 @@
+/* Identity Pages Styling - Professional Theme */
+
+/* General Identity Page Styling */
+.login-page, 
+.register-page, 
+.forgot-password-page, 
+.forgot-password-confirmation-page,
+.logout-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+/* Card Styling */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Form Controls */
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.form-control-lg {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Profile Page Specific */
+.avatar-circle {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.avatar-circle:hover {
+    transform: scale(1.05);
+}
+
+/* Sidebar Navigation */
+.list-group-item {
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.list-group-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-left-color: #764ba2;
+    color: white;
+}
+
+.list-group-item:hover:not(.active) {
+    background-color: #f8f9fa;
+    border-left-color: #667eea;
+    padding-left: 1.25rem;
+}
+
+/* Password Toggle Button */
+.btn-link {
+    text-decoration: none;
+    color: #6c757d;
+}
+
+.btn-link:hover {
+    color: #667eea;
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 12px;
+    border: none;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.alert-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+/* Validation Errors */
+.text-danger {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Icons */
+.bi {
+    vertical-align: middle;
+}
+
+/* Links */
+a {
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #764ba2 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem 1.5rem !important;
+    }
+    
+    .avatar-circle {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 1.5rem !important;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Statistics Cards on Profile */
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Floating Labels Fix */
+.form-floating > label {
+    color: #6c757d;
+}
+
+.form-floating > .form-control:focus ~ label {
+    color: #667eea;
+}
+
+/* Custom Scrollbar for Profile Sidebar */
+.list-group {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.list-group::-webkit-scrollbar {
+    width: 6px;
+}
+
+.list-group::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.list-group::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+.list-group::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}
+
+/* Success Icons Animation */
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.bi-envelope-check-fill,
+.bi-check-circle-fill {
+    animation: checkmark 0.6s ease-out;
+}
+
+/* Profile Header Gradient */
+.profile-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header-gradient::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Input Focus Effect */
+.form-control {
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    transform: translateY(-2px);
+}
+
+/* Badge Styling */
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+}
+
+/* Hover Effects for Interactive Elements */
+button[type="submit"],
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+button[type="submit"]::before,
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button[type="submit"]:hover::before,
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Shadow Utilities */
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* Loading Spinner */
+.spinner-border {
+    border-color: #667eea;
+    border-right-color: transparent;
+}
+
+/* Toast Notifications */
+.toast {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Stats Cards */
+.stat-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: white;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2) !important;
+}
+
+.stat-card .card-body {
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover .bi {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Custom Radio and Checkbox */
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+/* Breadcrumb Custom */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: #667eea;
+}
+
+/* Progress Bar */
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Dropdown Menus in Profile */
+.dropdown-menu {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #667eea;
+    padding-left: 1.5rem;
+}
+
+/* Mobile Optimization */
+@media (max-width: 576px) {
+    .login-page .card-body,
+    .register-page .card-body {
+        padding: 2rem 1rem !important;
+    }
+    
+    h2 {
+        font-size: 1.25rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+/* Tablet Optimization */
+@media (min-width: 768px) and (max-width: 991px) {
+    .container {
+        max-width: 720px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn,
+    .navbar,
+    footer {
+        display: none;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+}

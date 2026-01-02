@@ -1,49 +1,172 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Înregistrare";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="register-page min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+<div class="container">
+    @* Back to Home Link *@
+    <div class="text-center mb-4">
+        <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none">
+            <i class="bi bi-arrow-left me-2"></i> Inapoi la Pagina Principala
+        </a>
+    </div>
+        
+    <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-9">
+                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                    <div class="row g-0">
+                        @* Left Side - Benefits *@
+                        <div class="col-md-5 d-none d-md-flex align-items-center justify-content-center p-5" 
+                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="text-center text-white">
+                                <i class="bi bi-person-plus-fill display-1 mb-4 opacity-75"></i>
+                                <h3 class="fw-bold mb-3">Alatura-te comunitatii!</h3>
+                                <p class="mb-4 opacity-75">Creaza un cont si bucura-te de toate avantajele</p>
+                                <ul class="list-unstyled text-start">
+                                    <li class="mb-3">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Comanda rapid si simplu
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Salveaza produsele favorite
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Urmareste comenzile tale
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Oferte exclusive
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                        @* Right Side - Registration Form *@
+                        <div class="col-md-7 p-5">
+                            <div class="text-center mb-4">
+                                <div class="mb-3">
+                                    <i class="bi bi-shop-window text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <h2 class="fw-bold text-dark">Creaza cont nou</h2>
+                                <p class="text-muted">Completeaza formularul pentru a te inregistra</p>
+                            </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="First Name" />
-                <label asp-for="Input.FirstName">First Name</label>
-                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Last Name" />
-                <label asp-for="Input.LastName">Last Name</label>
-                <span asp-validation-for="Input.LastName" class="text-danger"></span>
-            </div>
+                            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Input.Email">Email</label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Input.FirstName" class="form-label fw-semibold">
+                                            <i class="bi bi-person me-1"></i> Prenume
+                                        </label>
+                                        <input asp-for="Input.FirstName" class="form-control form-control-lg rounded-3" 
+                                               autocomplete="given-name" placeholder="Ion" />
+                                        <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Input.LastName" class="form-label fw-semibold">
+                                            <i class="bi bi-person me-1"></i> Nume
+                                        </label>
+                                        <input asp-for="Input.LastName" class="form-control form-control-lg rounded-3" 
+                                               autocomplete="family-name" placeholder="Popescu" />
+                                        <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                                    </div>
+                                </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.Password">Password</label>
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                <div class="mb-3">
+                                    <label asp-for="Input.Email" class="form-label fw-semibold">
+                                        <i class="bi bi-envelope me-1"></i> Email
+                                    </label>
+                                    <input asp-for="Input.Email" class="form-control form-control-lg rounded-3" 
+                                           autocomplete="username" placeholder="exemplu@email.com" />
+                                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.Password" class="form-label fw-semibold">
+                                        <i class="bi bi-lock me-1"></i> Parola
+                                    </label>
+                                    <div class="position-relative">
+                                        <input asp-for="Input.Password" type="password" class="form-control form-control-lg rounded-3 pe-5" 
+                                               autocomplete="new-password" placeholder="Minimum 6 caractere" id="passwordInput" />
+                                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted" 
+                                                onclick="togglePasswordVisibility('passwordInput', 'toggleIcon1')" style="z-index: 10;">
+                                            <i class="bi bi-eye" id="toggleIcon1"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold">
+                                        <i class="bi bi-lock-fill me-1"></i> Confirma Parola
+                                    </label>
+                                    <div class="position-relative">
+                                        <input asp-for="Input.ConfirmPassword" type="password" class="form-control form-control-lg rounded-3 pe-5" 
+                                               autocomplete="new-password" placeholder="Rescrie parola" id="confirmPasswordInput" />
+                                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted" 
+                                                onclick="togglePasswordVisibility('confirmPasswordInput', 'toggleIcon2')" style="z-index: 10;">
+                                            <i class="bi bi-eye" id="toggleIcon2"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                                </div>
+
+                                <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-semibold mb-3">
+                                    <i class="bi bi-person-plus me-2"></i> Inregistreaza-te
+                                </button>
+
+                                <div class="text-center">
+                                    <p class="mb-0 text-muted small">
+                                        Ai deja cont? 
+                                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-semibold text-decoration-none">
+                                            Autentifica-te aici
+                                        </a>
+                                    </p>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                @* External Login Section *@
+                @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                {
+                    <div class="card shadow border-0 rounded-4 mt-4 p-4">
+                        <h5 class="text-center mb-3 fw-semibold">Sau inregistreaza-te cu</h5>
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                            <div class="d-grid gap-2">
+                                @foreach (var provider in Model.ExternalLogins!)
+                                {
+                                    <button type="submit" class="btn btn-outline-secondary btn-lg rounded-3" name="provider" value="@provider.Name" title="Register using your @provider.DisplayName account">
+                                        <i class="bi bi-@provider.Name.ToLower()"></i> @provider.DisplayName
+                                    </button>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                }
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-            </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
+        </div>
     </div>
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    }
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
