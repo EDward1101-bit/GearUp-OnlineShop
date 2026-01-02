@@ -303,8 +303,12 @@ node_modules/
 _Pvt_Extensions
 
 # Application settings (secrets and keys)
+# Exclude appsettings files that may contain sensitive data
 appsettings.json
 appsettings.Development.json
+appsettings.Production.json
+# Keep the example file for other developers
+!appsettings.example.json
 
 # Paket dependency manager
 .paket/paket.exe
