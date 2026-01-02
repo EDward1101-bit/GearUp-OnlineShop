@@ -24,6 +24,11 @@ namespace OnlineShopProject_dNet.Controllers
                 .Where(n => n.UserId == userId)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
+
+            foreach (var n in notifications)
+            {
+                n.Message = NotificationService.SanitizeMessage(n.Message);
+            }
             return View(notifications);
         }
 

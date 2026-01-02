@@ -1,10 +1,12 @@
 @using OnlineShopProject_dNet.Models
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<ApplicationUser> UserManager
+@inject OnlineShopProject_dNet.Services.NotificationService NotificationService
 
 @{
     // Obține numele complet al utilizatorului
     var currentUser = await UserManager.GetUserAsync(User);
+    var unreadNotifications = currentUser != null ? await NotificationService.UnreadCountAsync(currentUser.Id) : 0;
     var displayName = currentUser != null
         ? (!string.IsNullOrEmpty(currentUser.FirstName) && !string.IsNullOrEmpty(currentUser.LastName)
             ? $"{currentUser.FirstName} {currentUser.LastName}"
@@ -98,9 +100,15 @@
                                         <li><a class="dropdown-item" asp-controller="Wishlist" asp-action="Index">
                                             <i class="bi bi-heart"></i> Favorite
                                         </a></li>
-                                        <li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index">
-                                            <i class="bi bi-bell"></i> Notificări
-                                        </a></li>
+                                        <li>
+                                            <a class="dropdown-item d-flex justify-content-between align-items-center" asp-controller="Notifications" asp-action="Index">
+                                                <span><i class="bi bi-bell"></i> Notificări</span>
+                                                @if (unreadNotifications > 0)
+                                                {
+                                                    <span class="badge bg-danger">@unreadNotifications</span>
+                                                }
+                                            </a>
+                                        </li>
 
                                         @* ADMIN SECTION - Doar pentru administratori *@
                                         @if (User.IsInRole("Admin"))
