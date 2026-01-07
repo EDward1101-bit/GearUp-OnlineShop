@@ -1,99 +1,39 @@
-# OnlineShopProject_dNet – ASP.NET Core MVC Online Shop
+# OnlineShopProject_dNet
 
-Important (configura?ie necesar? înainte de rulare)
-- Proiectul necesit? un fi?ier de configurare valid; altfel aplica?ia nu porne?te.
-- Crea?i un fi?ier `OnlineShopProject_dNet/appsettings.json` (sau redenumi?i `OnlineShopProject_dNet/appsettings.example.json` în `appsettings.json`) ?i completa?i:
-  - `ConnectionStrings:DefaultConnection` – conexiunea la SQL Server
-  - `GoogleAI:ApiKey` – cheia pentru Google Gemini (Generative Language API)
-- Recomandat: NU comite?i `appsettings.json` în Git. Alternativ, folosi?i Secret Manager: `dotnet user-secrets`.
+<div align="center">
 
-Rezumat
-Aplica?ie web tip magazin online, construit? în `ASP.NET Core MVC` (net9.0) ?i `Entity Framework Core`, cu `ASP.NET Identity` pentru autentificare ?i roluri. Include flux complet de produse (CRUD, propuneri/aprobat), categorii dinamice, co?, comenzi, wishlist, c?utare/filtrare/sortare, review-uri cu rating ?i un asistent AI pentru produse bazat pe `Google Gemini`.
+**ASP.NET Core MVC Online Shop Platform**
 
-Tehnologii ?i decizii cheie
-- Backend: `ASP.NET Core MVC` (net9.0), `EF Core` (SQL Server)
-- Identitate ?i roluri: `ASP.NET Identity` (Admin, Proposer, User, plus vizitatori neautentifica?i)
-- UI: `Razor Views`, `Bootstrap`
-- AI: `Google Gemini` prin `GoogleProductAiService` (HTTP API), prompt strict cu fallback controlat
-- Securitate: valid?ri server-side, filtru global Anti-Forgery, înc?rcare imagini cu whitelist extensii ?i limit? m?rime, sanitizare HTML (`HtmlSanitizer`)
-- Observabilitate: logging (Console/Debug), mesaje TempData pentru feedback UX
-- Persisten??: rela?ii configurate explicit, cascade delete, chei compuse (wishlist), snapshot-uri în `OrderDetail` pentru istoric
+[![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat&logo=dotnet)](https://dotnet.microsoft.com/)
+[![C#](https://img.shields.io/badge/C%23-12.0-239120?style=flat&logo=csharp)](https://learn.microsoft.com/dotnet/csharp/)
+[![Entity Framework](https://img.shields.io/badge/EF%20Core-9.0-512BD4?style=flat)](https://docs.microsoft.com/ef/core/)
+[![ASP.NET Identity](https://img.shields.io/badge/ASP.NET%20Identity-9.0-512BD4?style=flat)](https://learn.microsoft.com/aspnet/core/security/authentication/identity)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-LocalDB-CC2927?style=flat&logo=microsoftsqlserver)](https://www.microsoft.com/sql-server)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-4285F4?style=flat&logo=google)](https://ai.google.dev/)
 
-Func?ionalit??i implementate (mapare pe cerin?e)
-1) Tipuri de utilizatori ?i roluri
-- Vizitator: poate vizualiza produse/review-uri; la ac?iuni restric?ionate este redirec?ionat la login
-- User: co?, comenzi, wishlist, review-uri
-- Proposer: propune produse; poate edita/?terge DOAR produsele proprii (cu reguli de status)
-- Admin: gestioneaz? categorii, produse, review-uri, utilizatori; decide aprob?ri/respingeri
+</div>
 
-2) Categorii dinamice
-- CRUD din interfa??; nume unic ?i obligatoriu
-- ?tergerea unei categorii ?terge toate produsele asociate (cascade delete)
-- Afi?are în meniu ?i filtrare dup? categorie
+---
 
-3) Produse – ad?ugare ?i gestionare
-- Câmpuri: titlu, descriere, imagine, pre?, stoc, rating (1–5), review-uri
-- Valid?ri: pre? > 0, stoc ? 0; imagine cu extensii permise ?i max 5MB; sanitizare HTML pentru descriere
-- Rating calculat ca medie a review-urilor (op?ional)
-- Imagini salvate în `wwwroot/images` cu fallback implicit
+## ?? Configura?ie Necesar? (Înainte de Rulare)
 
-4) Flux colaborator (propuneri ?i re-aprob?ri)
-- Propunerile intr? în status „Pending” ?i necesit? decizie Admin („Approved”/„Rejected”)
-- Proposer poate edita/?terge doar con?inut propriu; la editare produsul revine în „Pending”
-- Feedback c?tre autor prin sistemul de notific?ri
+> **Proiectul nu va porni f?r? configurarea corect? a fi?ierului `appsettings.json`**
 
-5) Vizitator ?i acces restric?ionat
-- La încercarea de a ad?uga în co?/wishlist, vizitatorul este direc?ionat la autentificare cu mesaj informativ
+**Pa?ii obligatorii:**
 
-6) Co?, comenzi ?i wishlist
-- Co? per utilizator, linii de comand? cu `UnitPrice` ?i snapshot detalii produs
-- Validare stoc la fiecare ac?iune; decrement stoc la plasare comand?
-- Wishlist per utilizator, f?r? duplicate (cheie compus? `UserId, ProductId`)
-- Mutare rapid? din wishlist în co?
+1. Crea?i fi?ierul `OnlineShopProject_dNet/appsettings.json` sau redenumi?i `appsettings.example.json`
+2. Completa?i valorile necesare:
+   - **`ConnectionStrings:DefaultConnection`** – conexiune SQL Server (LocalDB sau instan??)
+   - **`GoogleAI:ApiKey`** – cheie pentru Google Gemini API ([ob?ine?i aici](https://ai.google.dev/))
 
-7) Review-uri ?i rating
-- User-ul adaug?/editeaz?/?terge review-uri (text op?ional, rating op?ional 1–5)
-- Recalcul automat al scorului la opera?ii pe review-uri
-- Op?ional: restric?ie practic? – review doar dac? produsul a fost cump?rat
-
-8) C?utare, filtrare, sortare
-- C?utare par?ial? în titlu („lapto” ? „laptop”)
-- Filtrare pe categorie, sortare dup? pre?/rating/nume (asc/desc), paginare
-
-9) Component? AI – „Product Assistant” (Google Gemini)
-- Chat lateral per produs cu r?spunsuri din descriere ?i `FAQ`
-- Prompt strict în limba român?; f?r? halucina?ii; r?spuns fallback: „Momentan nu avem detalii despre acest aspect.”
-- Salvare/folosire `FAQ` generale ?i specifice produsului
-
-10) Administrare platform?
-- Admin poate aproba/respinge produse, gestiona categorii, produse, review-uri, utilizatori
-
-11) Calitatea proiectului
-- Organizare MVC clar? (`Models`, `Views`, `Controllers`), servicii pentru logic? de domeniu (`Services`)
-- Valid?ri, mesaje de eroare clare, seed de date de baz? (utilizatori/roluri)
-- Documenta?ie ?i instruc?iuni de rulare
-
-Arhitectur? (scurt)
-- `Controllers`: `ProductsController`, `OrdersController`, `ReviewsController`, `WishlistController`, `AdminController`, `ProductAIController` etc.
-- `Services`: `GoogleProductAiService` (integrare Gemini), `ProductAIService` (fallback/FAQ), `CartService`, `NotificationService`, `TextProcessingService`, `HtmlSanitizationService`
-- `Data`: `ApplicationDbContext` (EF Core), `SeedData`
-- `Models`: `Product`, `Category`, `Review`, `FAQ`, `Order`, `OrderDetail`, `Wishlist`, `Notification`, `ApplicationUser`
-
-Configurare ?i rulare (Quick start)
-Prerechizite
-- .NET SDK 9.0
-- SQL Server (ex. LocalDB) sau o instan?? SQL accesibil?
-- Cheie API Google Gemini (Generative Language API)
-
-1) Configura?i set?rile aplica?iei
-- Copia?i `OnlineShopProject_dNet/appsettings.example.json` în `OnlineShopProject_dNet/appsettings.json` ?i actualiza?i:
-```
+**Exemplu configurare:**
+```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=OnlineShop;Trusted_Connection=True;MultipleActiveResultSets=true"
   },
   "GoogleAI": {
-    "ApiKey": "<CHEIA_VOASTR?_GEMINI>"
+    "ApiKey": "YOUR_GEMINI_API_KEY_HERE"
   },
   "Logging": {
     "LogLevel": {
@@ -104,64 +44,360 @@ Prerechizite
   "AllowedHosts": "*"
 }
 ```
-- Alternativ, stoca?i cheia cu Secret Manager (în directorul proiectului `OnlineShopProject_dNet`):
-```
+
+**Alternative:** Utiliza?i .NET Secret Manager pentru securitate sporit?:
+```bash
+cd OnlineShopProject_dNet
 dotnet user-secrets init
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<conn_string>"
-dotnet user-secrets set "GoogleAI:ApiKey" "<cheie_gemini>"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "YOUR_CONNECTION_STRING"
+dotnet user-secrets set "GoogleAI:ApiKey" "YOUR_GEMINI_KEY"
 ```
 
-2) Restaura?i pachetele ?i aplica?i migra?iile
-În directorul `OnlineShopProject_dNet/`:
+> ?? **Important:** NU commit-a?i `appsettings.json` în Git (deja în `.gitignore`)
+
+---
+
+## ?? Prezentare General?
+
+Aplica?ie web de tip magazin online dezvoltat? în **ASP.NET Core MVC 9.0** cu **Entity Framework Core** ?i **ASP.NET Identity**. Implementeaz? sistem complet de e-commerce cu gestionare produse (CRUD, aprobat? colaboratori), categorii dinamice, co? de cump?r?turi, wishlist, review-uri cu rating ?i **asistent AI bazat pe Google Gemini** pentru întreb?ri despre produse.
+
+---
+
+## ??? Stack Tehnologic
+
+<table>
+<tr>
+<td><strong>Backend</strong></td>
+<td>ASP.NET Core MVC 9.0, C# 12</td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>Entity Framework Core 9.0, SQL Server</td>
+</tr>
+<tr>
+<td><strong>Autentificare</strong></td>
+<td>ASP.NET Identity (roluri: Admin, Proposer, User)</td>
+</tr>
+<tr>
+<td><strong>Frontend</strong></td>
+<td>Razor Views, Bootstrap 5</td>
+</tr>
+<tr>
+<td><strong>AI Integration</strong></td>
+<td>Google Gemini API (model: gemini-2.5-flash)</td>
+</tr>
+<tr>
+<td><strong>Securitate</strong></td>
+<td>Anti-Forgery Tokens, HtmlSanitizer, valid?ri server-side</td>
+</tr>
+<tr>
+<td><strong>Logging</strong></td>
+<td>Console/Debug, feedback TempData</td>
+</tr>
+</table>
+
+---
+
+## ? Func?ionalit??i Principale
+
+### ?? Sistem de Roluri ?i Autentificare
+
+| Rol | Permisiuni |
+|-----|-----------|
+| **Vizitator** | Vizualizare produse ?i review-uri; redirec?ionare la login pentru ac?iuni restric?ionate |
+| **User** | Co?, comenzi, wishlist, ad?ugare/editare review-uri |
+| **Proposer** | Propunere produse noi, editare/?tergere produse proprii (cu restric?ii status) |
+| **Admin** | Control complet: aprobat?/respingere produse, CRUD categorii/produse/review-uri, gestionare utilizatori |
+
+### ??? Gestionare Categorii Dinamice
+
+Administratorii pot crea, edita ?i ?terge categorii din interfa??. Caracteristici:
+- Nume unic ?i obligatoriu
+- Cascade delete (?tergerea categoriei elimin? toate produsele asociate)
+- Filtrare produse dup? categorie
+- Afi?are în meniu de navigare
+
+### ?? Gestionare Produse
+
+**Câmpuri:** titlu, descriere, imagine, pre?, stoc, rating (1-5), review-uri
+
+**Valid?ri implementate:**
+- Pre? > 0, stoc ? 0
+- Înc?rcare imagine: whitelist extensii (.jpg, .jpeg, .png, .gif), max 5MB
+- Sanitizare HTML pentru descriere (protec?ie XSS)
+- Rating calculat automat din media review-urilor
+
+**Workflow colaboratori:**
+- Produsele propuse intr? în status "Pending"
+- Admin decide: "Approved" (vizibil public) sau "Rejected" (cu feedback)
+- La editare, produsul revine în "Pending" pentru re-aprobat?
+- Notific?ri c?tre autor cu decizia Admin
+
+### ?? Co? de Cump?r?turi ?i Comenzi
+
+- Co? persistent per utilizator (salvat în baza de date)
+- Snapshot produs în `OrderDetail` (pre?, titlu, imagine) pentru istoric comenzi
+- Validare stoc în timp real la fiecare opera?ie
+- Decrement automat stoc la plasarea comenzii
+- Istoric comenzi cu detalii complete
+
+### ? Wishlist
+
+- Lista personal? de produse favorite
+- Cheie compus? `(UserId, ProductId)` previne duplicate
+- Mutare rapid? din wishlist în co?
+- Cascade delete la ?tergerea produsului
+
+### ?? Review-uri ?i Rating
+
+- Utilizatorii înregistra?i pot ad?uga/edita/?terge review-uri
+- Text op?ional, rating op?ional (1-5)
+- Recalcul automat al scorului produsului la orice modificare
+- Restric?ie practic?: review doar pentru produse cump?rate
+
+### ?? C?utare, Filtrare ?i Sortare
+
+| Func?ionalitate | Detalii |
+|----------------|---------|
+| **C?utare** | Matching par?ial în titlu (ex: "lapto" ? "laptop") |
+| **Filtrare** | Dup? categorie (ID sau nume) |
+| **Sortare** | Pre?/Rating/Nume (cresc?tor/descresc?tor) |
+| **Paginare** | Configurabil? (default: 12 produse/pagin?) |
+
+### ?? Asistent AI pentru Produse (Google Gemini)
+
+**Caracteristici:**
+- Chat lateral pe fiecare pagin? de produs
+- R?spunsuri generate din: descriere produs + FAQ + date categorii/stoc/pre?
+- Prompt strict în român?: "R?spunde DOAR din informa?iile furnizate"
+- Fallback controlat: *"Momentan nu avem detalii despre acest aspect."*
+- Salvare întreb?ri frecvente în tabelul `FAQ`
+
+**Securitate AI:**
+- Validare input utilizator (max 500 caractere)
+- Logging erori API
+- Graceful degradation (dac? API-ul nu r?spunde, utilizatorul prime?te mesaj politicos)
+
+---
+
+## ??? Arhitectur? ?i Organizare Cod
+
+<details>
+<summary><strong>Controllers</strong></summary>
+
+- `ProductsController` – CRUD produse, aprobat?/respingere, c?utare/filtrare
+- `OrdersController` – co?, checkout, istoric comenzi
+- `ReviewsController` – ad?ugare/editare/?tergere review-uri, recalcul rating
+- `WishlistController` – gestionare wishlist
+- `AdminController` – administrare utilizatori ?i platform?
+- `ProductAIController` – integrare asistent AI
+- `CategoriesController` – CRUD categorii
+- `NotificationsController` – sistem notific?ri
+
+</details>
+
+<details>
+<summary><strong>Services (Business Logic)</strong></summary>
+
+- `GoogleProductAiService` – integrare Google Gemini API (IProductAiService)
+- `ProductAIService` – fallback AI local + gestionare FAQ
+- `CartService` – logic? co? de cump?r?turi
+- `NotificationService` – notific?ri c?tre utilizatori
+- `TextProcessingService` – procesare text (encoding, formatare)
+- `HtmlSanitizationService` – sanitizare HTML (XSS protection)
+- `ImageValidationService` – validare înc?rcare imagini
+
+</details>
+
+<details>
+<summary><strong>Models (Entit??i Database)</strong></summary>
+
+| Model | Descriere |
+|-------|-----------|
+| `ApplicationUser` | Utilizator (extends IdentityUser) |
+| `Product` | Produs (titlu, descriere, pre?, stoc, status, rating) |
+| `Category` | Categorie produse |
+| `Review` | Review utilizator (text, rating, dat?) |
+| `FAQ` | Întreb?ri frecvente (generale sau per produs) |
+| `Order` | Comand? (user, dat?, adres? livrare, total, status) |
+| `OrderDetail` | Linie comand? (snapshot produs, cantitate, pre? unitar) |
+| `Wishlist` | Lista favorite (cheie compus? UserId+ProductId) |
+| `Notification` | Notific?ri utilizatori (tip, mesaj, feedback, dat?) |
+
+</details>
+
+<details>
+<summary><strong>Rela?ii Database (EF Core)</strong></summary>
+
 ```
+Category 1??N Product (cascade delete)
+Product 1??N Review (cascade delete)
+Product 1??N OrderDetail (SetNull + snapshot)
+Product 1??N Wishlist (cascade delete)
+User 1??N Review (cascade delete)
+User 1??N Order (cascade delete)
+User 1??N Wishlist (cascade delete)
+User 1??N Notification (cascade delete)
+Order 1??N OrderDetail (cascade delete)
+```
+
+</details>
+
+---
+
+## ?? Instalare ?i Rulare
+
+### Prerechizite
+
+- [.NET SDK 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
+- SQL Server (LocalDB sau instan?? accesibil?)
+- [Google Gemini API Key](https://ai.google.dev/)
+
+### Pa?i de Setup
+
+**1?? Clonare repository:**
+```bash
+git clone https://github.com/EDward1101-bit/OnlineShopProject_dNet.git
+cd OnlineShopProject_dNet
+```
+
+**2?? Configurare appsettings.json:**
+```bash
+cd OnlineShopProject_dNet
+cp appsettings.example.json appsettings.json
+# Edita?i appsettings.json ?i completa?i ConnectionStrings + GoogleAI:ApiKey
+```
+
+**3?? Restaurare pachete:**
+```bash
 dotnet restore
-# Necesit? EF Core Tools:  dotnet tool update --global dotnet-ef
-# Apoi:
+```
+
+**4?? Instalare EF Core Tools (dac? nu exist?):**
+```bash
+dotnet tool update --global dotnet-ef
+```
+
+**5?? Aplicare migra?ii:**
+```bash
+cd OnlineShopProject_dNet
 dotnet ef database update
 ```
 
-3) Rula?i aplica?ia
-```
+**6?? Rulare aplica?ie:**
+```bash
 dotnet run
 ```
-Aplica?ia porne?te pe https://localhost:xxxx. La prima rulare sunt create rolurile ?i utilizatorii demo prin `SeedData`.
 
-Utilizatori demo (Seed)
-- Admin: `admin@test.com` / `Admin123!`
-- Proposer: `proposer@test.com` / `Proposer123!`
-- User: `user@test.com` / `User123!`
-Not?: parolele ?i conturile sunt pentru dezvoltare. Modifica?i în produc?ie.
+Aplica?ia va porni pe `https://localhost:[port]`. Deschide?i browser-ul la adresa afi?at?.
 
-Detalii integrare AI (Gemini)
-- Serviciu: `GoogleProductAiService` apeleaz? Google Gemini (model: `gemini-2.5-flash`) prin endpointul Generative Language API
-- Input: descriere produs + categorie + stoc + pre? + `FAQ` relevante + întrebarea utilizatorului
-- Politic? r?spuns: numai în limitele contextului; fallback clar („Momentan nu avem detalii despre acest aspect.”)
-- Configurare: cheia în `GoogleAI:ApiKey`; f?r? cheie valid?, componenta AI r?spunde cu fallback ?i logheaz? avertisment
+---
 
-Baz? de date ?i reguli model
-- `Category` 1–N `Product` (cascade delete)
-- `Product` 1–N `Review` (cascade delete)
-- `Order` 1–N `OrderDetail` (cascade delete); `OrderDetail` ? `Product` cu `SetNull` ?i snapshot câmpuri pentru istoric
-- `Wishlist` PK compus (`UserId`, `ProductId`) – f?r? duplicate
-- `Notification` 1–N `ApplicationUser`
+## ?? Utilizatori Demo (Seed Data)
 
-Securitate ?i calitatea datelor
-- Filtru global Anti-Forgery pe `Controllers`
-- Sanitizare HTML ?i text pe descrieri/review-uri (`HtmlSanitizer`)
-- Valid?ri stricte înc?rcare imagini (format ?i dimensiune)
-- Autorizare pe ac?iuni critice: Admin/Proposer pentru workflow produse; User pentru ac?iuni de cump?rare/review
+La prima rulare, aplica?ia creeaz? automat 3 utilizatori de test:
 
-Observa?ii
-- Proiectul este configurat pentru SQL Server (DefaultConnection). Pachetul SQLite este inclus dar nu este folosit în configurarea implicit?.
-- `appsettings.json` este obligatoriu. F?r? acesta sau f?r? valori valide pentru `DefaultConnection` ?i `GoogleAI:ApiKey`, aplica?ia va e?ua la pornire.
-- Nu înc?rca?i chei secrete în repository.
+| Email | Parol? | Rol |
+|-------|--------|-----|
+| `admin@test.com` | `Admin123!` | Admin |
+| `proposer@test.com` | `Proposer123!` | Proposer (Colaborator) |
+| `user@test.com` | `User123!` | User (Client) |
 
-Structur? relevant?
-- `OnlineShopProject_dNet/Program.cs` – configurare servicii, pipeline, seeding
-- `OnlineShopProject_dNet/Data/ApplicationDbContext.cs` – modele, rela?ii, reguli EF Core
-- `OnlineShopProject_dNet/Controllers/*.cs` – logica MVC (produse, comenzi, review, AI, admin)
-- `OnlineShopProject_dNet/Services/*.cs` – servicii de domeniu (AI Gemini, co?, notific?ri, sanitizare)
-- `OnlineShopProject_dNet/Views/*` – interfa?? (Razor + Bootstrap)
+> ?? **Not?:** Aceste conturi sunt doar pentru dezvoltare. Modifica?i în produc?ie.
 
-Licen??
-Acest proiect este pentru uz educa?ional/demonstrativ. Verifica?i politicile interne înainte de utilizare în produc?ie.
+---
+
+## ?? Securitate ?i Valid?ri
+
+| M?sur? | Implementare |
+|--------|--------------|
+| **Anti-CSRF** | Filtru global `AutoValidateAntiforgeryToken` |
+| **XSS Protection** | Sanitizare HTML cu `HtmlSanitizer` pentru descrieri/review-uri |
+| **Upload Validation** | Whitelist extensii imagini + limit? 5MB |
+| **Authorization** | Atribute `[Authorize(Roles="...")]` pe controllere |
+| **Input Validation** | Data Annotations + valid?ri custom server-side |
+| **Secrets Management** | `appsettings.json` în `.gitignore`, recomandare Secret Manager |
+
+---
+
+## ?? Integrare AI (Google Gemini)
+
+### Configurare
+
+Cheia API se configureaz? în `appsettings.json` sau prin Secret Manager:
+```json
+"GoogleAI": {
+  "ApiKey": "YOUR_GEMINI_API_KEY"
+}
+```
+
+### Workflow
+
+1. Utilizatorul pune o întrebare pe pagina produsului
+2. `GoogleProductAiService` construie?te un prompt structurat:
+   - Date produs (titlu, descriere, pre?, stoc, categorie)
+   - FAQ-uri relevante (generale + specifice produsului)
+   - Întrebarea utilizatorului
+   - Reguli stricte: "R?spunde DOAR din informa?iile furnizate, în român?, f?r? halucina?ii"
+3. API Gemini (`gemini-2.5-flash`) genereaz? r?spuns
+4. Parsing r?spuns JSON ?i returnare c?tre client
+5. În caz de eroare sau informa?ii lips?: fallback fix *"Momentan nu avem detalii despre acest aspect."*
+
+### Beneficii
+
+- R?spunsuri instantanee la întreb?ri frecvente (garan?ie, compatibilitate, utilizare)
+- Salvare întreb?ri utile în baza de date pentru îmbun?t??ire FAQ
+- Reducere sarcin? customer support
+
+---
+
+## ?? Structur? Relevant? Fi?iere
+
+```
+OnlineShopProject_dNet/
+??? Controllers/          # Logica MVC
+?   ??? ProductsController.cs
+?   ??? OrdersController.cs
+?   ??? ReviewsController.cs
+?   ??? WishlistController.cs
+?   ??? AdminController.cs
+?   ??? ProductAIController.cs
+??? Models/               # Entit??i database
+??? Views/                # Interfa?? Razor
+??? Services/             # Business logic
+?   ??? GoogleProductAiService.cs
+?   ??? CartService.cs
+?   ??? NotificationService.cs
+?   ??? HtmlSanitizationService.cs
+??? Data/
+?   ??? ApplicationDbContext.cs
+?   ??? SeedData.cs
+?   ??? Migrations/
+??? wwwroot/              # Static files (CSS, JS, images)
+??? Program.cs            # Entry point + configurare servicii
+??? appsettings.json      # Configurare (NU commit în Git!)
+```
+
+---
+
+## ?? Observa?ii Importante
+
+- Aplica?ia este configurat? pentru **SQL Server**. Pachetul SQLite este inclus dar nu este utilizat.
+- F?r? `appsettings.json` valid sau f?r? chei API, aplica?ia **nu va porni**.
+- Produsele "Pending" sunt vizibile doar autorului ?i Admin.
+- Review-urile pot fi ad?ugate doar de utilizatori autentifica?i care au cump?rat produsul.
+- Snapshot-urile din `OrderDetail` asigur? c? istoricul comenzilor r?mâne intact chiar dac? produsele sunt modificate/?terse.
+
+---
+
+## ?? Licen??
+
+Acest proiect este pentru **uz educa?ional ?i demonstrativ**. Verifica?i politicile interne înainte de utilizare în produc?ie.
+
+---
+
+<div align="center">
+
+**Dezvoltat cu ASP.NET Core MVC | Entity Framework Core | Google Gemini AI**
+
+</div>
