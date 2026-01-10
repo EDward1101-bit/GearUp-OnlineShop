@@ -34,9 +34,11 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            [Required(ErrorMessage = "Prenumele este obligatoriu")]
             [Display(Name = "Prenume")]
             public string FirstName { get; set; }
 
+            [Required(ErrorMessage = "Numele este obligatoriu")]
             [Display(Name = "Nume")]
             public string LastName { get; set; }
 
@@ -44,7 +46,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
             public string Email { get; set; }
 
             [Phone]
-            [Display(Name = "Num?r de telefon")]
+            [Display(Name = "Numar de telefon")]
             public string PhoneNumber { get; set; }
         }
 
@@ -94,7 +96,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    StatusMessage = "Eroare la actualizarea num?rului de telefon.";
+                    StatusMessage = "Eroare la actualizarea numarului de telefon.";
                     return RedirectToPage();
                 }
             }
@@ -117,7 +119,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Profilul t?u a fost actualizat cu succes!";
+            StatusMessage = "Profilul tau a fost actualizat cu succes!";
             return RedirectToPage();
         }
     }

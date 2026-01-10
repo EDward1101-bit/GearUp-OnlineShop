@@ -4,7 +4,7 @@
 @if (Model == null || Model.OrderDetails == null || !Model.OrderDetails.Any())
 {
     <div class="text-center py-3 text-muted">
-        <i class="bi bi-cart-x"></i> Coș gol
+        <i class="bi bi-cart-x"></i> Cos gol
     </div>
 }
 else
@@ -29,7 +29,7 @@ else
                     }
                 </div>
                 <div class="ms-2 flex-grow-1">
-                    <div class="fw-semibold text-dark" style="font-size:0.9rem;">@(item.Product?.Title ?? item.ProductTitleSnapshot ?? "Produs șters")</div>
+                    <div class="fw-semibold text-dark" style="font-size:0.9rem;">@(item.Product?.Title ?? item.ProductTitleSnapshot ?? "Produs sters")</div>
                     <div class="text-muted small">@item.Quantity x @item.UnitPrice RON</div>
                 </div>
                 <div class="ms-2 text-end small fw-bold">@(@item.Quantity * item.UnitPrice) RON</div>
@@ -38,7 +38,7 @@ else
 
         @if (moreCount > 0)
         {
-            <div class="text-center small text-muted">+ @moreCount alte produse în coș &middot; <a href="/Orders/Index">Vezi toate</a></div>
+            <div class="text-center small text-muted">+ @moreCount alte produse in cos &middot; <a href="/Orders/Index">Vezi toate</a></div>
         }
 
         <div class="dropdown-divider my-2"></div>

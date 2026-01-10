@@ -17,7 +17,7 @@ namespace OnlineShopProject_dNet.Controllers
         private readonly CartService _cartService = cartService;
         
         
-        // 1. INDEX - Afișarea listei
+        // 1. INDEX - Afisarea listei
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -32,12 +32,12 @@ namespace OnlineShopProject_dNet.Controllers
             return View(wishlist);
         }
 
-        // 2. TOGGLE - Inimioara Inteligentă (AJAX)
+        // 2. TOGGLE - Inimioara Inteligenta (AJAX)
         [HttpPost]
         public async Task<IActionResult> Toggle(int productId)
         {
             var userId = _userManager.GetUserId(User);
-            if (userId == null) return Json(new { success = false, message = "Trebuie să fii autentificat." });
+            if (userId == null) return Json(new { success = false, message = "Trebuie sa fii autentificat." });
 
             var productExists = await db.Products.AnyAsync(p => p.Id == productId);
             if (!productExists) return Json(new { success = false, message = "Produs invalid" });
@@ -47,18 +47,18 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (existingItem != null)
             {
-                // SCENARIUL A: Produsul exista -> ÎL ȘTERGEM (Undo)
+                // SCENARIUL A: Produsul exista -> IL STERGEM (Undo)
                 db.Wishlists.Remove(existingItem);
                 await db.SaveChangesAsync();
                 return Json(new { success = true, action = "removed", message = "Produsul a fost scos de la favorite." });
             }
             else
             {
-                // SCENARIUL B: Nu exista -> ÎL ADĂUGĂM
+                // SCENARIUL B: Nu exista -> IL ADAUGAM
                 var newItem = new Wishlist { UserId = userId, ProductId = productId };
                 db.Wishlists.Add(newItem);
                 await db.SaveChangesAsync();
-                return Json(new { success = true, action = "added", message = "Produsul a fost adăugat la favorite!" });
+                return Json(new { success = true, action = "added", message = "Produsul a fost adaugat la favorite!" });
             }
         }
 
@@ -75,7 +75,7 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 db.Wishlists.Remove(item);
                 await db.SaveChangesAsync();
-                TempData["message"] = "Produsul a fost șters.";
+                TempData["message"] = "Produsul a fost sters.";
             }
             return RedirectToAction("Index");
         }
@@ -87,22 +87,22 @@ namespace OnlineShopProject_dNet.Controllers
             var userId = _userManager.GetUserId(User);
             if (userId == null) return RedirectToAction("Index", "Home");
 
-            // Verificăm doar dacă e în wishlist-ul tău (Securitate)
-            // Nu mai verificăm stocul aici, se ocupă Serviciul
+            // Verificam doar daca e in wishlist-ul tau (Securitate)
+            // Nu mai verificam stocul aici, se ocupa Serviciul
             var inWishlist = await db.Wishlists.AnyAsync(w => w.UserId == userId && w.ProductId == productId);
 
             if (!inWishlist) return RedirectToAction("Index");
 
-            // APELĂM SERVICIUL
+            // APELAM SERVICIUL
             bool success = await _cartService.AddItemToCart(userId, productId, 1);
 
             if (success)
             {
-                TempData["message"] = "Produsul a fost adaugat în coș!";
+                TempData["message"] = "Produsul a fost adaugat in cos!";
             }
             else
             {
-                TempData["message"] = "Nu s-a putut adăuga! Stoc insuficient sau limita atinsă.";
+                TempData["message"] = "Nu s-a putut adauga! Stoc insuficient sau limita atinsa.";
             }
 
             return RedirectToAction("Index");
@@ -115,14 +115,14 @@ namespace OnlineShopProject_dNet.Controllers
             var userId = _userManager.GetUserId(User);
             if (userId == null) return RedirectToAction("Index", "Home");
 
-            // Luăm doar ID-urile produselor din wishlist
+            // Luam doar ID-urile produselor din wishlist
             var wishlistItems = await db.Wishlists
                                         .Where(w => w.UserId == userId)
                                         .ToListAsync();
 
             if (wishlistItems.Count == 0)
             {
-                TempData["message"] = "Nu ai produse în wishlist.";
+                TempData["message"] = "Nu ai produse in wishlist.";
                 return RedirectToAction("Index");
             }
 
@@ -130,9 +130,9 @@ namespace OnlineShopProject_dNet.Controllers
 
             foreach (var item in wishlistItems)
             {
-                // APELĂM SERVICIUL PENTRU FIECARE
-                // Serviciul verifică singur dacă mai e stoc > 0. 
-                // Dacă stocul e 0, returnează false și nu se întâmplă nimic rău.
+                // APELAM SERVICIUL PENTRU FIECARE
+                // Serviciul verifica singur daca mai e stoc > 0. 
+                // Daca stocul e 0, returneaza false si nu se intampla nimic rau.
                 bool result = await _cartService.AddItemToCart(userId, item.ProductId, 1);
 
                 if (result)
@@ -142,14 +142,14 @@ namespace OnlineShopProject_dNet.Controllers
             }
 
             if (countAdded > 0)
-                TempData["message"] = $"{countAdded} produse au fost adăugate în coș!";
+                TempData["message"] = $"{countAdded} produse au fost adaugate in cos!";
             else
-                TempData["message"] = "Niciun produs nu a putut fi adăugat (stoc epuizat).";
+                TempData["message"] = "Niciun produs nu a putut fi adaugat (stoc epuizat).";
 
             return RedirectToAction("Index");
         }
 
-        // NOTĂ: Metoda AddProductToCartInternal a fost ștearsă complet!
-        // Codul este acum mult mai simplu și folosește logica centralizată din CartService.
+        // NOTA: Metoda AddProductToCartInternal a fost stearsa complet!
+        // Codul este acum mult mai simplu si foloseste logica centralizata din CartService.
     }
 }

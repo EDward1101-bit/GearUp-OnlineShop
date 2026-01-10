@@ -42,16 +42,16 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required(ErrorMessage = "Email-ul este obligatoriu")]
-            [EmailAddress(ErrorMessage = "Adresa de email nu este valid?")]
+            [EmailAddress(ErrorMessage = "Adresa de email nu este valida")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
             [Required(ErrorMessage = "Parola este obligatorie")]
             [DataType(DataType.Password)]
-            [Display(Name = "Parol?")]
+            [Display(Name = "Parola")]
             public string Password { get; set; }
 
-            [Display(Name = "?ine-m? minte")]
+            [Display(Name = "Tine-ma minte")]
             public bool RememberMe { get; set; }
         }
 
@@ -96,7 +96,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Email sau parol? incorect?.");
+                    ModelState.AddModelError(string.Empty, "Email sau parola incorecta.");
                     return Page();
                 }
             }

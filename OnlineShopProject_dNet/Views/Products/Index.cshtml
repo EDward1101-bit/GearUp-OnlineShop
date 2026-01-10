@@ -7,7 +7,7 @@
 @{
     ViewData["Title"] = "Produse";
 
-    // Transformăm ViewBag-ul într-o listă sigură
+    // Transformam ViewBag-ul intr-o lista sigura
     var productsList = ViewBag.Products as IEnumerable<OnlineShopProject_dNet.Models.Product>;
 }
 
@@ -19,13 +19,13 @@
                 <h1 class="mb-2 fw-bold display-5">
                     <i class="bi bi-gear-fill"></i> GearUp
                 </h1>
-                <p class="mb-0 fs-5 opacity-90">Descoperă produsele noastre premium</p>
+                <p class="mb-0 fs-5 opacity-90">Descopera produsele noastre premium</p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
                 @if (User.IsInRole("Admin") || User.IsInRole("Proposer"))
                 {
                     <a class="btn btn-light btn-lg shadow-sm" href="/Products/New">
-                        <i class="bi bi-plus-circle"></i> Adaugă produs
+                        <i class="bi bi-plus-circle"></i> Adauga produs
                     </a>
                 }
             </div>
@@ -35,15 +35,15 @@
 
 <div class="container">
 
-    @* ZONA CĂUTARE, FILTRARE ȘI SORTARE *@
+    @* ZONA CAUTARE, FILTRARE SI SORTARE *@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <form method="get" class="row g-3">
-                        @* Căutare *@
+                        @* Cautare *@
                         <div class="col-md-4">
-                            <label for="search" class="form-label fw-semibold">Caută produs</label>
+                            <label for="search" class="form-label fw-semibold">Cauta produs</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" class="form-control" id="search" name="search"
@@ -72,10 +72,10 @@
 
                         @* Sortare *@
                         <div class="col-md-2">
-                            <label for="sortBy" class="form-label fw-semibold">Sortează după</label>
+                            <label for="sortBy" class="form-label fw-semibold">Sorteaza dupa</label>
                             <select class="form-select" id="sortBy" name="sortBy">
                                 <option value="name" selected="@(ViewBag.SortBy == "name")">Nume</option>
-                                <option value="price" selected="@(ViewBag.SortBy == "price")">Preț</option>
+                                <option value="price" selected="@(ViewBag.SortBy == "price")">Pret</option>
                                 <option value="rating" selected="@(ViewBag.SortBy == "rating")">Rating</option>
                             </select>
                         </div>
@@ -84,12 +84,12 @@
                         <div class="col-md-2">
                             <label for="sortOrder" class="form-label fw-semibold">Ordine</label>
                             <select class="form-select" id="sortOrder" name="sortOrder">
-                                <option value="asc" selected="@(ViewBag.SortOrder == "asc")">Crescător</option>
-                                <option value="desc" selected="@(ViewBag.SortOrder == "desc")">Descrescător</option>
+                                <option value="asc" selected="@(ViewBag.SortOrder == "asc")">Crescator</option>
+                                <option value="desc" selected="@(ViewBag.SortOrder == "desc")">Descrescator</option>
                             </select>
                         </div>
 
-                        @* Buton căutare *@
+                        @* Buton cautare *@
                         <div class="col-md-1 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-search"></i>
@@ -110,7 +110,7 @@
             <div id="pending-products" class="alert alert-warning border-0 shadow-lg mb-4 rounded-3" role="alert" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b !important;">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="mb-0 fw-bold text-dark">
-                        <i class="bi bi-hourglass-split"></i> Produse în Așteptare
+                        <i class="bi bi-hourglass-split"></i> Produse in Asteptare
                         <span class="badge bg-danger ms-2">@pendingProducts.Count()</span>
                     </h4>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -131,13 +131,13 @@
                                         <i class="bi bi-person-circle"></i> @(product.User?.UserName ?? "Necunoscut")
                                     </p>
                                     <p class="text-muted small mb-2">
-                                        <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără categorie")
+                                        <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Faracategorie")
                                     </p>
                                     <p class="text-danger fw-bold mb-3 fs-5">@(product.Price?.ToString("0.##") ?? "-") <small class="fs-6">RON</small></p>
                                     <div class="d-grid gap-2">
                                         <button type="button" class="btn btn-success btn-sm w-100" 
                                                 onclick="openFeedbackModal(@product.Id, '@product.Title', 'approve')">
-                                            <i class="bi bi-check-circle"></i> Aprobă
+                                            <i class="bi bi-check-circle"></i> Aproba
                                         </button>
                                         <div class="btn-group" role="group">
                                             <button type="button" class="btn btn-danger btn-sm" 
@@ -167,7 +167,7 @@
             <div class="card border-info mb-4 shadow-sm">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
-                        <i class="bi bi-hourglass-split"></i> Produsele Mele în Așteptare (@myPendingProducts.Count())
+                        <i class="bi bi-hourglass-split"></i> Produsele Mele in Asteptare (@myPendingProducts.Count())
                     </h5>
                 </div>
                 <div class="card-body">
@@ -180,11 +180,11 @@
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <h6 class="card-title mb-0">@product.Title</h6>
                                             <span class="badge bg-info">
-                                                <i class="bi bi-hourglass-split"></i> În așteptare
+                                                <i class="bi bi-hourglass-split"></i> In asteptare
                                             </span>
                                         </div>
                                         <p class="text-muted small mb-2">
-                                            <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără categorie")
+                                            <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fara categorie")
                                         </p>
                                         <p class="text-danger fw-bold mb-3">@(product.Price?.ToString("0.##") ?? "-") RON</p>
                                         <div class="d-flex gap-2">
@@ -202,7 +202,7 @@
         }
     }
 
-    @* PRODUSE APROBATE - TOȚI *@
+    @* PRODUSE APROBATE - TOTI *@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0 fw-bold">
             <i class="bi bi-box-seam text-primary"></i> Produse Disponibile
@@ -220,7 +220,7 @@
     {
         <div class="alert alert-warning text-center shadow-sm border-0" role="alert">
             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-            <h5>Nu există produse de afișat</h5>
+            <h5>Nu exista produse de afisat</h5>
             <p class="text-muted mb-0">Momentan nu sunt produse disponibile.</p>
         </div>
     }
@@ -255,7 +255,7 @@
                             <div class="position-absolute top-0 start-0 m-2">
                                 @if (product.Stock.GetValueOrDefault() > 0)
                                 {
-                                    <span class="badge bg-success shadow-sm"><i class="bi bi-check-circle"></i> În Stoc</span>
+                                    <span class="badge bg-success shadow-sm"><i class="bi bi-check-circle"></i> In Stoc</span>
                                 }
                                 else
                                 {
@@ -263,7 +263,7 @@
                                 }
                             </div>
 
-                            @* 3. BUTOANE ACȚIUNE  *@
+                            @* 3. BUTOANE ACTIUNE  *@
                             @if (User.Identity?.IsAuthenticated == true)
                             {
                                 <div class="position-absolute top-0 end-0 mt-4 me-3 d-flex flex-column gap-2" style="z-index: 10;">
@@ -276,13 +276,13 @@
                                         <i class="bi @heartClass fs-5"></i>
                                     </button>
 
-                                    @* Buton Coș (Doar dacă e stoc) *@
+                                    @* Buton Cos (Doar daca e stoc) *@
                                     @if (product.Stock.GetValueOrDefault() > 0)
                                     {
                                         <button class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
                                                 style="width: 38px; height: 38px;"
                                                 onclick="addToCart(@product.Id)"
-                                                title="Adaugă în coș">
+                                                title="Adauga in cos">
                                             <i class="bi bi-cart-plus fs-5"></i>
                                         </button>
                                     }
@@ -294,7 +294,7 @@
                             @* Categorie *@
                             <div class="mb-2">
                                 <small class="text-muted">
-                                    <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fără Categorie")
+                                    <i class="bi bi-tag"></i> @(product.Category?.Name ?? "Fara Categorie")
                                 </small>
                             </div>
 
@@ -305,7 +305,7 @@
                                 </a>
                             </h5>
 
-                            @* Rating dacă există *@
+                            @* Rating daca exista *@
                             @if (product.Rating.HasValue)
                             {
                                 <div class="mb-2 d-flex align-items-center gap-1">
@@ -331,7 +331,7 @@
                                 @Html.Raw(_textProcessor.ProcessForDisplay(product.Description))
                             </div>
 
-                            @* Preț *@
+                            @* Pret *@
                             <div class="mt-auto">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="fs-4 fw-bold text-danger mb-0">
@@ -407,17 +407,17 @@
                         <p id="feedbackProductInfo" class="mb-3"></p>
                         <div class="mb-3">
                             <label for="feedbackMessage" class="form-label">
-                                Mesaj de feedback (opțional)
+                                Mesaj de feedback (optional)
                             </label>
                             <textarea class="form-control" id="feedbackMessage" name="feedbackMessage" 
                                       rows="4" maxlength="1000" 
-                                      placeholder="Adaugă un mesaj pentru proposer despre decizia ta..."></textarea>
-                            <div class="form-text">Acest mesaj va fi trimis către proposer împreună cu notificarea.</div>
+                                      placeholder="Adauga un mesaj pentru proposer despre decizia ta..."></textarea>
+                            <div class="form-text">Acest mesaj va fi trimis catre proposer impreuna cu notificarea.</div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
-                        <button type="submit" class="btn btn-primary" id="feedbackSubmitBtn">Confirmă</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuleaza</button>
+                        <button type="submit" class="btn btn-primary" id="feedbackSubmitBtn">Confirma</button>
                     </div>
                 </form>
             </div>
@@ -440,7 +440,7 @@
                 
                 if (action === 'approve') {
                     productInfo.innerHTML = `<strong>Aprobare produs:</strong> ${productTitle}`;
-                    submitBtn.textContent = 'Aprobă Produs';
+                    submitBtn.textContent = 'Aproba Produs';
                     submitBtn.className = 'btn btn-success';
                     form.action = '/Products/Approve/' + productId;
                 } else {
@@ -454,14 +454,14 @@
                 modal.show();
             }
 
-            // Funcție AJAX pentru Wishlist
+            // Functie AJAX pentru Wishlist
             function toggleWishlist(productId, btn) {
                 try {
                     const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
                     const token = tokenInput ? tokenInput.value : '';
                     if (!token) {
                         console.error('Anti-forgery token not found');
-                        alert('Eroare de securitate. Te rugăm să reîncarci pagina.');
+                        alert('Eroare de securitate. Te rugam sa reincarci pagina.');
                         return;
                     }
                     const bodyStr = `productId=${productId}&__RequestVerificationToken=${encodeURIComponent(token)}`;
@@ -495,9 +495,9 @@
                             }
                         }
                         if (typeof showToast === 'function') {
-                            showToast(data.message || (data.action === 'added' ? 'Adăugat la favorite' : 'Eliminat din favorite'), 'success');
+                            showToast(data.message || (data.action === 'added' ? 'Adaugat la favorite' : 'Eliminat din favorite'), 'success');
                         }
-                        // Reîncărcare rapidă pentru a actualiza badge-ul din Navbar
+                        // Reincarcare rapida pentru a actualiza badge-ul din Navbar
                         if (typeof loadMiniCart === 'function') {
                             loadMiniCart();
                         }
@@ -512,9 +512,9 @@
                 .catch(err => {
                     console.error('Wishlist toggle error:', err);
                     if (typeof showToast === 'function') {
-                        showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+                        showToast('Eroare retea. Te rugam sa incerci din nou.', 'danger');
                     } else {
-                        alert('Eroare rețea. Te rugăm să încerci din nou.');
+                        alert('Eroare retea. Te rugam sa incerci din nou.');
                     }
                 });
             } catch (e) {
@@ -523,7 +523,7 @@
             }
             }
 
-            // Funcție AJAX pentru Coș
+            // Functie AJAX pentru Cos
             function addToCart(productId) {
                 if (window.isAuthenticated) {
                     try {
@@ -531,7 +531,7 @@
                         const token = tokenInput ? tokenInput.value : '';
                         if (!token) {
                             console.error('Anti-forgery token not found');
-                            alert('Eroare de securitate. Te rugăm să reîncarci pagina.');
+                            alert('Eroare de securitate. Te rugam sa reincarci pagina.');
                             return;
                         }
                         const bodyStr = `productId=${productId}&quantity=1&__RequestVerificationToken=${encodeURIComponent(token)}`;
@@ -553,36 +553,36 @@
                                 loadMiniCart();
                             }
                             if (typeof showToast === 'function') {
-                                showToast('Produs adăugat în coș', 'success');
+                                showToast('Produs adaugat in cos', 'success');
                             } else {
-                                alert('Produs adăugat în coș!');
+                                alert('Produs adaugat in cos!');
                             }
                         } else {
                             if (typeof showToast === 'function') {
-                                showToast(data.message || 'Eroare la adăugare', 'danger');
+                                showToast(data.message || 'Eroare la adaugare', 'danger');
                             } else {
-                                alert(data.message || 'Eroare la adăugare');
+                                alert(data.message || 'Eroare la adaugare');
                             }
                         }
                     })
                     .catch(err => {
                         console.error('Cart add error:', err);
                         if (typeof showToast === 'function') {
-                            showToast('Eroare rețea. Te rugăm să încerci din nou.', 'danger');
+                            showToast('Eroare retea. Te rugam sa incerci din nou.', 'danger');
                         } else {
-                            alert('Eroare rețea. Te rugăm să încerci din nou.');
+                            alert('Eroare retea. Te rugam sa incerci din nou.');
                         }
                     });
                     } catch (e) { 
                         console.error('Auth cart add failed', e);
-                        alert('Eroare la adăugarea produsului.');
+                        alert('Eroare la adaugarea produsului.');
                     }
                 } else {
                     // fallback to localStorage
                     if (typeof addToLocalCart === 'function') {
                         addToLocalCart(productId, 1, null);
                     } else {
-                        alert('Te rugăm să te autentifici pentru a adăuga produse în coș.');
+                        alert('Te rugam sa te autentifici pentru a adauga produse in cos.');
                     }
                 }
             }

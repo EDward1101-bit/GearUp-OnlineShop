@@ -64,7 +64,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
             }
 
             await _signInManager.ForgetTwoFactorClientAsync();
-            StatusMessage = "Browserul curent a fost uitat. Când te autentifici din nou din acest browser, ?i se va cere codul 2FA.";
+            StatusMessage = "Browserul curent a fost uitat. Cand te autentifici din nou din acest browser, ti se va cere codul 2FA.";
             return RedirectToPage();
         }
     }

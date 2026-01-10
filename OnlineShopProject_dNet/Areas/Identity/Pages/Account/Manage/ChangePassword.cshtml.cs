@@ -37,20 +37,20 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Parola actual? este obligatorie")]
+            [Required(ErrorMessage = "Parola actuala este obligatorie")]
             [DataType(DataType.Password)]
-            [Display(Name = "Parola actual?")]
+            [Display(Name = "Parola actuala")]
             public string OldPassword { get; set; }
 
-            [Required(ErrorMessage = "Parola nou? este obligatorie")]
-            [StringLength(100, ErrorMessage = "{0} trebuie s? aib? minimum {2} caractere ?i maximum {1} caractere.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Parola noua este obligatorie")]
+            [StringLength(100, ErrorMessage = "{0} trebuie sa aiba minimum {2} caractere si maximum {1} caractere.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Parola nou?")]
+            [Display(Name = "Parola noua")]
             public string NewPassword { get; set; }
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm? parola nou?")]
-            [Compare("NewPassword", ErrorMessage = "Parola nou? ?i confirmarea nu se potrivesc.")]
+            [Display(Name = "Confirma parola noua")]
+            [Compare("NewPassword", ErrorMessage = "Parola noua si confirmarea nu se potrivesc.")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -96,7 +96,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
 
             await _signInManager.RefreshSignInAsync(user);
             _logger.LogInformation("User changed their password successfully.");
-            StatusMessage = "Parola ta a fost schimbat? cu succes!";
+            StatusMessage = "Parola ta a fost schimbata cu succes!";
 
             return RedirectToPage();
         }

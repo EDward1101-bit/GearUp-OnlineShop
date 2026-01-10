@@ -13,11 +13,11 @@ namespace OnlineShopProject_dNet.Models
         [Required]
         public string Answer { get; set; } = null!;
 
-        // Legătură cu produsul (opțional - FAQ-uri generale)
+        // Legatura cu produsul (optional - FAQ-uri generale)
         public int? ProductId { get; set; }
         public virtual Product? Product { get; set; }
 
-        // Câți utilizatori au găsit această întrebare utilă
+        // Cati utilizatori au gasit aceasta intrebare utila
         public int HelpfulCount { get; set; } = 0;
     }
 }

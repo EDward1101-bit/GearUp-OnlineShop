@@ -1,4 +1,4 @@
-@* Modal pentru gestionarea categoriilor - categoriile se încarcă prin AJAX *@
+@* Modal pentru gestionarea categoriilor - categoriile se incarca prin AJAX *@
 
 <!-- Modal pentru Categorii -->
 <div class="modal fade" id="categoriesModal" tabindex="-1" aria-labelledby="categoriesModalLabel" aria-hidden="true">
@@ -14,11 +14,11 @@
                 @* Mesaj de succes/eroare *@
                 <div id="categoryMessage" class="alert" style="display: none;"></div>
 
-                @* Formular adăugare categorie nouă *@
+                @* Formular adaugare categorie noua *@
                 <div class="card mb-4 border-primary">
                     <div class="card-header bg-light">
                         <h6 class="mb-0">
-                            <i class="bi bi-plus-circle text-primary"></i> Adaugă Categorie Nouă
+                            <i class="bi bi-plus-circle text-primary"></i> Adauga Categorie Noua
                         </h6>
                     </div>
                     <div class="card-body">
@@ -28,10 +28,10 @@
                                 <label for="newCategoryName" class="form-label fw-semibold">Nume Categorie:</label>
                                 <input type="text" class="form-control" id="newCategoryName" name="Name" required 
                                        placeholder="Ex: Electronice, Haine, etc." />
-                                <div class="form-text">Numele categoriei trebuie să fie unic.</div>
+                                <div class="form-text">Numele categoriei trebuie sa fie unic.</div>
                             </div>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Adaugă Categorie
+                                <i class="bi bi-check-circle"></i> Adauga Categorie
                             </button>
                         </form>
                     </div>
@@ -48,7 +48,7 @@
                         <div id="categoriesList">
                             <div class="text-center py-3">
                                 <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Se încarcă...</span>
+                                    <span class="visually-hidden">Se incarca...</span>
                                 </div>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Închide</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Inchide</button>
             </div>
         </div>
     </div>
@@ -68,7 +68,7 @@
         <div class="modal-content">
             <div class="modal-header bg-warning">
                 <h5 class="modal-title" id="editCategoryModalLabel">
-                    <i class="bi bi-pencil"></i> Editează Categoria
+                    <i class="bi bi-pencil"></i> Editeaza Categoria
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -82,9 +82,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuleaza</button>
                     <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-check-circle"></i> Salvează Modificările
+                        <i class="bi bi-check-circle"></i> Salveaza Modificarile
                     </button>
                 </div>
             </form>
@@ -93,7 +93,7 @@
 </div>
 
 <script>
-    // Încărcare categorii când se deschide modalul
+    // Incarcare categorii cand se deschide modalul
     document.getElementById('categoriesModal')?.addEventListener('show.bs.modal', function() {
         loadCategories();
     });
@@ -104,7 +104,7 @@
             .then(data => {
                 const categoriesList = document.getElementById('categoriesList');
                 if (data && data.length > 0) {
-                    let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nume</th><th>Acțiuni</th></tr></thead><tbody>';
+                    let html = '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Nume</th><th>Actiuni</th></tr></thead><tbody>';
                     const antiTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
                     const antiTokenValue = antiTokenInput ? antiTokenInput.value : '';
 
@@ -119,11 +119,11 @@
                                     <div class="btn-group btn-group-sm" role="group">
                                         <button type="button" class="btn btn-warning btn-edit-category" 
                                                 data-id="${category.id}" data-name="${category.name}">
-                                            <i class="bi bi-pencil"></i> Editează
+                                            <i class="bi bi-pencil"></i> Editeaza
                                         </button>
                                         <button type="button" class="btn btn-danger btn-delete-category" 
                                                 data-id="${category.id}" data-name="${category.name}">
-                                            <i class="bi bi-trash"></i> Șterge
+                                            <i class="bi bi-trash"></i> Sterge
                                         </button>
                                     </div>
                                 </td>
@@ -137,11 +137,11 @@
                     attachEditListeners();
                     attachDeleteListeners();
                 } else {
-                    categoriesList.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle"></i> Nu există categorii. Adaugă prima categorie!</div>';
+                    categoriesList.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle"></i> Nu exista categorii. Adauga prima categorie!</div>';
                 }
             })
             .catch(error => {
-                document.getElementById('categoriesList').innerHTML = '<div class="alert alert-danger">Eroare la încărcarea categoriilor!</div>';
+                document.getElementById('categoriesList').innerHTML = '<div class="alert alert-danger">Eroare la incarcarea categoriilor!</div>';
             });
     }
 
@@ -167,7 +167,7 @@
                 const categoryId = this.getAttribute('data-id');
                 const categoryName = this.getAttribute('data-name');
                 
-                if (!confirm(`ATENȚIE: Ștergerea categoriei "${categoryName}" va șterge TOATE produsele din ea! Continui?`)) {
+                if (!confirm(`ATENTIE: Stergerea categoriei "${categoryName}" va sterge TOATE produsele din ea! Continui?`)) {
                     return;
                 }
 
@@ -186,7 +186,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showMessage(data.message || 'Categoria a fost ștearsă!', 'success');
+                        showMessage(data.message || 'Categoria a fost stearsa!', 'success');
                         // Remove the row from table
                         const row = document.getElementById('category-row-' + categoryId);
                         if (row) {
@@ -195,18 +195,18 @@
                         // Reload categories to update counts
                         loadCategories();
                     } else {
-                        showMessage(data.message || 'Eroare la ștergerea categoriei!', 'danger');
+                        showMessage(data.message || 'Eroare la stergerea categoriei!', 'danger');
                     }
                 })
                 .catch(error => {
                     console.error('Delete error:', error);
-                    showMessage('Eroare la ștergerea categoriei!', 'danger');
+                    showMessage('Eroare la stergerea categoriei!', 'danger');
                 });
             });
         });
     }
 
-    // Gestionare formular adăugare categorie
+    // Gestionare formular adaugare categorie
     document.getElementById('addCategoryForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(this);
@@ -223,14 +223,14 @@
             if (data.success) {
                 loadCategories();
                 document.getElementById('newCategoryName').value = '';
-                showMessage(data.message || 'Categoria a fost adăugată cu succes!', 'success');
+                showMessage(data.message || 'Categoria a fost adaugata cu succes!', 'success');
             } else {
-                showMessage(data.message || 'Eroare la adăugarea categoriei!', 'danger');
+                showMessage(data.message || 'Eroare la adaugarea categoriei!', 'danger');
             }
         })
         .catch(error => {
             console.error('Add category error:', error);
-            showMessage('Eroare la adăugarea categoriei!', 'danger');
+            showMessage('Eroare la adaugarea categoriei!', 'danger');
         });
     });
 
@@ -252,7 +252,7 @@
             if (data.success) {
                 bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
                 loadCategories();
-                showMessage(data.message || 'Categoria a fost actualizată cu succes!', 'success');
+                showMessage(data.message || 'Categoria a fost actualizata cu succes!', 'success');
             } else {
                 showMessage(data.message || 'Eroare la editarea categoriei!', 'danger');
             }

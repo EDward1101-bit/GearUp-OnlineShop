@@ -23,13 +23,13 @@ namespace OnlineShopProject_dNet.Models
         public string? ProductCategorySnapshot { get; set; }
 
         [Required(ErrorMessage = "Cantitatea este obligatorie")]
-        [Range(1, int.MaxValue, ErrorMessage = "Cantitatea trebuie să fie cel puțin 1")]
+        [Range(1, int.MaxValue, ErrorMessage = "Cantitatea trebuie sa fie cel putin 1")]
         public int Quantity { get; set; }
 
         // Salvam pretul la momentul comenzii (in caz ca pretul produsului se schimba ulterior)
         [Required(ErrorMessage = "Pretul unitar este obligatoriu")]
         [Column(TypeName = "decimal(18, 2)")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Prețul trebuie să fie pozitiv")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Pretul trebuie sa fie pozitiv")]
         public decimal UnitPrice { get; set; }
     }
 }

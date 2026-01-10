@@ -27,7 +27,7 @@ namespace OnlineShopProject_dNet.Controllers
         private readonly IProductAiService _productAiService = productAiService;
         private readonly NotificationService _notificationService = notificationService;
 
-        // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu căutare, filtrare și sortare
+        // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu cautare, filtrare si sortare
         [HttpGet]
         public IActionResult Index(int? category, string search, string sortBy = "name", string sortOrder = "asc", int page = 1, int pageSize = 12)
         {
@@ -39,13 +39,13 @@ namespace OnlineShopProject_dNet.Controllers
                          .Include(p => p.Wishlists)
                          .Where(p => p.Status == "Approved"); // Filtrare esentiala
 
-            // Filtrare după categorie dacă este specificată
+            // Filtrare dupa categorie daca este specificata
             if (category.HasValue)
             {
                 query = query.Where(p => p.CategoryId == category.Value);
             }
 
-            // Căutare după nume (parțial matching)
+            // Cautare dupa nume (partial matching)
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.ToLower().Trim();
@@ -89,7 +89,7 @@ namespace OnlineShopProject_dNet.Controllers
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            // Pentru Admin: adăugăm produsele Pending într-o zonă separată
+            // Pentru Admin: adaugam produsele Pending intr-o zona separata
             if (User.IsInRole("Admin"))
             {
                 var pendingProducts = db.Products
@@ -101,7 +101,7 @@ namespace OnlineShopProject_dNet.Controllers
                 ViewBag.PendingProducts = pendingProducts;
             }
 
-            // Pentru Proposer: adăugăm produsele proprii Pending
+            // Pentru Proposer: adaugam produsele proprii Pending
             if (User.IsInRole("Proposer"))
             {
                 var currentUserId = _userManager.GetUserId(User);
@@ -115,7 +115,7 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (products.Count == 0)
             {
-                TempData["message"] = "Nu există produse aprobate momentan.";
+                TempData["message"] = "Nu exista produse aprobate momentan.";
             }
 
             return View();
@@ -248,7 +248,7 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (!allowedExtensions.Contains(fileExtension) || Image.Length > 5 * 1024 * 1024)
                 {
-                    ModelState.AddModelError("Image", "Fișier invalid. Doar JPG, PNG, GIF, max 5MB.");
+                    ModelState.AddModelError("Image", "Fisier invalid. Doar JPG, PNG, GIF, max 5MB.");
                     ViewBag.Categories = db.Categories;
                     return View(product);
                 }
@@ -305,14 +305,14 @@ namespace OnlineShopProject_dNet.Controllers
                     if (product.Status == "Pending")
                         TempData["message"] = "Produsul a fost trimis spre aprobare!";
                     else
-                        TempData["message"] = "Produsul a fost adăugat!";
+                        TempData["message"] = "Produsul a fost adaugat!";
 
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error saving product");
-                    ModelState.AddModelError(string.Empty, "A apărut o eroare la salvarea produsului. Verifică datele introduse.");
+                    ModelState.AddModelError(string.Empty, "A aparut o eroare la salvarea produsului. Verifica datele introduse.");
                 }
             }
 
@@ -330,13 +330,13 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (product.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
             {
-                TempData["message"] = "Nu ai dreptul să editezi acest produs!";
+                TempData["message"] = "Nu ai dreptul sa editezi acest produs!";
                 return RedirectToAction("Index");
             }
 
             if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["message"] = "Poți edita produsul doar după ce a fost respins de admin (cu feedback).";
+                TempData["message"] = "Poti edita produsul doar dupa ce a fost respins de admin (cu feedback).";
                 return RedirectToAction("Index");
             }
 
@@ -358,7 +358,7 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["message"] = "Poți edita produsul doar după ce a fost respins de admin (cu feedback).";
+                TempData["message"] = "Poti edita produsul doar dupa ce a fost respins de admin (cu feedback).";
                 return RedirectToAction("Index");
             }
 
@@ -425,7 +425,7 @@ namespace OnlineShopProject_dNet.Controllers
                 await db.SaveChangesAsync();
 
                 if (product.Status == "Pending")
-                    TempData["message"] = "Produsul modificat necesită o nouă aprobare!";
+                    TempData["message"] = "Produsul modificat necesita o noua aprobare!";
                 else
                     TempData["message"] = "Produsul a fost actualizat!";
 
@@ -446,13 +446,13 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (product.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
             {
-                TempData["message"] = "Nu ai dreptul să ștergi acest produs!";
+                TempData["message"] = "Nu ai dreptul sa stergi acest produs!";
                 return RedirectToAction("Index");
             }
 
             if (User.IsInRole("Proposer") && !string.Equals(product.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
             {
-                TempData["message"] = "Poți șterge produsul doar dacă a fost respins de admin.";
+                TempData["message"] = "Poti sterge produsul doar daca a fost respins de admin.";
                 return RedirectToAction("Index");
             }
 
@@ -475,7 +475,7 @@ namespace OnlineShopProject_dNet.Controllers
 
             db.Products.Remove(product);
             db.SaveChanges();
-            TempData["message"] = "Produsul a fost șters.";
+            TempData["message"] = "Produsul a fost sters.";
             return RedirectToAction("Index");
         }
 
@@ -490,10 +490,10 @@ namespace OnlineShopProject_dNet.Controllers
             product.Status = "Approved";
             db.SaveChanges();
 
-            // Trimite notificare către proposer
+            // Trimite notificare catre proposer
             if (!string.IsNullOrEmpty(product.UserId))
             {
-                var message = $"Produsul tău '{product.Title}' a fost aprobat!";
+                var message = $"Produsul tau '{product.Title}' a fost aprobat!";
                 await _notificationService.AddNotificationAsync(
                     product.UserId, 
                     message, 
@@ -517,10 +517,10 @@ namespace OnlineShopProject_dNet.Controllers
             product.Status = "Rejected";
             db.SaveChanges();
 
-            // Trimite notificare către proposer
+            // Trimite notificare catre proposer
             if (!string.IsNullOrEmpty(product.UserId))
             {
-                var message = $"Produsul tău '{product.Title}' a fost respins.";
+                var message = $"Produsul tau '{product.Title}' a fost respins.";
                 await _notificationService.AddNotificationAsync(
                     product.UserId, 
                     message, 
@@ -533,7 +533,7 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // 8. GETPENDINGCOUNT - Returnează numărul de produse Pending (pentru badge în navbar)
+        // 8. GETPENDINGCOUNT - Returneaza numarul de produse Pending (pentru badge in navbar)
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetPendingCount()

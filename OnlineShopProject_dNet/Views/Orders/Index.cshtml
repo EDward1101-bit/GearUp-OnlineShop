@@ -1,12 +1,12 @@
 @model OnlineShopProject_dNet.Models.Order
 
 @{
-    ViewData["Title"] = "Coș";
+    ViewData["Title"] = "Cos";
 }
 
 <div class="container py-5">
     <h2 class="mb-4 fw-bold text-primary">
-        <i class="bi bi-cart3"></i> Coșul tău de cumpărături
+        <i class="bi bi-cart3"></i> Cosul tau de cumparaturi
     </h2>
 
     @* 1. MESAJE DE STOC (Din Controller) *@
@@ -29,10 +29,10 @@
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4">Produs</th>
-                                        <th>Preț</th>
+                                        <th>Pret</th>
                                         <th>Cantitate</th>
                                         <th>Total</th>
-                                        <th>Acțiuni</th>
+                                        <th>Actiuni</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -57,7 +57,7 @@
                                                             }
                                                             else
                                                             {
-                                                                <span class="text-muted">@(!string.IsNullOrEmpty(item.ProductTitleSnapshot) ? item.ProductTitleSnapshot : "Produs șters")</span>
+                                                                <span class="text-muted">@(!string.IsNullOrEmpty(item.ProductTitleSnapshot) ? item.ProductTitleSnapshot : "Produs sters")</span>
                                                             }
                                                         </h6>
                                                     </div>
@@ -81,7 +81,7 @@
                                                 <form asp-controller="Orders" asp-action="RemoveFromCart" method="post">
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="productId" value="@item.ProductId" />
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Șterge">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Sterge">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
@@ -95,11 +95,11 @@
                 </div>
             </div>
 
-            @* --- REZUMAT COMANDĂ --- *@
+            @* --- REZUMAT COMANDA --- *@
             <div class="col-lg-4 mt-4 mt-lg-0">
                 <div class="card shadow-lg border-0 bg-light">
                     <div class="card-body p-4">
-                        <h5 class="card-title fw-bold mb-4">Sumar Comandă</h5>
+                        <h5 class="card-title fw-bold mb-4">Sumar Comanda</h5>
 
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Subtotal:</span>
@@ -118,7 +118,7 @@
                         @if (ViewBag.HasStockIssues == true)
                         {
                             <button class="btn btn-secondary w-100 py-2" disabled>
-                                Rezolvă problemele de stoc
+                                Rezolva problemele de stoc
                             </button>
                         }
                         else
@@ -129,7 +129,7 @@
                         }
 
                         <a asp-controller="Products" asp-action="Index" class="d-block text-center mt-3 text-muted small text-decoration-none">
-                            <i class="bi bi-arrow-left"></i> Continuă cumpărăturile
+                            <i class="bi bi-arrow-left"></i> Continua cumparaturile
                         </a>
                     </div>
                 </div>
@@ -138,13 +138,13 @@
     }
     else
     {
-        @* --- COȘ GOL --- *@
+        @* --- COS GOL --- *@
         <div class="text-center py-5">
             <div class="mb-4">
                 <i class="bi bi-cart-x display-1 text-muted opacity-25"></i>
             </div>
-            <h3 class="fw-bold text-muted">Coșul tău este gol</h3>
-            <p class="text-muted mb-4">Nu ai adăugat încă niciun produs.</p>
+            <h3 class="fw-bold text-muted">Cosul tau este gol</h3>
+            <p class="text-muted mb-4">Nu ai adaugat inca niciun produs.</p>
             <a asp-controller="Products" asp-action="Index" class="btn btn-primary px-5 py-2 fw-bold rounded-pill">
                 Mergi la GearUp
             </a>

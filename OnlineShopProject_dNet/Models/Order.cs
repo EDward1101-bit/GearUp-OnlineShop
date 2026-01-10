@@ -13,12 +13,12 @@ namespace OnlineShopProject_dNet.Models
 
         public DateTime Date { get; set; }
 
-        // Statusul va fi folosit pentru a diferenția coșul de comanda plasată
+        // Statusul va fi folosit pentru a diferentia cosul de comanda plasata
         // Ex: "InCart", "Placed", "Shipped", "Delivered"
         public string? Status { get; set; }
 
         // Adresa poate fi null cat timp e doar in stadiul de Cos
-        [StringLength(200, ErrorMessage = "Adresa nu poate depăși 200 de caractere")]
+        [StringLength(200, ErrorMessage = "Adresa nu poate depasi 200 de caractere")]
         public string? ShippingAddress { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]

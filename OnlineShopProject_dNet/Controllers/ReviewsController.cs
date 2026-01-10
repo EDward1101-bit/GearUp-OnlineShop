@@ -21,7 +21,7 @@ namespace OnlineShopProject_dNet.Controllers
             _textProcessor = textProcessor;
         }
 
-        // POST: Adaugarea unui review (doar utilizatori înregistrați)
+        // POST: Adaugarea unui review (doar utilizatori inregistrati)
         [Authorize]
         [HttpPost]
         public IActionResult New(Review rev)
@@ -41,7 +41,7 @@ namespace OnlineShopProject_dNet.Controllers
                 rev.Content = _textProcessor.ProcessForStorage(_textProcessor.SanitizeHtml(rev.Content));
             }
 
-            // Validare: Verifică dacă utilizatorul are deja un review pentru acest produs
+            // Validare: Verifica daca utilizatorul are deja un review pentru acest produs
             if (rev.ProductId.HasValue && !string.IsNullOrEmpty(rev.UserId))
             {
                 var existingReview = db.Reviews
@@ -49,11 +49,11 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (existingReview != null)
                 {
-                    TempData["message"] = "Aveți deja un review pentru acest produs. Puteți edita review-ul existent.";
+                    TempData["message"] = "Aveti deja un review pentru acest produs. Puteti edita review-ul existent.";
                     return Redirect("/Products/Show/" + rev.ProductId);
                 }
 
-                // Validare IMPORTANTĂ: Verifică dacă utilizatorul a cumpărat produsul
+                // Validare IMPORTANTA: Verifica daca utilizatorul a cumparat produsul
                 var hasPurchased = db.OrderDetails
                     .Any(od => od.ProductId == rev.ProductId.Value &&
                               od.Order != null &&
@@ -62,7 +62,7 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (!hasPurchased)
                 {
-                    TempData["message"] = "Puteți lăsa review-uri doar pentru produsele pe care le-ați cumpărat.";
+                    TempData["message"] = "Puteti lasa review-uri doar pentru produsele pe care le-ati cumparat.";
                     return Redirect("/Products/Show/" + rev.ProductId);
                 }
             }
@@ -78,14 +78,14 @@ namespace OnlineShopProject_dNet.Controllers
                     SetProductRating(rev.ProductId.Value);
                 }
 
-                TempData["message"] = "Review-ul a fost adăugat cu succes!";
+                TempData["message"] = "Review-ul a fost adaugat cu succes!";
                 return Redirect("/Products/Show/" + rev.ProductId);
             }
 
             return Redirect("/Products/Show/" + rev.ProductId);
         }
 
-        // GET: Editare review (doar utilizatori înregistrați)
+        // GET: Editare review (doar utilizatori inregistrati)
         [Authorize]
         public IActionResult Edit(int id)
         {
@@ -98,7 +98,7 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (rev.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
             {
-                TempData["message"] = "Nu aveți dreptul să editați acest review!";
+                TempData["message"] = "Nu aveti dreptul sa editati acest review!";
                 return Redirect("/Products/Show/" + rev.ProductId);
             }
 
@@ -119,7 +119,7 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (rev.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
             {
-                TempData["message"] = "Nu aveți dreptul să editați acest review!";
+                TempData["message"] = "Nu aveti dreptul sa editati acest review!";
                 return Redirect("/Products/Show/" + rev.ProductId);
             }
 
@@ -160,7 +160,7 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (rev.UserId != _userManager.GetUserId(User) && !User.IsInRole("Admin"))
             {
-                TempData["message"] = "Nu aveți dreptul să ștergeți acest review!";
+                TempData["message"] = "Nu aveti dreptul sa stergeti acest review!";
                 return Redirect("/Products/Show/" + rev.ProductId);
             }
 

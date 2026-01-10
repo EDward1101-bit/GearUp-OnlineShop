@@ -12,7 +12,7 @@ namespace OnlineShopProject_dNet.Models
         // Un user (Proposer) propune produse
         public virtual ICollection<Product>? Products { get; set; }
 
-        // Un user (Inregistrat) lasă review-uri (în diagramă Review are UserId)
+        // Un user (Inregistrat) lasa review-uri (in diagrama Review are UserId)
         public virtual ICollection<Review>? Reviews { get; set; }
 
 
@@ -22,7 +22,7 @@ namespace OnlineShopProject_dNet.Models
         // Relatia M-M cu Products (prin Wishlist)
         public virtual ICollection<Wishlist>? Wishlists { get; set; }
 
-        // Notificări in-app
+        // Notificari in-app
         public virtual ICollection<Notification>? Notifications { get; set; }
     }
 }
