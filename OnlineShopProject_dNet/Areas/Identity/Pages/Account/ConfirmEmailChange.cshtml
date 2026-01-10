@@ -1,0 +1,48 @@
+@page
+@model ConfirmEmailChangeModel
+@{
+    ViewData["Title"] = "Confirmare Schimbare Email";
+}
+
+<div class="confirm-email-change-page min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-5 text-center">
+                        @if (Model.StatusMessage?.Contains("Eroare") == true)
+                        {
+                            <div class="mb-4">
+                                <i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>
+                            </div>
+                            <h2 class="fw-bold text-dark mb-3">Eroare</h2>
+                            <p class="text-muted mb-4">@Model.StatusMessage</p>
+
+                            <div class="alert alert-danger rounded-3 border-0 mb-4">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Eroare!</strong> Nu am putut schimba adresa de email.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-4">
+                                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                            </div>
+                            <h2 class="fw-bold text-dark mb-3">Email schimbat!</h2>
+                            <p class="text-muted mb-4">@Model.StatusMessage</p>
+
+                            <div class="alert alert-success rounded-3 border-0 mb-4">
+                                <i class="bi bi-shield-check me-2"></i>
+                                <strong>Succes!</strong> Adresa de email a fost actualizata.
+                            </div>
+                        }
+
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary btn-lg w-100 rounded-3 fw-semibold">
+                            <i class="bi bi-person-circle me-2"></i> Inapoi la Profil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

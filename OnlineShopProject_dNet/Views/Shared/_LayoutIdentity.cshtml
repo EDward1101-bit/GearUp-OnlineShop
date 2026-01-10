@@ -14,22 +14,28 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        /* Floating back button */
+        /* Floating back button - bottom right corner */
         .floating-back-btn {
             position: fixed;
-            top: 1rem;
-            left: 1rem;
+            bottom: 1.5rem;
+            right: 1.5rem;
             z-index: 1050;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        .floating-back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
-    @* Floating back button instead of navbar *@
-    <a href="/" class="floating-back-btn btn btn-light shadow-sm rounded-pill px-3 py-2">
-        <i class="bi bi-arrow-left me-1"></i> Inapoi la magazin
-    </a>
-
     @RenderBody()
+
+    @* Floating back button - moved to bottom right to avoid overlapping content *@
+    <a href="/" class="floating-back-btn btn btn-primary shadow rounded-pill px-4 py-2">
+        <i class="bi bi-house-door me-1"></i> Magazin
+    </a>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

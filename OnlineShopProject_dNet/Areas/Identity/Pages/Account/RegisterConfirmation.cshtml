@@ -1,0 +1,54 @@
+@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Confirmare Inregistrare";
+}
+
+<div class="register-confirmation-page min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-5 text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-envelope-paper-heart text-primary" style="font-size: 5rem;"></i>
+                        </div>
+                        <h2 class="fw-bold text-dark mb-3">Verifica email-ul</h2>
+                        <p class="text-muted mb-4">
+                            Ti-am trimis un email de confirmare la adresa <strong>@Model.Email</strong>. 
+                            Te rugam sa verifici inbox-ul si sa dai click pe link pentru a-ti activa contul.
+                        </p>
+
+                        <div class="alert alert-info rounded-3 border-0 mb-4" style="background-color: #e3f2fd;">
+                            <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                            <small>Daca nu gasesti email-ul, verifica si folderul Spam sau Junk.</small>
+                        </div>
+
+                        @if (Model.DisplayConfirmAccountLink)
+                        {
+                            <div class="alert alert-warning rounded-3 border-0 mb-4">
+                                <i class="bi bi-tools me-2"></i>
+                                <strong>Mod dezvoltare:</strong>
+                                <p class="mb-2 small">Pentru ca nu este configurat un serviciu de email, poti confirma contul manual:</p>
+                                <a href="@Model.EmailConfirmationUrl" class="btn btn-warning btn-sm rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i> Confirma email-ul acum
+                                </a>
+                            </div>
+                        }
+
+                        <hr class="my-4">
+
+                        <div class="d-grid gap-2">
+                            <a asp-page="./Login" class="btn btn-primary btn-lg rounded-3 fw-semibold">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> Mergi la Autentificare
+                            </a>
+                            <a href="/" class="btn btn-outline-secondary rounded-3">
+                                <i class="bi bi-house-door me-1"></i> Inapoi la magazin
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
