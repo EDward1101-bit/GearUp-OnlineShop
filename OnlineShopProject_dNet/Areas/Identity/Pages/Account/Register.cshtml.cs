@@ -71,44 +71,28 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
-
-            [Required]
-            [Display(Name = "First Name")]
+            [Required(ErrorMessage = "Prenumele este obligatoriu")]
+            [Display(Name = "Prenume")]
             public string FirstName { get; set; }
 
-            [Required]
-            [Display(Name = "Last Name")]
+            [Required(ErrorMessage = "Numele este obligatoriu")]
+            [Display(Name = "Nume")]
             public string LastName { get; set; }
 
-
-
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Email-ul este obligatoriu")]
+            [EmailAddress(ErrorMessage = "Adresa de email nu este validă")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Parola este obligatorie")]
+            [StringLength(100, ErrorMessage = "Parola trebuie să aibă cel puțin {2} și maxim {1} caractere.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Parolă")]
             public string Password { get; set; }
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Confirmă parola")]
+            [Compare("Password", ErrorMessage = "Parola și confirmarea parolei nu se potrivesc.")]
             public string ConfirmPassword { get; set; }
         }
 

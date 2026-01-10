@@ -43,10 +43,12 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
         {
             [Required(ErrorMessage = "Email-ul este obligatoriu")]
             [EmailAddress(ErrorMessage = "Adresa de email nu este valid?")]
+            [Display(Name = "Email")]
             public string Email { get; set; }
 
             [Required(ErrorMessage = "Parola este obligatorie")]
             [DataType(DataType.Password)]
+            [Display(Name = "Parol?")]
             public string Password { get; set; }
 
             [Display(Name = "?ine-m? minte")]

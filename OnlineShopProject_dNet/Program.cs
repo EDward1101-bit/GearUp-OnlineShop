@@ -27,7 +27,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
-    .AddDefaultUI();
+    .AddDefaultUI()
+    .AddErrorDescriber<RomanianIdentityErrorDescriber>();
 
 builder.Services.AddControllersWithViews(options =>
 {
