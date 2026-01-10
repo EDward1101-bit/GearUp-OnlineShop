@@ -1,7 +1,7 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Înregistrare";
+    ViewData["Title"] = "Inregistrare";
 }
 
 <div class="register-page min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -15,17 +15,17 @@
                              style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                             <div class="text-center text-white">
                                 <i class="bi bi-person-plus-fill display-1 mb-4 opacity-75"></i>
-                                <h3 class="fw-bold mb-3">Alătură-te comunității!</h3>
-                                <p class="mb-4 opacity-75">Creează un cont și bucură-te de toate avantajele</p>
+                                <h3 class="fw-bold mb-3">Alatura-te comunitatii!</h3>
+                                <p class="mb-4 opacity-75">Creeaza un cont si bucura-te de toate avantajele</p>
                                 <ul class="list-unstyled text-start">
                                     <li class="mb-3">
-                                        <i class="bi bi-check-circle-fill me-2"></i> Comandă rapid și simplu
+                                        <i class="bi bi-check-circle-fill me-2"></i> Comanda rapid si simplu
                                     </li>
                                     <li class="mb-3">
-                                        <i class="bi bi-check-circle-fill me-2"></i> Salvează produsele favorite
+                                        <i class="bi bi-check-circle-fill me-2"></i> Salveaza produsele favorite
                                     </li>
                                     <li class="mb-3">
-                                        <i class="bi bi-check-circle-fill me-2"></i> Urmărește comenzile tale
+                                        <i class="bi bi-check-circle-fill me-2"></i> Urmareste comenzile tale
                                     </li>
                                     <li class="mb-3">
                                         <i class="bi bi-check-circle-fill me-2"></i> Oferte exclusive
@@ -40,8 +40,8 @@
                                 <div class="mb-3">
                                     <i class="bi bi-shop-window text-primary" style="font-size: 3rem;"></i>
                                 </div>
-                                <h2 class="fw-bold text-dark">Creează cont nou</h2>
-                                <p class="text-muted">Completează formularul pentru a te înregistra</p>
+                                <h2 class="fw-bold text-dark">Creeaza cont nou</h2>
+                                <p class="text-muted">Completeaza formularul pentru a te inregistra</p>
                             </div>
 
                             <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
@@ -77,7 +77,7 @@
 
                                 <div class="mb-3">
                                     <label asp-for="Input.Password" class="form-label fw-semibold">
-                                        <i class="bi bi-lock me-1"></i> Parolă
+                                        <i class="bi bi-lock me-1"></i> Parola
                                     </label>
                                     <div class="position-relative">
                                         <input asp-for="Input.Password" type="password" class="form-control form-control-lg rounded-3 pe-5" 
@@ -92,7 +92,7 @@
 
                                 <div class="mb-4">
                                     <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold">
-                                        <i class="bi bi-lock-fill me-1"></i> Confirmă parola
+                                        <i class="bi bi-lock-fill me-1"></i> Confirma parola
                                     </label>
                                     <div class="position-relative">
                                         <input asp-for="Input.ConfirmPassword" type="password" class="form-control form-control-lg rounded-3 pe-5" 
@@ -106,14 +106,14 @@
                                 </div>
 
                                 <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-semibold mb-3">
-                                    <i class="bi bi-person-plus me-2"></i> Înregistrează-te
+                                    <i class="bi bi-person-plus me-2"></i> Inregistreaza-te
                                 </button>
 
                                 <div class="text-center">
                                     <p class="mb-0 text-muted small">
                                         Ai deja cont? 
                                         <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-semibold text-decoration-none">
-                                            Autentifică-te aici
+                                            Autentifica-te aici
                                         </a>
                                     </p>
                                 </div>
@@ -126,7 +126,7 @@
                 @if ((Model.ExternalLogins?.Count ?? 0) > 0)
                 {
                     <div class="card shadow border-0 rounded-4 mt-4 p-4">
-                        <h5 class="text-center mb-3 fw-semibold">Sau înregistrează-te cu</h5>
+                        <h5 class="text-center mb-3 fw-semibold">Sau inregistreaza-te cu</h5>
                         <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
                             <div class="d-grid gap-2">
                                 @foreach (var provider in Model.ExternalLogins!)

@@ -17,7 +17,7 @@
                         </div>
                         <div>
                             <h2 class="mb-1 fw-bold">Gestionare email</h2>
-                            <p class="mb-0 opacity-75">Schimb? sau verific? adresa de email</p>
+                            <p class="mb-0 opacity-75">Schimba sau verifica adresa de email</p>
                         </div>
                     </div>
                 </div>
@@ -34,7 +34,7 @@
                             <i class="bi bi-envelope me-1"></i> Email
                         </a>
                         <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
-                            <i class="bi bi-key me-1"></i> Schimb? parola
+                            <i class="bi bi-key me-1"></i> Schimba parola
                         </a>
                         <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
                             <i class="bi bi-shield-lock me-1"></i> 2FA
@@ -51,7 +51,7 @@
                             <i class="bi bi-heart me-1"></i> Favorite
                         </a>
                         <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-bell me-1"></i> Notific?ri
+                            <i class="bi bi-bell me-1"></i> Notificari
                         </a>
                         <a href="/Products/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-bag me-1"></i> Magazin
@@ -65,7 +65,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold">
-                            <i class="bi bi-envelope-at text-primary"></i> Emailul t?u
+                            <i class="bi bi-envelope-at text-primary"></i> Emailul tau
                         </h4>
 
                         @if (TempData["StatusMessage"] != null)
@@ -87,13 +87,13 @@
                             @if (Model.IsEmailConfirmed)
                             {
                                 <small class="text-success d-block mt-2">
-                                    <i class="bi bi-check-circle-fill"></i> Emailul t?u este verificat
+                                    <i class="bi bi-check-circle-fill"></i> Emailul tau este verificat
                                 </small>
                             }
                             else
                             {
                                 <small class="text-warning d-block mt-2">
-                                    <i class="bi bi-exclamation-triangle-fill"></i> Emailul t?u nu este verificat
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Emailul tau nu este verificat
                                 </small>
                             }
                         </div>
@@ -103,7 +103,7 @@
                             <form method="post" asp-page-handler="SendVerificationEmail" class="mb-4">
                                 <div class="alert alert-warning rounded-3">
                                     <i class="bi bi-info-circle-fill me-2"></i>
-                                    <strong>Aten?ie!</strong> Emailul t?u nu este verificat.
+                                    <strong>Atentie!</strong> Emailul tau nu este verificat.
                                 </div>
                                 <button type="submit" class="btn btn-warning">
                                     <i class="bi bi-send me-2"></i> Retrimite emailul de verificare
@@ -113,7 +113,7 @@
 
                         <hr class="my-4">
 
-                        <h5 class="mb-3 fw-bold">Schimb? emailul</h5>
+                        <h5 class="mb-3 fw-bold">Schimba emailul</h5>
                         <form method="post" asp-page-handler="ChangeEmail">
                             <div asp-validation-summary="All" class="alert alert-danger rounded-3" role="alert"></div>
 
@@ -125,13 +125,13 @@
                                        placeholder="email.nou@exemplu.com" />
                                 <span asp-validation-for="Input.NewEmail" class="text-danger small"></span>
                                 <small class="text-muted d-block mt-1">
-                                    <i class="bi bi-info-circle"></i> Vei primi un email de confirmare la noua adres?.
+                                    <i class="bi bi-info-circle"></i> Vei primi un email de confirmare la noua adresa.
                                 </small>
                             </div>
 
                             <div class="d-flex justify-content-center">
                                 <button type="submit" class="btn btn-primary btn-lg px-4 rounded-3">
-                                    <i class="bi bi-check-circle me-2"></i> Schimb? emailul
+                                    <i class="bi bi-check-circle me-2"></i> Schimba emailul
                                 </button>
                             </div>
                         </form>
@@ -142,9 +142,9 @@
                             <i class="bi bi-shield-check text-primary me-2"></i>
                             <strong>Securitate:</strong>
                             <ul class="mb-0 mt-2 small">
-                                <li>Vei primi un email de confirmare la noua adres?.</li>
-                                <li>Emailul actual r?mâne activ pân? la confirmarea celui nou.</li>
-                                <li>Verific? ?i folderele Spam/Junk dac? nu g?se?ti emailul.</li>
+                                <li>Vei primi un email de confirmare la noua adresa.</li>
+                                <li>Emailul actual ramane activ pana la confirmarea celui nou.</li>
+                                <li>Verifica si folderele Spam/Junk daca nu gasesti emailul.</li>
                             </ul>
                         </div>
                     </div>

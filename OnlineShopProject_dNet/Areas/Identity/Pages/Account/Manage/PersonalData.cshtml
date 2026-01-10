@@ -17,7 +17,7 @@
                         </div>
                         <div>
                             <h2 class="mb-1 fw-bold">Datele tale personale</h2>
-                            <p class="mb-0 opacity-75">Descarc? sau ?terge datele tale</p>
+                            <p class="mb-0 opacity-75">Descarca sau sterge datele tale</p>
                         </div>
                     </div>
                 </div>
@@ -34,7 +34,7 @@
                             <i class="bi bi-envelope me-1"></i> Email
                         </a>
                         <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
-                            <i class="bi bi-key me-1"></i> Schimb? parola
+                            <i class="bi bi-key me-1"></i> Schimba parola
                         </a>
                         <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
                             <i class="bi bi-shield-lock me-1"></i> 2FA
@@ -51,7 +51,7 @@
                             <i class="bi bi-heart me-1"></i> Favorite
                         </a>
                         <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-bell me-1"></i> Notific?ri
+                            <i class="bi bi-bell me-1"></i> Notificari
                         </a>
                         <a href="/Products/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-bag me-1"></i> Magazin
@@ -65,18 +65,18 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold">
-                            <i class="bi bi-download text-primary"></i> Descarc? datele tale
+                            <i class="bi bi-download text-primary"></i> Descarca datele tale
                         </h4>
 
                         <p class="text-muted mb-4">
-                            Contul t?u con?ine date personale pe care ni le-ai furnizat. Aceast? pagin? î?i permite s? descarci aceste date.
+                            Contul tau contine date personale pe care ni le-ai furnizat. Aceasta pagina iti permite sa descarci aceste date.
                         </p>
 
                         <div class="alert alert-info rounded-3 border-0" style="background-color: #e3f2fd;">
                             <i class="bi bi-info-circle-fill text-primary me-2"></i>
-                            <strong>Ce date pot fi desc?rcate?</strong>
+                            <strong>Ce date pot fi descarcate?</strong>
                             <ul class="mb-0 mt-2 small">
-                                <li>Informa?ii de profil (nume, prenume, email, telefon)</li>
+                                <li>Informatii de profil (nume, prenume, email, telefon)</li>
                                 <li>Istoricul comenzilor</li>
                                 <li>Lista de favorite</li>
                                 <li>Recenzii scrise</li>
@@ -85,7 +85,7 @@
 
                         <form method="post" asp-page="DownloadPersonalData" class="mt-4">
                             <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3">
-                                <i class="bi bi-download me-2"></i> Descarc? datele mele
+                                <i class="bi bi-download me-2"></i> Descarca datele mele
                             </button>
                         </form>
                     </div>
@@ -94,30 +94,30 @@
                 <div class="card border-0 shadow-sm border-danger">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold text-danger">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i> ?terge cont
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Sterge cont
                         </h4>
 
                         <div class="alert alert-danger rounded-3">
                             <i class="bi bi-shield-exclamation text-danger me-2"></i>
-                            <strong>Aten?ie!</strong> ?tergerea contului t?u este permanent? ?i nu poate fi anulat?.
+                            <strong>Atentie!</strong> Stergerea contului tau este permanenta si nu poate fi anulata.
                         </div>
 
                         <p class="text-muted mb-4">
-                            Când ?tergi contul, toate datele tale personale vor fi eliminate permanent din sistemul nostru, inclusiv:
+                            Cand stergi contul, toate datele tale personale vor fi eliminate permanent din sistemul nostru, inclusiv:
                         </p>
 
                         <ul class="text-muted mb-4">
-                            <li>Informa?ii de profil</li>
+                            <li>Informatii de profil</li>
                             <li>Istoricul comenzilor</li>
                             <li>Lista de favorite</li>
                             <li>Recenzii scrise</li>
-                            <li>Notific?ri</li>
+                            <li>Notificari</li>
                         </ul>
 
                         <form method="post" asp-page="DeletePersonalData">
                             <button type="submit" class="btn btn-danger btn-lg px-5 rounded-3" 
-                                    onclick="return confirm('E?ti sigur c? vrei s? ?tergi contul? Aceast? ac?iune nu poate fi anulat?!');">
-                                <i class="bi bi-trash me-2"></i> ?terge contul meu
+                                    onclick="return confirm('Esti sigur ca vrei sa stergi contul? Aceasta actiune nu poate fi anulata!');">
+                                <i class="bi bi-trash me-2"></i> Sterge contul meu
                             </button>
                         </form>
                     </div>

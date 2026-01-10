@@ -50,7 +50,7 @@
                             <i class="bi bi-envelope me-1"></i> Email
                         </a>
                         <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
-                            <i class="bi bi-key me-1"></i> Schimb? parola
+                            <i class="bi bi-key me-1"></i> Schimba parola
                         </a>
                         <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
                             <i class="bi bi-shield-lock me-1"></i> 2FA
@@ -67,7 +67,7 @@
                             <i class="bi bi-heart me-1"></i> Favorite
                         </a>
                         <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-bell me-1"></i> Notific?ri
+                            <i class="bi bi-bell me-1"></i> Notificari
                         </a>
                         <a href="/Products/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-bag me-1"></i> Magazin
@@ -81,7 +81,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold">
-                            <i class="bi bi-person-gear text-primary"></i> Editeaz? profilul
+                            <i class="bi bi-person-gear text-primary"></i> Editeaza profilul
                         </h4>
 
                         @if (TempData["StatusMessage"] != null)
@@ -100,7 +100,7 @@
                                     <label asp-for="Input.FirstName" class="form-label fw-semibold">
                                         <i class="bi bi-person me-1 text-primary"></i> Prenume
                                     </label>
-                                    <input asp-for="Input.FirstName" class="form-control form-control-lg rounded-3" placeholder="Prenumele t?u" />
+                                    <input asp-for="Input.FirstName" class="form-control form-control-lg rounded-3" placeholder="Prenumele tau" />
                                     <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
                                 </div>
 
@@ -108,7 +108,7 @@
                                     <label asp-for="Input.LastName" class="form-label fw-semibold">
                                         <i class="bi bi-person me-1 text-primary"></i> Nume
                                     </label>
-                                    <input asp-for="Input.LastName" class="form-control form-control-lg rounded-3" placeholder="Numele t?u" />
+                                    <input asp-for="Input.LastName" class="form-control form-control-lg rounded-3" placeholder="Numele tau" />
                                     <span asp-validation-for="Input.LastName" class="text-danger small"></span>
                                 </div>
 
@@ -118,13 +118,13 @@
                                     </label>
                                     <input asp-for="Input.Email" class="form-control form-control-lg rounded-3" placeholder="email@exemplu.com" disabled />
                                     <small class="text-muted d-block mt-1">
-                                        <i class="bi bi-info-circle"></i> Pentru a schimba emailul, contacteaz? suportul.
+                                        <i class="bi bi-info-circle"></i> Pentru a schimba emailul, contacteaza suportul.
                                     </small>
                                 </div>
 
                                 <div class="col-12">
                                     <label asp-for="Input.PhoneNumber" class="form-label fw-semibold">
-                                        <i class="bi bi-telephone me-1 text-primary"></i> Num?r de telefon
+                                        <i class="bi bi-telephone me-1 text-primary"></i> Numar de telefon
                                     </label>
                                     <input asp-for="Input.PhoneNumber" class="form-control form-control-lg rounded-3" placeholder="+40 7XX XXX XXX" />
                                     <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
@@ -135,7 +135,7 @@
 
                             <div class="d-flex justify-content-center">
                                 <button type="submit" class="btn btn-primary btn-lg rounded-3 px-5">
-                                    <i class="bi bi-check-circle me-2"></i> Salveaz? modific?rile
+                                    <i class="bi bi-check-circle me-2"></i> Salveaza modificarile
                                 </button>
                             </div>
                         </form>
@@ -172,7 +172,7 @@
                                 <div class="card-body text-center p-4">
                                     <i class="bi bi-star-fill text-warning mb-3" style="font-size: 3.5rem;"></i>
                                     <h5 class="card-title fw-bold text-dark">Recenzii</h5>
-                                    <p class="text-muted mb-0">Evalu?ri scrise</p>
+                                    <p class="text-muted mb-0">Evaluari scrise</p>
                                 </div>
                             </div>
                         </a>

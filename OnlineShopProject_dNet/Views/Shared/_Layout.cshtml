@@ -4,7 +4,7 @@
 @inject OnlineShopProject_dNet.Services.NotificationService NotificationService
 
 @{
-    // Obține numele complet al utilizatorului
+    // Obtine numele complet al utilizatorului
     var currentUser = await UserManager.GetUserAsync(User);
     var unreadNotifications = currentUser != null ? await NotificationService.UnreadCountAsync(currentUser.Id) : 0;
     var displayName = currentUser != null
@@ -41,11 +41,11 @@
                 </button>
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
 
-                    @* --- GRUP 1: MENIUL STÂNGA (Navigare) --- *@
+                    @* --- GRUP 1: MENIUL STANGA (Navigare) --- *@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house-door"></i> Acasă
+                                <i class="bi bi-house-door"></i> Acasa
                             </a>
                         </li>
                         <li class="nav-item">
@@ -60,7 +60,7 @@
                             <ul class="dropdown-menu" aria-labelledby="categoriesDropdown" id="categoriesDropdownMenu">
                                 <li><a class="dropdown-item" href="/Products/Index"><i class="bi bi-list-ul"></i> Toate produsele</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li class="px-3 py-2 text-muted small"><i class="bi bi-hourglass-split"></i> Se încarcă...</li>
+                                <li class="px-3 py-2 text-muted small"><i class="bi bi-hourglass-split"></i> Se incarca...</li>
                             </ul>
                         </li>
 
@@ -68,15 +68,15 @@
         <!-- mini cart placeholder; real loader defined later -->
                     </ul>
 
-                    @* --- GRUP 2: MENIUL DREAPTA (Iconițe + User) --- *@
+                    @* --- GRUP 2: MENIUL DREAPTA (Iconite + User) --- *@
                     <div class="d-flex align-items-center">
 
-                        @* 1. COȘ & WISHLIST (Iconițe cu badge-uri) *@
+                        @* 1. COS & WISHLIST (Iconite cu badge-uri) *@
                         <ul class="navbar-nav align-items-center me-2">
                             @await Component.InvokeAsync("NavbarSummary")
                         </ul>
 
-                        @* 2. USER MENU - Pentru toți utilizatorii autentificați *@
+                        @* 2. USER MENU - Pentru toti utilizatorii autentificati *@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <ul class="navbar-nav align-items-center">
@@ -102,7 +102,7 @@
                                         </a></li>
                                         <li>
                                             <a class="dropdown-item d-flex justify-content-between align-items-center" asp-controller="Notifications" asp-action="Index">
-                                                <span><i class="bi bi-bell"></i> Notificări</span>
+                                                <span><i class="bi bi-bell"></i> Notificari</span>
                                                 @if (unreadNotifications > 0)
                                                 {
                                                     <span class="badge bg-danger">@unreadNotifications</span>
@@ -121,7 +121,7 @@
                                                 <i class="bi bi-tags"></i> Gestionare Categorii
                                             </a></li>
                                             <li><a class="dropdown-item text-primary fw-semibold" href="/Products/Index#pending-products">
-                                                <i class="bi bi-clock-history"></i> Produse în Așteptare 
+                                                <i class="bi bi-clock-history"></i> Produse in Asteptare 
                                                 <span id="pendingCountNav" class="badge bg-warning text-dark ms-2">0</span>
                                             </a></li>
                                             <li><a class="dropdown-item text-primary fw-semibold" asp-controller="Admin" asp-action="Users">
@@ -143,11 +143,11 @@
                         }
                         else
                         {
-                            @* Pentru utilizatori neautentificați - butoane Înregistrare / Autentificare *@
+                            @* Pentru utilizatori neautentificati - butoane Inregistrare / Autentificare *@
                             <ul class="navbar-nav align-items-center">
                                 <li class="nav-item">
                                     <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">
-                                        <i class="bi bi-person-plus"></i> <span class="d-none d-lg-inline">Înregistrare</span>
+                                        <i class="bi bi-person-plus"></i> <span class="d-none d-lg-inline">Inregistrare</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -173,7 +173,7 @@
             <div class="row gy-4">
                 <div class="col-md-4">
                     <h5 class="fw-bold text-dark"><i class="bi bi-shop-window"></i> Magazin Online</h5>
-                    <p class="small text-muted">Magazine Online — produse de calitate, livrare rapidă și suport dedicat. Descoperă selecțiile noastre atent curate.</p>
+                    <p class="small text-muted">Magazine Online - produse de calitate, livrare rapida si suport dedicat. Descopera selectiile noastre atent curate.</p>
                     <div class="mt-3">
                         <a href="#" class="text-decoration-none me-2"><i class="bi bi-facebook fs-5"></i></a>
                         <a href="#" class="text-decoration-none me-2"><i class="bi bi-instagram fs-5"></i></a>
@@ -182,11 +182,11 @@
                 </div>
 
                 <div class="col-6 col-md-2">
-                    <h6 class="fw-semibold">Servicii Clienți</h6>
+                    <h6 class="fw-semibold">Servicii Clienti</h6>
                     <ul class="list-unstyled small">
                         <li><a class="text-decoration-none text-muted" href="/Home/Contact">Contact</a></li>
                         <li><a class="text-decoration-none text-muted" href="/Orders/Index">Comenzile mele</a></li>
-                        <li><a class="text-decoration-none text-muted" href="/Home/ReturnPolicy">Returnări</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/ReturnPolicy">Returnari</a></li>
                         <li><a class="text-decoration-none text-muted" href="/Home/Shipping">Livrare</a></li>
                     </ul>
                 </div>
@@ -196,18 +196,18 @@
                     <ul class="list-unstyled small">
                         <li><a class="text-decoration-none text-muted" href="/Products/Index">Catalog</a></li>
                         <li><a class="text-decoration-none text-muted" href="/Home/About">Despre noi</a></li>
-                        <li><a class="text-decoration-none text-muted" href="/Home/Privacy">Politica de confidențialitate</a></li>
-                        <li><a class="text-decoration-none text-muted" href="/Home/Terms">Termeni și condiții</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/Privacy">Politica de confidentialitate</a></li>
+                        <li><a class="text-decoration-none text-muted" href="/Home/Terms">Termeni si conditii</a></li>
                     </ul>
                 </div>
 
                 <div class="col-md-4">
-                    <h6 class="fw-semibold">Abonează-te la newsletter</h6>
-                    <p class="small text-muted">Primești oferte și noutăți exclusive.</p>
+                    <h6 class="fw-semibold">Aboneaza-te la newsletter</h6>
+                    <p class="small text-muted">Primesti oferte si noutati exclusive.</p>
                     <form class="d-flex" method="post" action="/Home/Subscribe">
                         @Html.AntiForgeryToken()
                         <input type="email" name="email" class="form-control form-control-sm me-2" placeholder="Adresa ta de email" required />
-                        <button class="btn btn-primary btn-sm">Abonează-te</button>
+                        <button class="btn btn-primary btn-sm">Aboneaza-te</button>
                     </form>
                 </div>
             </div>
