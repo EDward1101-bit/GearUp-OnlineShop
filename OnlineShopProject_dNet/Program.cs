@@ -88,7 +88,7 @@ app.Use(async (context, next) =>
         await context.Response.WriteAsync(@"
             <html>
                 <head>
-                    <title>Eroare Internă Server</title>
+                    <title>Eroare internă a serverului</title>
                     <link href='/lib/bootstrap/dist/css/bootstrap.min.css' rel='stylesheet' />
                 </head>
                 <body class='bg-light'>
@@ -100,7 +100,7 @@ app.Use(async (context, next) =>
                                         <i class='bi bi-exclamation-triangle text-danger' style='font-size: 4rem;'></i>
                                         <h1 class='card-title mt-3'>Oops! Ceva nu a mers bine</h1>
                                         <p class='card-text'>A apărut o eroare neașteptată. Vă rugăm să încercați din nou mai târziu.</p>
-                                        <a href='/' class='btn btn-primary'>Înapoi la Acasă</a>
+                                        <a href='/' class='btn btn-primary'>Înapoi acasă</a>
                                     </div>
                                 </div>
                             </div>

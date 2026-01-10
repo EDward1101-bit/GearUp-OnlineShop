@@ -1,7 +1,7 @@
 @page
 @model PersonalDataModel
 @{
-    ViewData["Title"] = "Date Personale";
+    ViewData["Title"] = "Date personale";
 }
 
 <div class="container py-5">
@@ -16,7 +16,7 @@
                             <i class="bi bi-file-person-fill"></i>
                         </div>
                         <div>
-                            <h2 class="mb-1 fw-bold">Datele Tale Personale</h2>
+                            <h2 class="mb-1 fw-bold">Datele tale personale</h2>
                             <p class="mb-0 opacity-75">Descarca sau sterge datele tale</p>
                         </div>
                     </div>
@@ -34,24 +34,27 @@
                             <i class="bi bi-envelope me-1"></i> Email
                         </a>
                         <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
-                            <i class="bi bi-key me-1"></i> Schimba Parola
+                            <i class="bi bi-key me-1"></i> Schimba parola
                         </a>
                         <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
                             <i class="bi bi-shield-lock me-1"></i> 2FA
                         </a>
                         <a href="/Identity/Account/Manage/PersonalData" class="btn btn-primary">
-                            <i class="bi bi-file-person me-1"></i> Date Personale
+                            <i class="bi bi-file-person me-1"></i> Date personale
                         </a>
                     </div>
                     <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
                         <a href="/Orders/MyOrders" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-box-seam me-1"></i> Comenzile Mele
+                            <i class="bi bi-box-seam me-1"></i> Comenzile mele
                         </a>
                         <a href="/Wishlist/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-heart me-1"></i> Favorite
                         </a>
                         <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-bell me-1"></i> Notificari
+                        </a>
+                        <a href="/Products/Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-bag me-1"></i> Magazin
                         </a>
                     </div>
                 </div>
@@ -62,7 +65,7 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold">
-                            <i class="bi bi-download text-primary"></i> Descarca Datele Tale
+                            <i class="bi bi-download text-primary"></i> Descarca datele tale
                         </h4>
 
                         <p class="text-muted mb-4">
@@ -82,7 +85,7 @@
 
                         <form method="post" asp-page="DownloadPersonalData" class="mt-4">
                             <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3">
-                                <i class="bi bi-download me-2"></i> Descarca Datele Mele
+                                <i class="bi bi-download me-2"></i> Descarca datele mele
                             </button>
                         </form>
                     </div>
@@ -91,7 +94,7 @@
                 <div class="card border-0 shadow-sm border-danger">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold text-danger">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Sterge Cont
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Sterge cont
                         </h4>
 
                         <div class="alert alert-danger rounded-3">
@@ -114,7 +117,7 @@
                         <form method="post" asp-page="DeletePersonalData">
                             <button type="submit" class="btn btn-danger btn-lg px-5 rounded-3" 
                                     onclick="return confirm('Esti sigur ca vrei sa stergi contul? Aceasta actiune nu poate fi anulata!');">
-                                <i class="bi bi-trash me-2"></i> Sterge Contul Meu
+                                <i class="bi bi-trash me-2"></i> Sterge contul meu
                             </button>
                         </form>
                     </div>
@@ -123,3 +126,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -50,24 +50,27 @@
                             <i class="bi bi-envelope me-1"></i> Email
                         </a>
                         <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
-                            <i class="bi bi-key me-1"></i> Schimba Parola
+                            <i class="bi bi-key me-1"></i> Schimba parola
                         </a>
                         <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
                             <i class="bi bi-shield-lock me-1"></i> 2FA
                         </a>
                         <a href="/Identity/Account/Manage/PersonalData" class="btn btn-outline-primary">
-                            <i class="bi bi-file-person me-1"></i> Date Personale
+                            <i class="bi bi-file-person me-1"></i> Date personale
                         </a>
                     </div>
                     <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
                         <a href="/Orders/MyOrders" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-box-seam me-1"></i> Comenzile Mele
+                            <i class="bi bi-box-seam me-1"></i> Comenzile mele
                         </a>
                         <a href="/Wishlist/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-heart me-1"></i> Favorite
                         </a>
                         <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-bell me-1"></i> Notificari
+                        </a>
+                        <a href="/Products/Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-bag me-1"></i> Magazin
                         </a>
                     </div>
                 </div>
@@ -78,7 +81,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold">
-                            <i class="bi bi-person-gear text-primary"></i> Editeaza Profilul
+                            <i class="bi bi-person-gear text-primary"></i> Editeaza profilul
                         </h4>
 
                         @if (TempData["StatusMessage"] != null)
@@ -115,13 +118,13 @@
                                     </label>
                                     <input asp-for="Input.Email" class="form-control form-control-lg rounded-3" placeholder="email@exemplu.com" disabled />
                                     <small class="text-muted d-block mt-1">
-                                        <i class="bi bi-info-circle"></i> Pentru a schimba email-ul, contacteaza suportul.
+                                        <i class="bi bi-info-circle"></i> Pentru a schimba emailul, contacteaza suportul.
                                     </small>
                                 </div>
 
                                 <div class="col-12">
                                     <label asp-for="Input.PhoneNumber" class="form-label fw-semibold">
-                                        <i class="bi bi-telephone me-1 text-primary"></i> Numar de Telefon
+                                        <i class="bi bi-telephone me-1 text-primary"></i> Numar de telefon
                                     </label>
                                     <input asp-for="Input.PhoneNumber" class="form-control form-control-lg rounded-3" placeholder="+40 7XX XXX XXX" />
                                     <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
@@ -130,13 +133,10 @@
 
                             <hr class="my-4">
 
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-center">
                                 <button type="submit" class="btn btn-primary btn-lg rounded-3 px-5">
-                                    <i class="bi bi-check-circle me-2"></i> Salveaza Modificarile
+                                    <i class="bi bi-check-circle me-2"></i> Salveaza modificarile
                                 </button>
-                                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg rounded-3">
-                                    <i class="bi bi-x-circle me-2"></i> Anuleaza
-                                </a>
                             </div>
                         </form>
                     </div>
@@ -150,7 +150,7 @@
                                 <div class="card-body text-center p-4">
                                     <i class="bi bi-box-seam text-primary mb-3" style="font-size: 3.5rem;"></i>
                                     <h5 class="card-title fw-bold text-dark">Comenzi</h5>
-                                    <p class="text-muted mb-0">Vezi istoric</p>
+                                    <p class="text-muted mb-0">Vezi istoricul</p>
                                 </div>
                             </div>
                         </a>

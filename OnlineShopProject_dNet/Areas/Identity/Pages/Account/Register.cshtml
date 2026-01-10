@@ -1,18 +1,11 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Înregistrare";
+    ViewData["Title"] = "Inregistrare";
 }
 
 <div class="register-page min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
 <div class="container">
-    @* Back to Home Link *@
-    <div class="text-center mb-4">
-        <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none">
-            <i class="bi bi-arrow-left me-2"></i> Inapoi la Pagina Principala
-        </a>
-    </div>
-        
     <div class="row justify-content-center">
             <div class="col-md-10 col-lg-9">
                 <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
@@ -23,7 +16,7 @@
                             <div class="text-center text-white">
                                 <i class="bi bi-person-plus-fill display-1 mb-4 opacity-75"></i>
                                 <h3 class="fw-bold mb-3">Alatura-te comunitatii!</h3>
-                                <p class="mb-4 opacity-75">Creaza un cont si bucura-te de toate avantajele</p>
+                                <p class="mb-4 opacity-75">Creeaza un cont si bucura-te de toate avantajele</p>
                                 <ul class="list-unstyled text-start">
                                     <li class="mb-3">
                                         <i class="bi bi-check-circle-fill me-2"></i> Comanda rapid si simplu
@@ -47,7 +40,7 @@
                                 <div class="mb-3">
                                     <i class="bi bi-shop-window text-primary" style="font-size: 3rem;"></i>
                                 </div>
-                                <h2 class="fw-bold text-dark">Creaza cont nou</h2>
+                                <h2 class="fw-bold text-dark">Creeaza cont nou</h2>
                                 <p class="text-muted">Completeaza formularul pentru a te inregistra</p>
                             </div>
 
@@ -99,7 +92,7 @@
 
                                 <div class="mb-4">
                                     <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold">
-                                        <i class="bi bi-lock-fill me-1"></i> Confirma Parola
+                                        <i class="bi bi-lock-fill me-1"></i> Confirma parola
                                     </label>
                                     <div class="position-relative">
                                         <input asp-for="Input.ConfirmPassword" type="password" class="form-control form-control-lg rounded-3 pe-5" 
