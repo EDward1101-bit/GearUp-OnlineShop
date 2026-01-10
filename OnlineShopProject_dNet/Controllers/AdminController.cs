@@ -48,7 +48,7 @@ namespace OnlineShopProject_dNet.Controllers
                 });
             }
 
-            // Daca nu exista cautare, afisam doar Proposerii
+            // Dac? nu exist? c?utare, afi??m doar Proposerii
             if (string.IsNullOrWhiteSpace(search))
             {
                 model = model.Where(m => m.IsProposer).ToList();
@@ -78,7 +78,7 @@ namespace OnlineShopProject_dNet.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                TempData["message"] = "Utilizatorul nu a fost gasit.";
+                TempData["message"] = "Utilizatorul nu a fost g?sit.";
                 return RedirectToAction("Users");
             }
 
@@ -90,7 +90,7 @@ namespace OnlineShopProject_dNet.Controllers
             if (isProposer)
             {
                 result = await _userManager.RemoveFromRoleAsync(user, "Proposer");
-                message = "Rolul de Proposer ti-a fost revocat de administrator.";
+                message = "Rolul de Proposer ?i-a fost revocat de administrator.";
             }
             else
             {
@@ -99,7 +99,7 @@ namespace OnlineShopProject_dNet.Controllers
                     await _roleManager.CreateAsync(new IdentityRole("Proposer"));
                 }
                 result = await _userManager.AddToRoleAsync(user, "Proposer");
-                message = "Ai primit rolul de Proposer. Poti propune produse spre aprobare.";
+                message = "Ai primit rolul de Proposer. Po?i propune produse spre aprobare.";
             }
 
             if (result.Succeeded)

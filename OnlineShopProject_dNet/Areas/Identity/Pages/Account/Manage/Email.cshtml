@@ -16,8 +16,8 @@
                             <i class="bi bi-envelope-fill"></i>
                         </div>
                         <div>
-                            <h2 class="mb-1 fw-bold">Gestionare Email</h2>
-                            <p class="mb-0 opacity-75">Schimba sau verifica adresa de email</p>
+                            <h2 class="mb-1 fw-bold">Gestionare email</h2>
+                            <p class="mb-0 opacity-75">Schimb? sau verific? adresa de email</p>
                         </div>
                     </div>
                 </div>
@@ -34,24 +34,27 @@
                             <i class="bi bi-envelope me-1"></i> Email
                         </a>
                         <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-outline-primary">
-                            <i class="bi bi-key me-1"></i> Schimba Parola
+                            <i class="bi bi-key me-1"></i> Schimb? parola
                         </a>
                         <a href="/Identity/Account/Manage/TwoFactorAuthentication" class="btn btn-outline-primary">
                             <i class="bi bi-shield-lock me-1"></i> 2FA
                         </a>
                         <a href="/Identity/Account/Manage/PersonalData" class="btn btn-outline-primary">
-                            <i class="bi bi-file-person me-1"></i> Date Personale
+                            <i class="bi bi-file-person me-1"></i> Date personale
                         </a>
                     </div>
                     <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
                         <a href="/Orders/MyOrders" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-box-seam me-1"></i> Comenzile Mele
+                            <i class="bi bi-box-seam me-1"></i> Comenzile mele
                         </a>
                         <a href="/Wishlist/Index" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-heart me-1"></i> Favorite
                         </a>
                         <a href="/Notifications/Index" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-bell me-1"></i> Notificari
+                            <i class="bi bi-bell me-1"></i> Notific?ri
+                        </a>
+                        <a href="/Products/Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-bag me-1"></i> Magazin
                         </a>
                     </div>
                 </div>
@@ -62,7 +65,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
                         <h4 class="card-title mb-4 fw-bold">
-                            <i class="bi bi-envelope-at text-primary"></i> Email-ul Tau
+                            <i class="bi bi-envelope-at text-primary"></i> Emailul t?u
                         </h4>
 
                         @if (TempData["StatusMessage"] != null)
@@ -74,7 +77,7 @@
                         }
 
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Email Curent</label>
+                            <label class="form-label fw-semibold">Email curent</label>
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-light">
                                     <i class="bi bi-envelope"></i>
@@ -84,13 +87,13 @@
                             @if (Model.IsEmailConfirmed)
                             {
                                 <small class="text-success d-block mt-2">
-                                    <i class="bi bi-check-circle-fill"></i> Email-ul tau este verificat
+                                    <i class="bi bi-check-circle-fill"></i> Emailul t?u este verificat
                                 </small>
                             }
                             else
                             {
                                 <small class="text-warning d-block mt-2">
-                                    <i class="bi bi-exclamation-triangle-fill"></i> Email-ul tau nu este verificat
+                                    <i class="bi bi-exclamation-triangle-fill"></i> Emailul t?u nu este verificat
                                 </small>
                             }
                         </div>
@@ -100,35 +103,37 @@
                             <form method="post" asp-page-handler="SendVerificationEmail" class="mb-4">
                                 <div class="alert alert-warning rounded-3">
                                     <i class="bi bi-info-circle-fill me-2"></i>
-                                    <strong>Atentie!</strong> Email-ul tau nu este verificat.
+                                    <strong>Aten?ie!</strong> Emailul t?u nu este verificat.
                                 </div>
                                 <button type="submit" class="btn btn-warning">
-                                    <i class="bi bi-send me-2"></i> Retrimite Email de Verificare
+                                    <i class="bi bi-send me-2"></i> Retrimite emailul de verificare
                                 </button>
                             </form>
                         }
 
                         <hr class="my-4">
 
-                        <h5 class="mb-3 fw-bold">Schimba Email-ul</h5>
+                        <h5 class="mb-3 fw-bold">Schimb? emailul</h5>
                         <form method="post" asp-page-handler="ChangeEmail">
                             <div asp-validation-summary="All" class="alert alert-danger rounded-3" role="alert"></div>
 
                             <div class="mb-4">
                                 <label asp-for="Input.NewEmail" class="form-label fw-semibold">
-                                    <i class="bi bi-envelope-plus me-1 text-primary"></i> Email Nou
+                                    <i class="bi bi-envelope-plus me-1 text-primary"></i> Email nou
                                 </label>
                                 <input asp-for="Input.NewEmail" class="form-control form-control-lg rounded-3" 
                                        placeholder="email.nou@exemplu.com" />
                                 <span asp-validation-for="Input.NewEmail" class="text-danger small"></span>
                                 <small class="text-muted d-block mt-1">
-                                    <i class="bi bi-info-circle"></i> Vei primi un email de confirmare la noua adresa.
+                                    <i class="bi bi-info-circle"></i> Vei primi un email de confirmare la noua adres?.
                                 </small>
                             </div>
 
-                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3">
-                                <i class="bi bi-check-circle me-2"></i> Schimba Email-ul
-                            </button>
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-4 rounded-3">
+                                    <i class="bi bi-check-circle me-2"></i> Schimb? emailul
+                                </button>
+                            </div>
                         </form>
 
                         <hr class="my-4">
@@ -137,9 +142,9 @@
                             <i class="bi bi-shield-check text-primary me-2"></i>
                             <strong>Securitate:</strong>
                             <ul class="mb-0 mt-2 small">
-                                <li>Vei primi un email de confirmare la noua adresa</li>
-                                <li>Email-ul actual ramane activ pana la confirmarea celui nou</li>
-                                <li>Nu uita sa verifici si folderul spam/junk</li>
+                                <li>Vei primi un email de confirmare la noua adres?.</li>
+                                <li>Emailul actual r?mâne activ pân? la confirmarea celui nou.</li>
+                                <li>Verific? ?i folderele Spam/Junk dac? nu g?se?ti emailul.</li>
                             </ul>
                         </div>
                     </div>

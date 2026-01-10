@@ -7,13 +7,6 @@
 
 <div class="login-page min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
 <div class="container">
-    @* Back to Home Link *@
-    <div class="text-center mb-4">
-        <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none">
-            <i class="bi bi-arrow-left me-2"></i> Înapoi la Pagina Principal?
-        </a>
-    </div>
-        
     <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8">
                 <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
@@ -25,7 +18,7 @@
                                     <i class="bi bi-shop-window text-primary" style="font-size: 3rem;"></i>
                                 </div>
                                 <h2 class="fw-bold text-dark">Bine ai revenit!</h2>
-                                <p class="text-muted">Conecteaza-te la contul tau</p>
+                                <p class="text-muted">Conecteaz?-te la contul t?u</p>
                             </div>
 
                             <form id="account" method="post">
@@ -42,7 +35,7 @@
 
                                 <div class="mb-3">
                                     <label asp-for="Input.Password" class="form-label fw-semibold">
-                                        <i class="bi bi-lock me-1"></i> Parola
+                                        <i class="bi bi-lock me-1"></i> Parol?
                                     </label>
                                     <div class="position-relative">
                                         <input asp-for="Input.Password" type="password" class="form-control form-control-lg rounded-3 pe-5" 
@@ -63,7 +56,7 @@
                                 </div>
 
                                 <button id="login-submit" type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-semibold mb-3">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i> Autentifica-te
+                                    <i class="bi bi-box-arrow-in-right me-2"></i> Autentific?-te
                                 </button>
 
                                 <div class="text-center">
@@ -78,7 +71,7 @@
                                     <p class="mb-0 text-muted small">
                                         Nu ai cont? 
                                         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-semibold text-decoration-none">
-                                            Inregistreaza-te acum
+                                            Înregistreaz?-te acum
                                         </a>
                                     </p>
                                 </div>
@@ -90,20 +83,20 @@
                              style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                             <div class="text-center text-white">
                                 <i class="bi bi-shield-check display-1 mb-4 opacity-75"></i>
-                                <h3 class="fw-bold mb-3">Contul tau securizat</h3>
-                                <p class="mb-4 opacity-75">Acceseaza toate functiile magazinului nostru online</p>
+                                <h3 class="fw-bold mb-3">Contul t?u securizat</h3>
+                                <p class="mb-4 opacity-75">Acceseaz? toate func?iile magazinului nostru online</p>
                                 <ul class="list-unstyled text-start">
                                     <li class="mb-2">
-                                        <i class="bi bi-check-circle-fill me-2"></i> Comenzi rapide si sigure
+                                        <i class="bi bi-check-circle-fill me-2"></i> Comenzi rapide ?i sigure
                                     </li>
                                     <li class="mb-2">
-                                        <i class="bi bi-check-circle-fill me-2"></i> Istoric complet al achizitiilor
+                                        <i class="bi bi-check-circle-fill me-2"></i> Istoric complet al achizi?iilor
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle-fill me-2"></i> Liste de favorite personalizate
                                     </li>
                                     <li class="mb-2">
-                                        <i class="bi bi-check-circle-fill me-2"></i> Oferte exclusive pentru membrii
+                                        <i class="bi bi-check-circle-fill me-2"></i> Oferte exclusive pentru membri
                                     </li>
                                 </ul>
                             </div>
@@ -115,7 +108,7 @@
                 @if ((Model.ExternalLogins?.Count ?? 0) > 0)
                 {
                     <div class="card shadow border-0 rounded-4 mt-4 p-4">
-                        <h5 class="text-center mb-3 fw-semibold">Sau autentifica-te cu</h5>
+                        <h5 class="text-center mb-3 fw-semibold">Sau autentific?-te cu</h5>
                         <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
                             <div class="d-grid gap-2">
                                 @foreach (var provider in Model.ExternalLogins!)

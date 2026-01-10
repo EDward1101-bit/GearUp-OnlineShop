@@ -168,7 +168,7 @@
         </main>
     </div>
 
-    <footer class="bg-light border-top mt-4 pt-5 pb-4 text-muted">
+    <footer class="bg-light border-top mt-4 pt-5 pb-4 text-muted footer-disabled">
         <div class="container">
             <div class="row gy-4">
                 <div class="col-md-4">
@@ -241,6 +241,15 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <style>
+        /* Disable footer interactivity */
+        footer.footer-disabled a,
+        footer.footer-disabled button,
+        footer.footer-disabled input,
+        footer.footer-disabled form {
+            pointer-events: none;
+            cursor: default;
+        }
+
         /* Smart sticky navbar that follows user scroll position */
         .navbar.sticky-top { 
             position: fixed !important; 

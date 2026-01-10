@@ -28,14 +28,12 @@ namespace OnlineShopProject_dNet.Data
             const string ADMIN_ID = "9e445865-a24d-4543-a6c6-9443d048cdb9";
             const string PROPOSER_ID = "9e445865-a24d-4543-a6c6-9443d048cdb8";
             const string USER_ID = "9e445865-a24d-4543-a6c6-9443d048cdb7";
-            const string ATHLETE_ID = "9e445865-a24d-4543-a6c6-9443d048cdb6";
 
             var userDefinitions = new List<(string Id, string Email, string First, string Last, string Password, string Role)>
             {
                 (ADMIN_ID, "admin@test.com", "Admin", "Sistem", "Admin123!", "Admin"),
                 (PROPOSER_ID, "proposer@test.com", "Dan", "Propunător", "Proposer123!", "Proposer"),
-                (USER_ID, "user@test.com", "Ion", "Userescu", "User123!", "User"),
-                (ATHLETE_ID, "andreea.fit@test.com", "Andreea", "Toma", "Andreea123!", "User")
+                (USER_ID, "user@test.com", "Ion", "Userescu", "User123!", "User")
             };
 
             var usersById = new Dictionary<string, ApplicationUser>();
@@ -96,7 +94,7 @@ namespace OnlineShopProject_dNet.Data
             {
                 (
                     "Creatină Monohidrată Micronizată 500 g",
-                    "Creatină monohidrată micronizată, testată pentru puritate, 100 de porții a câte 5 g. Se dizolvă ușor, fără arome artificiale. Perfectă pentru forță, volum și refacere rapidă după antrenamentele intense.",
+                    "Creatină monohidrată micronizată, testată pentru puritate.\n\n✔️ 100 de porții a câte 5 g\n✔️ Se dizolvă rapid, fără gust nisipos\n✔️ Perfectă pentru forță, volum și refacere după antrenamentele grele",
                     "/images/creatina-monohidratata.jpeg",
                     149.90m,
                     120,
@@ -105,7 +103,7 @@ namespace OnlineShopProject_dNet.Data
                 ),
                 (
                     "Whey Protein Gold 1 kg",
-                    "Proteina din zer premium cu 24 g proteină per porție și 5,5 g BCAA. Se mixează fin în shaker, gust echilibrat de vanilie și se absoarbe rapid pentru recuperare musculară și menținerea masei slabe.",
+                    "Proteina din zer premium, gust fin de vanilie.\n\n• 24 g proteină + 5,5 g BCAA per porție\n• Se amestecă perfect în shaker, fără cocoloașe\n• Absorbție rapidă pentru recuperare și menținerea masei slabe",
                     "/images/whey-protein-gold-1kg.jpg",
                     219.00m,
                     80,
@@ -114,7 +112,7 @@ namespace OnlineShopProject_dNet.Data
                 ),
                 (
                     "Set Gantere Reglabile 20 kg",
-                    "Set compact cu discuri metalice cauciucate și bare cu filet. Poți ajusta greutatea între 2 kg și 20 kg, mânere striate pentru grip sigur și inele de fixare cu filet care nu se slăbesc în timpul antrenamentului.",
+                    "Set compact cu discuri metalice cauciucate și bare cu filet.\n\n• Ajustare între 2 kg și 20 kg\n• Mânere striate pentru grip sigur\n• Inele de fixare cu filet stabile chiar și la superserii",
                     "/images/set-gantere-reglabile.jpeg",
                     579.00m,
                     30,
@@ -123,7 +121,7 @@ namespace OnlineShopProject_dNet.Data
                 ),
                 (
                     "Geantă de Sală XL - Albă",
-                    "Geantă spațioasă pentru sală, material impermeabil, compartiment ventilat pentru încălțăminte și buzunare laterale pentru shaker și accesorii mici. Curea reglabilă și întărituri pe fund pentru a rezista la greutate.",
+                    "Geantă spațioasă pentru sală, material impermeabil.\n\n• Compartiment ventilat pentru încălțăminte\n• Buzunare laterale pentru shaker și accesorii\n• Curea reglabilă, întărituri pe fund pentru greutate",
                     "/images/gym-bag-white.jpeg",
                     189.00m,
                     45,
@@ -132,7 +130,7 @@ namespace OnlineShopProject_dNet.Data
                 ),
                 (
                     "Shaker Proteine din Oțel Inoxidabil 750 ml",
-                    "Shaker izolat din oțel inoxidabil care nu prinde mirosuri, cu capac etanș și sită anti-cocoloașe. Păstrează băutura rece după antrenament și se curăță ușor în doar câteva clătiri.",
+                    "Shaker izolat din oțel inoxidabil, nu prinde mirosuri.\n\n• Capac etanș și sită anti-cocoloașe\n• Păstrează băutura rece după antrenament\n• Se curăță ușor și rezistă la uz zilnic",
                     "/images/shaker-proteine-otel-inoxidabil.jpeg",
                     99.00m,
                     200,
@@ -184,8 +182,7 @@ namespace OnlineShopProject_dNet.Data
             {
                 [ADMIN_ID] = ("Str. Sportivilor 10, București", DateTime.UtcNow.AddDays(-30)),
                 [PROPOSER_ID] = ("Str. Atletismului 22, Cluj-Napoca", DateTime.UtcNow.AddDays(-24)),
-                [USER_ID] = ("Bd. Independenței 15, Iași", DateTime.UtcNow.AddDays(-18)),
-                [ATHLETE_ID] = ("Str. Energiei 7, Timișoara", DateTime.UtcNow.AddDays(-12))
+                [USER_ID] = ("Bd. Independenței 15, Iași", DateTime.UtcNow.AddDays(-18))
             };
 
             var placedOrders = context.Orders
@@ -217,6 +214,7 @@ namespace OnlineShopProject_dNet.Data
                 (ADMIN_ID, "Creatină Monohidrată Micronizată 500 g", 1),
                 (ADMIN_ID, "Set Gantere Reglabile 20 kg", 1),
                 (ADMIN_ID, "Geantă de Sală XL - Albă", 1),
+                (ADMIN_ID, "Shaker Proteine din Oțel Inoxidabil 750 ml", 1),
 
                 (PROPOSER_ID, "Whey Protein Gold 1 kg", 1),
                 (PROPOSER_ID, "Set Gantere Reglabile 20 kg", 1),
@@ -226,12 +224,7 @@ namespace OnlineShopProject_dNet.Data
                 (USER_ID, "Creatină Monohidrată Micronizată 500 g", 1),
                 (USER_ID, "Whey Protein Gold 1 kg", 1),
                 (USER_ID, "Geantă de Sală XL - Albă", 1),
-                (USER_ID, "Shaker Proteine din Oțel Inoxidabil 750 ml", 1),
-
-                (ATHLETE_ID, "Creatină Monohidrată Micronizată 500 g", 1),
-                (ATHLETE_ID, "Whey Protein Gold 1 kg", 1),
-                (ATHLETE_ID, "Set Gantere Reglabile 20 kg", 1),
-                (ATHLETE_ID, "Shaker Proteine din Oțel Inoxidabil 750 ml", 1)
+                (USER_ID, "Shaker Proteine din Oțel Inoxidabil 750 ml", 1)
             };
 
             foreach (var purchase in purchases)
@@ -270,25 +263,32 @@ namespace OnlineShopProject_dNet.Data
             // --- REVIEW-URI ---
             var reviewSeeds = new List<(string ProductTitle, string UserId, int Rating, string Content, DateTime Date)>
             {
-                ("Creatină Monohidrată Micronizată 500 g", ADMIN_ID, 5, "Se dizolvă perfect în apă rece și nu are gust nisipos. Am simțit mai multă energie la seriile grele după 2 săptămâni.", DateTime.UtcNow.AddDays(-20)),
-                ("Creatină Monohidrată Micronizată 500 g", USER_ID, 4, "O folosesc după antrenamente și recuperarea e mai rapidă. Mi-ar fi plăcut să includă și o linguriță gradată în pachet.", DateTime.UtcNow.AddDays(-16)),
-                ("Creatină Monohidrată Micronizată 500 g", ATHLETE_ID, 5, "Micronizată real, nu face spumă și nu deranjează digestia. Ideală pentru ciclurile de volum.", DateTime.UtcNow.AddDays(-14)),
+                // Creatina
+                ("Creatină Monohidrată Micronizată 500 g", ADMIN_ID, 5, "Se dizolvă perfect în apă rece și nu are gust nisipos. Am simțit mai multă energie la seriile grele după două săptămâni.", DateTime.UtcNow.AddDays(-20)),
+                ("Creatină Monohidrată Micronizată 500 g", PROPOSER_ID, 4, "Micronizată fin, nu balonează. O iau cu suc de portocale și intru mai repede în antrenament.", DateTime.UtcNow.AddDays(-18)),
+                ("Creatină Monohidrată Micronizată 500 g", USER_ID, 5, "După 10 zile am observat recuperare mai bună la picioare. Aș fi vrut să includă și o linguriță gradată.", DateTime.UtcNow.AddDays(-15)),
 
-                ("Whey Protein Gold 1 kg", PROPOSER_ID, 5, "Gust de vanilie echilibrat, se mixează fin în shaker și nu face cocoloașe. 24 g de proteină per porție, excelent după antrenamente.", DateTime.UtcNow.AddDays(-18)),
-                ("Whey Protein Gold 1 kg", USER_ID, 4, "Îl folosesc dimineața cu ovăz, nu balonează și se digeră ușor. Ar fi grozav să existe și variantă de 2 kg.", DateTime.UtcNow.AddDays(-15)),
-                ("Whey Protein Gold 1 kg", ATHLETE_ID, 5, "Proteina e curată, fără arome artificiale tari. Am observat recuperare mai bună la antrenamentele de forță.", DateTime.UtcNow.AddDays(-12)),
+                // Whey
+                ("Whey Protein Gold 1 kg", ADMIN_ID, 5, "Gust echilibrat de vanilie, se mixează fin în shaker și nu face spumă. 24 g proteină per porție, excelent post-antrenament.", DateTime.UtcNow.AddDays(-19)),
+                ("Whey Protein Gold 1 kg", PROPOSER_ID, 4, "Îl pun în terciul de ovăz dimineața. Nu balonează și se dizolvă repede.", DateTime.UtcNow.AddDays(-16)),
+                ("Whey Protein Gold 1 kg", USER_ID, 5, "Proteina e curată, fără arome artificiale tari. M-a ajutat la recuperare după antrenamentele de forță.", DateTime.UtcNow.AddDays(-12)),
 
-                ("Set Gantere Reglabile 20 kg", ADMIN_ID, 5, "Mânerele striate prind bine și schimb greutățile rapid. Discurile cauciucate nu zgârie podeaua și nu fac zgomot mare.", DateTime.UtcNow.AddDays(-22)),
-                ("Set Gantere Reglabile 20 kg", PROPOSER_ID, 4, "Sistemul de prindere e sigur, dar șuruburile trebuie strânse din când în când. Ideal pentru antrenamente acasă.", DateTime.UtcNow.AddDays(-17)),
-                ("Set Gantere Reglabile 20 kg", ATHLETE_ID, 5, "Set compact, ocupă puțin spațiu și am reușit să înlocuiesc complet vechile gantere fixe.", DateTime.UtcNow.AddDays(-11)),
+                // Gantere
+                ("Set Gantere Reglabile 20 kg", ADMIN_ID, 5, "Mânerele striate prind bine și schimb greutățile rapid. Discurile cauciucate nu zgârie podeaua și nu fac zgomot.", DateTime.UtcNow.AddDays(-22)),
+                ("Set Gantere Reglabile 20 kg", PROPOSER_ID, 4, "Sistemul de prindere e sigur, dar șuruburile trebuie strânse periodic. Perfect pentru antrenamente acasă.", DateTime.UtcNow.AddDays(-17)),
+                ("Set Gantere Reglabile 20 kg", USER_ID, 5, "Compacte, ocupă puțin spațiu. Am înlocuit vechile gantere fixe fără să simt diferență la grip.", DateTime.UtcNow.AddDays(-11)),
 
-                ("Geantă de Sală XL - Albă", ADMIN_ID, 5, "Încape tot: încălțăminte, prosop, centură și shaker. Compartimentul ventilat pentru pantofi chiar își face treaba.", DateTime.UtcNow.AddDays(-19)),
-                ("Geantă de Sală XL - Albă", PROPOSER_ID, 4, "Material gros și fermoare solide. Mi-ar fi plăcut o curea de umăr puțin mai lată pentru drumuri lungi.", DateTime.UtcNow.AddDays(-13)),
-                ("Geantă de Sală XL - Albă", USER_ID, 5, "Buzunarele pentru chei și telefon sunt exact ce aveam nevoie. Își păstrează forma chiar și încărcată.", DateTime.UtcNow.AddDays(-10)),
+                // Geanta
+                ("Geantă de Sală XL - Albă", ADMIN_ID, 5, "Încape tot: pantofi, prosop, centură, shaker. Compartimentul ventilat chiar își face treaba.", DateTime.UtcNow.AddDays(-19)),
+                ("Geantă de Sală XL - Albă", PROPOSER_ID, 4, "Material gros, fermoare solide. Aș fi vrut curea de umăr mai lată.", DateTime.UtcNow.AddDays(-13)),
+                ("Geantă de Sală XL - Albă", USER_ID, 5, "Buzunare bine gândite pentru telefon și chei. Își păstrează forma chiar și plină.", DateTime.UtcNow.AddDays(-10)),
+                ("Geantă de Sală XL - Albă", ADMIN_ID, 3, "Arată premium, dar pentru compartimentul de pantofi ar fi utilă o căptușeală mai rigidă.", DateTime.UtcNow.AddDays(-8)),
 
-                ("Shaker Proteine din Oțel Inoxidabil 750 ml", PROPOSER_ID, 5, "Capacul etanș nu curge deloc, iar oțelul nu prinde mirosuri. Ideal după antrenamentele de seară.", DateTime.UtcNow.AddDays(-21)),
-                ("Shaker Proteine din Oțel Inoxidabil 750 ml", USER_ID, 4, "Păstrează shake-ul rece mai mult timp și sita anti-cocoloașe chiar funcționează. E un pic mai greu, dar foarte solid.", DateTime.UtcNow.AddDays(-12)),
-                ("Shaker Proteine din Oțel Inoxidabil 750 ml", ATHLETE_ID, 5, "Îl iau zilnic la sală și la birou, se spală ușor și nu a curs niciodată. Simt că o să mă țină ani buni.", DateTime.UtcNow.AddDays(-9))
+                // Shaker
+                ("Shaker Proteine din Oțel Inoxidabil 750 ml", ADMIN_ID, 5, "Capacul etanș nu curge deloc, oțelul nu prinde mirosuri. Ideal după antrenamentele de seară.", DateTime.UtcNow.AddDays(-21)),
+                ("Shaker Proteine din Oțel Inoxidabil 750 ml", PROPOSER_ID, 4, "Păstrează shake-ul rece mai mult timp. E un pic mai greu decât plasticul, dar solid.", DateTime.UtcNow.AddDays(-14)),
+                ("Shaker Proteine din Oțel Inoxidabil 750 ml", USER_ID, 5, "Îl iau zilnic la sală și la birou, se spală ușor și nu a curs niciodată.", DateTime.UtcNow.AddDays(-9)),
+                ("Shaker Proteine din Oțel Inoxidabil 750 ml", PROPOSER_ID, 3, "Mi-aș fi dorit o marcaj mai vizibil pentru ml, în rest e robust și arată bine.", DateTime.UtcNow.AddDays(-7))
             };
 
             foreach (var reviewSeed in reviewSeeds)

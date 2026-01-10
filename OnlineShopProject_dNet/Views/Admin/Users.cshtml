@@ -7,11 +7,11 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
         <div>
             <h2 class="mb-1">Gestionare Colaboratori</h2>
-            <div class="text-muted small">Se afiseaza doar utilizatorii cu rol Proposer. Foloseste cautarea pentru a gasi orice utilizator si a-i acorda / revoca rolul.</div>
+            <div class="text-muted small">Se afi?eaz? doar utilizatorii cu rol Proposer. Folose?te c?utarea pentru a g?si orice utilizator ?i a-i acorda / revoca rolul.</div>
         </div>
         <form method="get" class="d-flex gap-2" role="search">
-            <input type="text" name="search" class="form-control" placeholder="Cauta dupa email, user, nume" value="@Model.Search" />
-            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Cauta</button>
+            <input type="text" name="search" class="form-control" placeholder="Caut? dup? email, user, nume" value="@Model.Search" />
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Caut?</button>
         </form>
     </div>
 
@@ -33,14 +33,14 @@
                             <th>Email</th>
                             <th>Admin</th>
                             <th>Proposer</th>
-                            <th>Actiuni</th>
+                            <th>Ac?iuni</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (!Model.Items.Any())
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">Nu exista rezultate.</td>
+                                <td colspan="5" class="text-center text-muted py-4">Nu exist? rezultate.</td>
                             </tr>
                         }
                         else
@@ -75,7 +75,7 @@
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="userId" value="@u.Id" />
                                             <button type="submit" class="btn btn-sm @(u.IsProposer ? "btn-outline-danger" : "btn-outline-success")">
-                                                @(u.IsProposer ? "Revoca" : "Acorda") rol Proposer
+                                                @(u.IsProposer ? "Revoc?" : "Acord?") rol Proposer
                                             </button>
                                         </form>
                                     </td>
