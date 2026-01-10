@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace OnlineShopProject_dNet.Components
 {
-    // Clasa care moștenește ViewComponent
+    // Clasa care mosteneste ViewComponent
     public class NavbarSummary(ApplicationDbContext context, UserManager<ApplicationUser> userManager) : ViewComponent
     {
         private readonly ApplicationDbContext _context = context;
@@ -16,16 +16,16 @@ namespace OnlineShopProject_dNet.Components
         {
             var model = new NavbarSummaryViewModel();
 
-            // Verificăm dacă userul e logat
+            // Verificam daca userul e logat
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var userId = _userManager.GetUserId(UserClaimsPrincipal);
 
-                // 1. Numărăm produsele din Wishlist
+                // 1. Numaram produsele din Wishlist
                 model.WishlistCount = await _context.Wishlists.CountAsync(w => w.UserId == userId);
 
-                // 2. Numărăm produsele din Coș (suma cantităților)
-                // Folosim logica identică cu OrdersController [cite: 3, 47]
+                // 2. Numaram produsele din Cos (suma cantitatilor)
+                // Folosim logica identica cu OrdersController
                 var cart = await _context.Orders
                                          .Include(o => o.OrderDetails)
                                          .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
@@ -36,12 +36,12 @@ namespace OnlineShopProject_dNet.Components
                 }
             }
 
-            // Trimitem datele către View-ul HTML
+            // Trimitem datele catre View-ul HTML
             return View(model);
         }
     }
 
-    // Clasa mică pentru transportul datelor (ViewModel)
+    // Clasa mica pentru transportul datelor (ViewModel)
     public class NavbarSummaryViewModel
     {
         public int CartCount { get; set; } = 0;

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text;
-using OnlineShopProject_dNet.Data; // Avem nevoie de asta pentru a accesa baza de date
+using OnlineShopProject_dNet.Data;
 
 namespace OnlineShopProject_dNet.Models
 {
@@ -24,7 +24,7 @@ namespace OnlineShopProject_dNet.Models
 
             if (_context != null)
             {
-                // Normalizăm pentru a evita duplicate cauzate de spații, majuscule/minuscule sau diacritice
+                // Normalizam pentru a evita duplicate cauzate de spatii, majuscule/minuscule sau diacritice
                 string Normalize(string s)
                 {
                     if (string.IsNullOrWhiteSpace(s)) return string.Empty;
@@ -43,14 +43,14 @@ namespace OnlineShopProject_dNet.Models
 
                 var thisName = Normalize(Name);
 
-                // Încărcăm în memorie (set mic) și comparăm normalizat — suficient pentru numărul mic de categorii
+                // Incarcam in memorie (set mic) si comparam normalizat - suficient pentru numarul mic de categorii
                 var duplicateExists = _context.Categories
                     .AsEnumerable()
                     .Any(c => c.Id != Id && Normalize(c.Name) == thisName);
 
                 if (duplicateExists)
                 {
-                    yield return new ValidationResult("Acest nume de categorie există deja!", new[] { nameof(Name) });
+                    yield return new ValidationResult("Acest nume de categorie exista deja!", new[] { nameof(Name) });
                 }
             }
         }

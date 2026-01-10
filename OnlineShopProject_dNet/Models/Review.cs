@@ -14,11 +14,11 @@ namespace OnlineShopProject_dNet.Models
 
         public DateTime Date { get; set; }
 
-        // FK către Produs
+        // FK catre Produs
         public int? ProductId { get; set; }
         public virtual Product? Product { get; set; }
 
-        // FK către User
+        // FK catre User
         public string? UserId { get; set; }
         public virtual ApplicationUser? User { get; set; }
     }

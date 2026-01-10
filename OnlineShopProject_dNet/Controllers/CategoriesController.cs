@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization; // NECESAR pentru securitate
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // NECESAR pentru Include
+using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
 using OnlineShopProject_dNet.Services;
@@ -23,7 +23,7 @@ namespace OnlineShopProject_dNet.Controllers
             _logger = logger;
         }
 
-        // 1. GETALL - Returnează categorii ca JSON (pentru dropdown - public)
+        // 1. GETALL - Returneaza categorii ca JSON (pentru dropdown - public)
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -41,7 +41,7 @@ namespace OnlineShopProject_dNet.Controllers
             return Json(categories);
         }
 
-        // GETALLFORADMIN - Returnează categorii cu detalii pentru admin (pentru gestionare)
+        // GETALLFORADMIN - Returneaza categorii cu detalii pentru admin (pentru gestionare)
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAllForAdmin()
@@ -59,13 +59,6 @@ namespace OnlineShopProject_dNet.Controllers
 
             return Json(categories);
         }
-
-        // INDEX - Eliminat (folosim modal acum)
-        // [HttpGet]
-        // public IActionResult Index() { ... }
-
-        // SHOW - Eliminat (nu mai avem nevoie de view separat)
-        // Produsele se filtrează direct din Products/Index
 
         // 3. NEW - RESTRICTIONAT: Doar Admin
         [Authorize(Roles = "Admin")]
@@ -105,12 +98,12 @@ namespace OnlineShopProject_dNet.Controllers
                 {
                     db.Categories.Add(cat);
                     db.SaveChanges();
-                    return Json(new { success = true, message = "Categoria a fost adăugată!" });
+                    return Json(new { success = true, message = "Categoria a fost adaugata!" });
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error saving new category");
-                    return Json(new { success = false, message = "A apărut o eroare la salvarea categoriei." });
+                    return Json(new { success = false, message = "A aparut o eroare la salvarea categoriei." });
                 }
             }
 
@@ -140,13 +133,13 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 db.Categories.Add(cat);
                 db.SaveChanges();
-                TempData["message"] = "Categoria a fost adăugată!";
+                TempData["message"] = "Categoria a fost adaugata!";
                 return RedirectToAction("Index", "Products");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving new category");
-                ModelState.AddModelError(string.Empty, "A apărut o eroare la salvarea categoriei.");
+                ModelState.AddModelError(string.Empty, "A aparut o eroare la salvarea categoriei.");
                 return View(cat);
             }
         }
@@ -174,7 +167,7 @@ namespace OnlineShopProject_dNet.Controllers
             if (category == null)
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(new { success = false, message = "Categoria nu a fost găsită." });
+                    return Json(new { success = false, message = "Categoria nu a fost gasita." });
                 return NotFound();
             }
 
@@ -204,12 +197,12 @@ namespace OnlineShopProject_dNet.Controllers
                 {
                     category.Name = requestCategory.Name;
                     db.SaveChanges();
-                    return Json(new { success = true, message = "Categoria a fost modificată!" });
+                    return Json(new { success = true, message = "Categoria a fost modificata!" });
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error updating category {CategoryId}", id);
-                    return Json(new { success = false, message = "A apărut o eroare la actualizarea categoriei." });
+                    return Json(new { success = false, message = "A aparut o eroare la actualizarea categoriei." });
                 }
             }
 
@@ -239,18 +232,18 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 category.Name = requestCategory.Name;
                 db.SaveChanges();
-                TempData["message"] = "Categoria a fost modificată!";
+                TempData["message"] = "Categoria a fost modificata!";
                 return RedirectToAction("Index", "Products");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating category {CategoryId}", id);
-                ModelState.AddModelError(string.Empty, "A apărut o eroare la actualizarea categoriei.");
+                ModelState.AddModelError(string.Empty, "A aparut o eroare la actualizarea categoriei.");
                 return View(requestCategory);
             }
         }
 
-        // 5. DELETE - RESTRICTIONAT: Doar Admin + Logica ta de stergere poze
+        // 5. DELETE - RESTRICTIONAT: Doar Admin + Logica de stergere poze
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult Delete(int id)
@@ -259,11 +252,11 @@ namespace OnlineShopProject_dNet.Controllers
             if (category == null) 
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(new { success = false, message = "Categoria nu a fost găsită." });
+                    return Json(new { success = false, message = "Categoria nu a fost gasita." });
                 return NotFound();
             }
 
-            // --- LOGICA TA DE STERGERE IMAGINI (PASTRATA) ---
+            // Logica de stergere imagini
             var associatedProducts = db.Products.Where(p => p.CategoryId == id).ToList();
 
             foreach (var product in associatedProducts)
@@ -278,7 +271,6 @@ namespace OnlineShopProject_dNet.Controllers
                     }
                 }
             }
-            // ------------------------------------------------
 
             try
             {
@@ -288,10 +280,10 @@ namespace OnlineShopProject_dNet.Controllers
                 // Return JSON for AJAX requests (modal stays open)
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(new { success = true, message = "Categoria și produsele aferente au fost șterse!" });
+                    return Json(new { success = true, message = "Categoria si produsele aferente au fost sterse!" });
                 }
                 
-                TempData["message"] = "Categoria și produsele aferente au fost șterse!";
+                TempData["message"] = "Categoria si produsele aferente au fost sterse!";
                 return RedirectToAction("Index", "Products");
             }
             catch (Exception ex)
@@ -300,10 +292,10 @@ namespace OnlineShopProject_dNet.Controllers
                 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(new { success = false, message = "A apărut o eroare la ștergerea categoriei." });
+                    return Json(new { success = false, message = "A aparut o eroare la stergerea categoriei." });
                 }
                 
-                TempData["message"] = "A apărut o eroare la ștergerea categoriei.";
+                TempData["message"] = "A aparut o eroare la stergerea categoriei.";
                 return RedirectToAction("Index", "Products");
             }
         }

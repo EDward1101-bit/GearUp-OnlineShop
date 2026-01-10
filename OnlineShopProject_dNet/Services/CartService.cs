@@ -9,24 +9,24 @@ namespace OnlineShopProject_dNet.Services
         private readonly ApplicationDbContext _context = context;
 
         /// <summary>
-        /// Metoda centralizată pentru adăugarea produselor în coș.
-        /// Gestionează automat: crearea coșului, verificarea stocului și înghețarea prețului.
-        /// Returnează TRUE dacă a reușit, FALSE dacă nu e stoc.
+        /// Metoda centralizata pentru adaugarea produselor in cos.
+        /// Gestioneaza automat: crearea cosului, verificarea stocului si inghetarea pretului.
+        /// Returneaza TRUE daca a reusit, FALSE daca nu e stoc.
         /// </summary>
         public async Task<bool> AddItemToCart(string userId, int productId, int quantity)
         {
-            // 1. Validare de bază a produsului
+            // 1. Validare de baza a produsului
             var product = await _context.Products
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == productId);
 
-            // Dacă produsul nu există sau stocul e epuizat din start
+            // Daca produsul nu exista sau stocul e epuizat din start
             if (product == null || (product.Stock ?? 0) < 1)
             {
                 return false;
             }
 
-            // 2. Găsim sau Creăm Coșul (Order cu status "InCart")
+            // 2. Gasim sau Cream Cosul (Order cu status "InCart")
             var order = await _context.Orders
                                 .Include(o => o.OrderDetails)
                                 .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
@@ -41,34 +41,34 @@ namespace OnlineShopProject_dNet.Services
                     TotalAmount = 0
                 };
                 _context.Orders.Add(order);
-                // Salvăm imediat pentru a genera ID-ul comenzii, necesar pentru OrderDetails
+                // Salvam imediat pentru a genera ID-ul comenzii, necesar pentru OrderDetails
                 await _context.SaveChangesAsync();
             }
 
-            // 3. Gestionăm linia din coș (OrderDetail)
+            // 3. Gestionam linia din cos (OrderDetail)
             var detail = order.OrderDetails.FirstOrDefault(od => od.ProductId == productId);
 
             if (detail != null)
             {
-                // SCENARIUL A: Produsul e deja în coș -> Verificăm stocul cumulat
-                // (Cantitatea actuală din coș + ce vrea să adauge acum <= Stocul Real)
+                // SCENARIUL A: Produsul e deja in cos -> Verificam stocul cumulat
+                // (Cantitatea actuala din cos + ce vrea sa adauge acum <= Stocul Real)
                 if (detail.Quantity + quantity <= (product.Stock ?? 0))
                 {
                     detail.Quantity += quantity;
-                    // Asigurăm snapshot-ul pentru istoricul comenzilor
+                    // Asiguram snapshot-ul pentru istoricul comenzilor
                     detail.ProductTitleSnapshot ??= product.Title;
                     detail.ProductImageSnapshot ??= product.Image;
                     detail.ProductCategorySnapshot ??= product.Category?.Name;
                 }
                 else
                 {
-                    // Stoc insuficient pentru cantitatea totală cerută
+                    // Stoc insuficient pentru cantitatea totala ceruta
                     return false;
                 }
             }
             else
             {
-                // SCENARIUL B: Produs nou în coș -> Verificăm stocul pentru cantitatea cerută
+                // SCENARIUL B: Produs nou in cos -> Verificam stocul pentru cantitatea ceruta
                 if ((product.Stock ?? 0) >= quantity)
                 {
                     var newDetail = new OrderDetail
@@ -76,7 +76,7 @@ namespace OnlineShopProject_dNet.Services
                         OrderId = order.Id,
                         ProductId = productId,
                         Quantity = quantity,
-                        UnitPrice = product.Price ?? 0, // Înghețăm prețul aici!
+                        UnitPrice = product.Price ?? 0, // Inghetam pretul aici!
                         ProductTitleSnapshot = product.Title,
                         ProductImageSnapshot = product.Image,
                         ProductCategorySnapshot = product.Category?.Name
@@ -85,11 +85,11 @@ namespace OnlineShopProject_dNet.Services
                 }
                 else
                 {
-                    return false; // Nu avem destule bucăți nici pentru prima adăugare
+                    return false; // Nu avem destule bucati nici pentru prima adaugare
                 }
             }
 
-            // 4. Finalizare: Salvăm modificările în baza de date
+            // 4. Finalizare: Salvam modificarile in baza de date
             await _context.SaveChangesAsync();
             return true;
         }

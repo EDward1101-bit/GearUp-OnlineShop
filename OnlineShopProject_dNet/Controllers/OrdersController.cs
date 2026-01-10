@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineShopProject_dNet.Data;
 using OnlineShopProject_dNet.Models;
-using OnlineShopProject_dNet.Services; // 1. IMPORT IMPORTANT
+using OnlineShopProject_dNet.Services;
 
 namespace OnlineShopProject_dNet.Controllers
 {
@@ -13,15 +13,15 @@ namespace OnlineShopProject_dNet.Controllers
     {
         private readonly ApplicationDbContext db = context;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly CartService _cartService = cartService; // 2. DEFINIRE SERVICIU
+        private readonly CartService _cartService = cartService;
 
-        // 1. INDEX - Afișarea Coșului de Cumpărături
+        // 1. INDEX - Afisarea Cosului de Cumparaturi
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
 
-            // Căutăm comanda cu status "InCart" pentru userul curent
+            // Cautam comanda cu status "InCart" pentru userul curent
             var cart = await db.Orders
                                .Include(o => o.OrderDetails)
                                .ThenInclude(od => od.Product)
@@ -41,15 +41,15 @@ namespace OnlineShopProject_dNet.Controllers
                                    .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
                 }
 
-                // Calculăm totalul folosind prețul salvat (UnitPrice), ignorând modificările din magazin
+                // Calculam totalul folosind pretul salvat (UnitPrice), ignorand modificarile din magazin
                 cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
 
-                // Verificăm stocul pentru a afișa avertismente în View
+                // Verificam stocul pentru a afisa avertismente in View
                 bool hasStockIssues = false;
 
                 foreach (var item in cart.OrderDetails)
                 {
-                    // Dacă produsul a fost șters sau cantitatea din coș depășește stocul actual
+                    // Daca produsul a fost sters sau cantitatea din cos depaseste stocul actual
                     if (item.Product != null && item.Quantity > item.Product.Stock.GetValueOrDefault())
                     {
                         hasStockIssues = true;
@@ -58,7 +58,7 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (hasStockIssues)
                 {
-                    ViewBag.ErrorMessage = "Unele produse din coș nu mai sunt disponibile în cantitatea selectată. Te rugăm să actualizezi coșul înainte de a comanda.";
+                    ViewBag.ErrorMessage = "Unele produse din cos nu mai sunt disponibile in cantitatea selectata. Te rugam sa actualizezi cosul inainte de a comanda.";
                     ViewBag.HasStockIssues = true;
                 }
             }
@@ -66,7 +66,7 @@ namespace OnlineShopProject_dNet.Controllers
         }
 
 
-        // 2. ADD TO CART - REFACTORIZAT (Mult mai scurt!)
+        // 2. ADD TO CART - REFACTORIZAT
         [HttpPost]
         public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
@@ -85,11 +85,11 @@ namespace OnlineShopProject_dNet.Controllers
                 return Json(new { success = false, message = "Stoc insuficient sau produs invalid!" });
             }
 
-            return Json(new { success = true, message = "Produsul a fost adăugat în coș!" });
+            return Json(new { success = true, message = "Produsul a fost adaugat in cos!" });
         }
 
 
-        /// 3. REMOVE FROM CART - Șterge un produs din coș
+        // 3. REMOVE FROM CART - Sterge un produs din cos
         [HttpPost]
         public async Task<IActionResult> RemoveFromCart(int productId)
         {
@@ -106,21 +106,21 @@ namespace OnlineShopProject_dNet.Controllers
                 {
                     db.OrderDetails.Remove(orderDetail);
 
-                    // --- OPTIMIZARE: Dacă coșul rămâne gol, ștergem și antetul comenzii ---
+                    // OPTIMIZARE: Daca cosul ramane gol, stergem si antetul comenzii
                     if (order.OrderDetails.Count == 1) // Era 1, acum devine 0
                     {
                         db.Orders.Remove(order);
                     }
 
                     await db.SaveChangesAsync();
-                    TempData["message"] = "Produsul a fost eliminat din coș.";
+                    TempData["message"] = "Produsul a fost eliminat din cos.";
                 }
             }
             return RedirectToAction("Index");
         }
 
 
-        // 4. UPDATE QUANTITY - Modifică cantitatea (+/-)
+        // 4. UPDATE QUANTITY - Modifica cantitatea (+/-)
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(int productId, int quantity)
         {
@@ -136,7 +136,7 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (orderDetail != null)
                 {
-                    // A. Verificăm dacă userul vrea să șteargă (cantitate 0)
+                    // A. Verificam daca userul vrea sa stearga (cantitate 0)
                     if (quantity <= 0)
                     {
                         db.OrderDetails.Remove(orderDetail);
@@ -144,10 +144,10 @@ namespace OnlineShopProject_dNet.Controllers
                     }
                     else
                     {
-                        // B. Verificăm STOCUL DISPONIBIL [Important!]
+                        // B. Verificam STOCUL DISPONIBIL
                         if (orderDetail.Product != null && orderDetail.Product.Stock < quantity)
                         {
-                            TempData["message"] = $"Stoc insuficient! Doar {orderDetail.Product.Stock} bucăți disponibile.";
+                            TempData["message"] = $"Stoc insuficient! Doar {orderDetail.Product.Stock} bucati disponibile.";
                         }
                         else
                         {
@@ -162,7 +162,7 @@ namespace OnlineShopProject_dNet.Controllers
         }
         
 
-        // 5. CHECKOUT (Pasul 1 - Afișare Formular)
+        // 5. CHECKOUT (Pasul 1 - Afisare Formular)
         [HttpGet]
         public async Task<IActionResult> Checkout()
         {
@@ -173,30 +173,30 @@ namespace OnlineShopProject_dNet.Controllers
                                .ThenInclude(od => od.Product)
                                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
 
-            // Nu poți face checkout la un coș gol
+            // Nu poti face checkout la un cos gol
             if (cart == null || cart.OrderDetails.Count == 0)
             {
-                TempData["message"] = "Coșul tău este gol.";
+                TempData["message"] = "Cosul tau este gol.";
                 return RedirectToAction("Index");
             }
 
-            // Validăm stocul înainte să lăsăm omul să completeze adresa
+            // Validam stocul inainte sa lasam omul sa completeze adresa
             foreach (var item in cart.OrderDetails)
             {
                 if (item.Product != null && item.Quantity > item.Product.Stock.GetValueOrDefault())
                 {
-                    TempData["message"] = "Nu poți finaliza comanda deoarece ai produse cu stoc insuficient!";
-                    return RedirectToAction("Index"); // Îl întoarcem în coș
+                    TempData["message"] = "Nu poti finaliza comanda deoarece ai produse cu stoc insuficient!";
+                    return RedirectToAction("Index"); // Il intoarcem in cos
                 }
             }
             cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
 
-            // Aici userul va vedea suma finală și va completa adresa
+            // Aici userul va vedea suma finala si va completa adresa
             return View(cart);
         }
 
 
-        // 6. CHECKOUT [POST] - Finalizarea efectivă a comenzii
+        // 6. CHECKOUT [POST] - Finalizarea efectiva a comenzii
         [HttpPost]
         public async Task<IActionResult> Checkout(Order requestOrder)
         {
@@ -209,14 +209,14 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (cart == null || cart.OrderDetails.Count == 0)
             {
-                TempData["message"] = "Coșul este gol.";
+                TempData["message"] = "Cosul este gol.";
                 return RedirectToAction("Index");
             }
 
-            // VALIDARE ADRESĂ: Este obligatoriu să completăm adresa
+            // VALIDARE ADRESA: Este obligatoriu sa completam adresa
             if (string.IsNullOrWhiteSpace(requestOrder.ShippingAddress))
             {
-                TempData["message"] = "Te rugăm să completezi adresa de livrare!";
+                TempData["message"] = "Te rugam sa completezi adresa de livrare!";
                 cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
                 return View(cart);
             }
@@ -234,12 +234,12 @@ namespace OnlineShopProject_dNet.Controllers
 
                 if (item.Product == null || item.Quantity > item.Product.Stock.GetValueOrDefault())
                 {
-                    TempData["message"] = $"Produsul nu mai este pe stoc. Actualizează coșul.";
+                    TempData["message"] = $"Produsul nu mai este pe stoc. Actualizeaza cosul.";
                     return RedirectToAction("Index");
                 }
             }
 
-            // Procesarea Comenzii - SCĂDEREA STOCULUI
+            // Procesarea Comenzii - SCADEREA STOCULUI
             foreach (var item in cart.OrderDetails)
             {
                 if (item.Product != null)
@@ -256,11 +256,11 @@ namespace OnlineShopProject_dNet.Controllers
 
             await db.SaveChangesAsync();
 
-            TempData["success"] = "Comanda a fost plasată cu succes! Vei primi un email de confirmare.";
+            TempData["success"] = "Comanda a fost plasata cu succes! Vei primi un email de confirmare.";
             return RedirectToAction("OrderSuccess", new { orderId = cart.Id });
         }
 
-        // 9. ORDER SUCCESS PAGE - Afișare mesaj după plasarea comenzii
+        // 9. ORDER SUCCESS PAGE - Afisare mesaj dupa plasarea comenzii
         [HttpGet]
         public async Task<IActionResult> OrderSuccess(int orderId)
         {
@@ -286,8 +286,8 @@ namespace OnlineShopProject_dNet.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            // Luăm toate comenzile care NU mai sunt în stadiul de "Coș"
-            // Include OrderDetails și Product pentru a afișa corect informațiile
+            // Luam toate comenzile care NU mai sunt in stadiul de "Cos"
+            // Include OrderDetails si Product pentru a afisa corect informatiile
             var orders = await db.Orders
                                  .Include(o => o.OrderDetails)
                                  .ThenInclude(od => od.Product)
@@ -299,14 +299,14 @@ namespace OnlineShopProject_dNet.Controllers
             return View(orders);
         }
 
-        // 8. DETALII COMANDĂ (Details) - Ce produse sunt într-o comandă veche
+        // 8. DETALII COMANDA (Details) - Ce produse sunt intr-o comanda veche
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var userId = _userManager.GetUserId(User);
 
-            // Căutăm comanda specifică (id) și încărcăm produsele cu categoria
-            // Verificăm și UserId pentru securitate (să nu vezi comenzile altuia)
+            // Cautam comanda specifica (id) si incarcam produsele cu categoria
+            // Verificam si UserId pentru securitate (sa nu vezi comenzile altuia)
             var order = await db.Orders
                                 .Include(o => o.OrderDetails)
                                 .ThenInclude(od => od.Product)
@@ -315,11 +315,11 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (order == null)
             {
-                // Dacă comanda nu există sau nu e a ta
+                // Daca comanda nu exista sau nu e a ta
                 return NotFound();
             }
 
-            // Calculăm totalul dacă nu este setat
+            // Calculam totalul daca nu este setat
             if (order.TotalAmount == 0 && order.OrderDetails.Any())
             {
                 order.TotalAmount = order.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -46,29 +46,13 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
             _emailSender = emailSender;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string ReturnUrl { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
             [Required(ErrorMessage = "Prenumele este obligatoriu")]
@@ -80,19 +64,19 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
             public string LastName { get; set; }
 
             [Required(ErrorMessage = "Email-ul este obligatoriu")]
-            [EmailAddress(ErrorMessage = "Adresa de email nu este validă")]
+            [EmailAddress(ErrorMessage = "Adresa de email nu este valida")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
             [Required(ErrorMessage = "Parola este obligatorie")]
-            [StringLength(100, ErrorMessage = "Parola trebuie să aibă cel puțin {2} și maxim {1} caractere.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "Parola trebuie sa aiba cel putin {2} si maxim {1} caractere.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Parolă")]
+            [Display(Name = "Parola")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirmă parola")]
-            [Compare("Password", ErrorMessage = "Parola și confirmarea parolei nu se potrivesc.")]
+            [Display(Name = "Confirma parola")]
+            [Compare("Password", ErrorMessage = "Parola si confirmarea parolei nu se potrivesc.")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -133,8 +117,8 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(Input.Email, "Confirma email-ul",
+                        $"Te rugam sa confirmi contul facand <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>click aici</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -152,7 +136,6 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 

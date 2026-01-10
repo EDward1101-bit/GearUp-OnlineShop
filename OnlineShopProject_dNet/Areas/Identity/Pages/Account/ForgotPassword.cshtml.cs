@@ -35,7 +35,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required(ErrorMessage = "Email-ul este obligatoriu")]
-            [EmailAddress(ErrorMessage = "Adresa de email nu este valid?")]
+            [EmailAddress(ErrorMessage = "Adresa de email nu este valida")]
             public string Email { get; set; }
         }
 
@@ -59,8 +59,8 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reseteaz? Parola",
-                    $"Te rug?m s? î?i resetezi parola f?când <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>click aici</a>.");
+                    "Reseteaza-ti parola",
+                    $"Te rugam sa iti resetezi parola facand <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>click aici</a>.");
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

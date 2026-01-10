@@ -15,7 +15,7 @@ namespace OnlineShopProject_dNet.Controllers
         }
 
         /// <summary>
-        /// Primește o întrebare despre un produs și returnează răspunsul AI
+        /// Primeste o intrebare despre un produs si returneaza raspunsul AI
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> AskQuestion(int productId, string question)
@@ -24,12 +24,12 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 if (string.IsNullOrWhiteSpace(question))
                 {
-                    return Json(new { success = false, message = "Vă rugăm să introduceți o întrebare." });
+                    return Json(new { success = false, message = "Va rugam sa introduceti o intrebare." });
                 }
 
                 if (question.Length > 500)
                 {
-                    return Json(new { success = false, message = "Întrebarea este prea lungă. Limita este de 500 de caractere." });
+                    return Json(new { success = false, message = "Intrebarea este prea lunga. Limita este de 500 de caractere." });
                 }
 
                 var answer = await _aiService.GetAnswerForQuestion(productId, question);
@@ -38,12 +38,12 @@ namespace OnlineShopProject_dNet.Controllers
             }
             catch (Exception)
             {
-                return Json(new { success = false, message = "A apărut o eroare. Vă rugăm să încercați din nou." });
+                return Json(new { success = false, message = "A aparut o eroare. Va rugam sa incercati din nou." });
             }
         }
 
         /// <summary>
-        /// Marchează un răspuns FAQ ca fiind util
+        /// Marcheaza un raspuns FAQ ca fiind util
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> MarkHelpful(int faqId)
