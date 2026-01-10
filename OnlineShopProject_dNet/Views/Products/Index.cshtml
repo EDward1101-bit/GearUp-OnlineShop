@@ -5,7 +5,7 @@
 @inject OnlineShopProject_dNet.Services.TextProcessingService _textProcessor
 
 @{
-    ViewBag.Title = "Lista Produse";
+    ViewData["Title"] = "Produse";
 
     // Transformăm ViewBag-ul într-o listă sigură
     var productsList = ViewBag.Products as IEnumerable<OnlineShopProject_dNet.Models.Product>;
