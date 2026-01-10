@@ -2,7 +2,7 @@
 @model Product
 
 @{
-    ViewBag.Title = "Editează Produs";
+    ViewData["Title"] = "Editează Produs";
     Product displayProduct = Model ?? ViewBag.Product;
     int selectedCategoryId = displayProduct.CategoryId ?? 0;
 }

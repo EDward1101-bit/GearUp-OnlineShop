@@ -5,7 +5,7 @@
 @inject OnlineShopProject_dNet.Services.TextProcessingService _textProcessor
 
 @{
-    ViewBag.Title = "Detalii Produs";
+ViewData["Title"] = "Detalii Produs";
 
     var currentUserId = UserManager.GetUserId(User);
     bool isInWishlist = currentUserId != null && (Model.Wishlists?.Any(w => w.UserId == currentUserId) ?? false);

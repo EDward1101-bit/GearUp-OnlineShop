@@ -5,7 +5,7 @@
 @inject OnlineShopProject_dNet.Services.TextProcessingService _textProcessor
 
 @{
-    ViewBag.Title = "Lista Produse";
+    ViewData["Title"] = "Produse";
 
     // Transformăm ViewBag-ul într-o listă sigură
     var productsList = ViewBag.Products as IEnumerable<OnlineShopProject_dNet.Models.Product>;
@@ -17,7 +17,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h1 class="mb-2 fw-bold display-5">
-                    <i class="bi bi-shop-window"></i> Magazin Online
+                    <i class="bi bi-gear-fill"></i> GearUp
                 </h1>
                 <p class="mb-0 fs-5 opacity-90">Descoperă produsele noastre premium</p>
             </div>

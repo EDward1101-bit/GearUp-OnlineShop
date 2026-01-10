@@ -45,7 +45,7 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
         public class InputModel
         {
             [Required(ErrorMessage = "Email-ul este obligatoriu")]
-            [EmailAddress(ErrorMessage = "Adresa de email nu este valida")]
+            [EmailAddress(ErrorMessage = "Adresa de email nu este valid?")]
             [Display(Name = "Email nou")]
             public string NewEmail { get; set; }
         }
@@ -102,14 +102,14 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
                     protocol: Request.Scheme);
                 await _emailSender.SendEmailAsync(
                     Input.NewEmail,
-                    "Confirma email-ul",
-                    $"Te rugam sa confirmi contul facand <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>click aici</a>.");
+                    "Confirm? email-ul",
+                    $"Te rug?m s? confirmi contul f?când <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>click aici</a>.");
 
-                StatusMessage = "Link-ul de confirmare pentru schimbarea email-ului a fost trimis. Verifica email-ul.";
+                StatusMessage = "Link-ul de confirmare pentru schimbarea email-ului a fost trimis. Verific? email-ul.";
                 return RedirectToPage();
             }
 
-            StatusMessage = "Email-ul tau nu s-a schimbat.";
+            StatusMessage = "Email-ul t?u nu s-a schimbat.";
             return RedirectToPage();
         }
 
@@ -138,10 +138,10 @@ namespace OnlineShopProject_dNet.Areas.Identity.Pages.Account.Manage
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 email,
-                "Confirma email-ul",
-                $"Te rugam sa confirmi contul facand <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>click aici</a>.");
+                "Confirm? email-ul",
+                $"Te rug?m s? confirmi contul f?când <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>click aici</a>.");
 
-            StatusMessage = "Email-ul de verificare a fost trimis. Verifica email-ul.";
+            StatusMessage = "Email-ul de verificare a fost trimis. Verific? email-ul.";
             return RedirectToPage();
         }
     }
