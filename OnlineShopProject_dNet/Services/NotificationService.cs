@@ -26,7 +26,8 @@ namespace OnlineShopProject_dNet.Services
             }
 
             var cleaned = sb.ToString().Normalize(NormalizationForm.FormC);
-            return cleaned.Replace('�', '?');
+            // Remove any replacement characters that may have been introduced
+            return cleaned.Replace('\uFFFD', '?');
         }
 
         public async Task AddNotificationAsync(string userId, string message, string? type = null, int? productId = null, string? feedbackMessage = null)

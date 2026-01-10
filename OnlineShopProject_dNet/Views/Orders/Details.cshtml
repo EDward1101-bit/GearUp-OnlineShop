@@ -2,17 +2,17 @@
 @using OnlineShopProject_dNet.Models
 
 @{
-    ViewData["Title"] = "Detalii Comandă";
+    ViewData["Title"] = "Detalii Comanda";
 }
 
 <div class="container py-5">
     @if (Model == null)
     {
         <div class="alert alert-danger">
-            <i class="bi bi-exclamation-triangle"></i> Comanda nu a fost găsită sau nu ai permisiunea să o accesezi.
+            <i class="bi bi-exclamation-triangle"></i> Comanda nu a fost gasita sau nu ai permisiunea sa o accesezi.
         </div>
         <a href="/Orders/MyOrders" class="btn btn-primary">
-            <i class="bi bi-arrow-left"></i> Înapoi la comenzi
+            <i class="bi bi-arrow-left"></i> Inapoi la comenzi
         </a>
     }
     else
@@ -23,21 +23,21 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h2 class="fw-bold mb-1">
-                        <i class="bi bi-receipt-cutoff"></i> Detalii Comandă #@Model.Id
+                        <i class="bi bi-receipt-cutoff"></i> Detalii Comanda #@Model.Id
                     </h2>
                     <p class="text-muted mb-0">
-                        Plasată pe @Model.Date.ToString("dd MMMM yyyy, HH:mm", new System.Globalization.CultureInfo("ro-RO"))
+                        Plasata pe @Model.Date.ToString("dd MMMM yyyy, HH:mm", new System.Globalization.CultureInfo("ro-RO"))
                     </p>
                 </div>
                 <a href="/Orders/MyOrders" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Înapoi
+                    <i class="bi bi-arrow-left"></i> Inapoi
                 </a>
             </div>
         </div>
     </div>
 
     <div class="row">
-        @* LEFT: Detalii Comandă *@
+        @* LEFT: Detalii Comanda *@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-primary text-white">
@@ -49,7 +49,7 @@
                     @if (Model.OrderDetails == null || !Model.OrderDetails.Any())
                     {
                         <div class="alert alert-warning m-4">
-                            <i class="bi bi-exclamation-triangle"></i> Nu există produse în această comandă.
+                            <i class="bi bi-exclamation-triangle"></i> Nu exista produse in aceasta comanda.
                         </div>
                     }
                     else
@@ -59,7 +59,7 @@
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4">Produs</th>
-                                        <th>Preț unitar</th>
+                                        <th>Pret unitar</th>
                                         <th>Cantitate</th>
                                         <th>Total</th>
                                     </tr>
@@ -94,7 +94,7 @@
                                                         <img src="@imgSrc" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="Produs indisponibil">
                                                         <div>
                                                             <h6 class="mb-0 text-muted fw-semibold">
-                                                                @(!string.IsNullOrEmpty(item.ProductTitleSnapshot) ? item.ProductTitleSnapshot : "Produs șters")
+                                                                @(!string.IsNullOrEmpty(item.ProductTitleSnapshot) ? item.ProductTitleSnapshot : "Produs sters")
                                                             </h6>
                                                             @if (!string.IsNullOrEmpty(item.ProductCategorySnapshot))
                                                             {
@@ -127,18 +127,18 @@
             </div>
         </div>
 
-        @* RIGHT: Sumar Comandă *@
+        @* RIGHT: Sumar Comanda *@
         <div class="col-lg-4">
             <div class="card shadow-sm border-0 sticky-top" style="top: 100px;">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">
-                        <i class="bi bi-info-circle"></i> Sumar Comandă
+                        <i class="bi bi-info-circle"></i> Sumar Comanda
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <small class="text-muted fw-semibold d-block mb-1">
-                            <i class="bi bi-geo-alt"></i> Adresă de livrare
+                            <i class="bi bi-geo-alt"></i> Adresa de livrare
                         </small>
                         <p class="mb-0">@Model.ShippingAddress</p>
                     </div>
@@ -170,7 +170,7 @@
                         @if (Model.Status == "Placed")
                         {
                             <span class="badge bg-success">
-                                <i class="bi bi-check-circle"></i> Comandă plasată
+                                <i class="bi bi-check-circle"></i> Comanda plasata
                             </span>
                         }
                         else
@@ -180,7 +180,7 @@
                     </div>
 
                     <a href="/Orders/MyOrders" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-left"></i> Înapoi la comenzi
+                        <i class="bi bi-arrow-left"></i> Inapoi la comenzi
                     </a>
                 </div>
             </div>

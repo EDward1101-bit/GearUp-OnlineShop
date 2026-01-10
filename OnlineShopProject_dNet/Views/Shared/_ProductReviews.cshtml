@@ -15,7 +15,7 @@
     var totalPages = ViewBag.ReviewsTotalPages as int? ?? 1;
 }
 
-@* Link CSS pentru iconițe *@
+@* Link CSS pentru iconite *@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
@@ -46,7 +46,7 @@
 <div class="mt-5 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0 text-dark fw-bold">
-            <i class="bi bi-star-fill text-warning"></i> Review-uri clienți
+            <i class="bi bi-star-fill text-warning"></i> Review-uri clienti
             @if (reviewsTotal > 0)
             {
                 <span class="badge bg-secondary ms-2">@reviewsTotal</span>
@@ -117,12 +117,12 @@
                                 {
                                     <div class="d-flex align-items-center gap-3 pt-2 border-top">
                                         <a href="javascript:void(0)" onclick="toggleEditMode(@review.Id)" class="text-decoration-none text-primary small d-flex align-items-center gap-1">
-                                            <i class="bi bi-pencil"></i> Editează
+                                            <i class="bi bi-pencil"></i> Editeaza
                                         </a>
                                                 <form method="post" action="/Reviews/Delete/@review.Id" class="d-inline-block m-0 p-0">
                                                     @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-link p-0 text-decoration-none text-danger small d-flex align-items-center gap-1" style="border: none; vertical-align: baseline;" onclick="return confirm('Ștergi review-ul?');">
-                                                <i class="bi bi-trash"></i> Șterge
+                                            <button type="submit" class="btn btn-link p-0 text-decoration-none text-danger small d-flex align-items-center gap-1" style="border: none; vertical-align: baseline;" onclick="return confirm('Stergi review-ul?');">
+                                                <i class="bi bi-trash"></i> Sterge
                                             </button>
                                         </form>
                                     </div>
@@ -154,10 +154,10 @@
 
                                         <div class="d-flex gap-2">
                                             <button type="submit" class="btn btn-primary px-3">
-                                                <i class="bi bi-check"></i> Salvează
+                                                <i class="bi bi-check"></i> Salveaza
                                             </button>
                                             <button type="button" class="btn btn-outline-secondary px-3" onclick="toggleEditMode(@review.Id)">
-                                                <i class="bi bi-x"></i> Anulează
+                                                <i class="bi bi-x"></i> Anuleaza
                                             </button>
                                         </div>
                                     </form>
@@ -172,7 +172,7 @@
             {
                 <div class="alert alert-light border-0 shadow-sm text-center py-4">
                     <i class="bi bi-chat-left-text fs-1 text-muted d-block mb-2"></i>
-                    <p class="text-muted mb-0">Nu există încă review-uri. Fii primul care scrie unul!</p>
+                    <p class="text-muted mb-0">Nu exista inca review-uri. Fii primul care scrie unul!</p>
                 </div>
             }
 
@@ -231,12 +231,12 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="review-content" class="form-label fw-semibold">Comentariul tău:</label>
-                                    <textarea class="form-control" id="review-content" name="Content" rows="4" placeholder="Detaliază experiența ta cu acest produs..." required></textarea>
+                                    <label for="review-content" class="form-label fw-semibold">Comentariul tau:</label>
+                                    <textarea class="form-control" id="review-content" name="Content" rows="4" placeholder="Detaliaza experienta ta cu acest produs..." required></textarea>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary px-4 fw-semibold">
-                                    <i class="bi bi-send"></i> Postează review
+                                    <i class="bi bi-send"></i> Posteaza review
                                 </button>
                             </form>
                         </div>
@@ -245,14 +245,14 @@
                 else
                 {
                     <div class="alert alert-info border-0 shadow-sm">
-                        <i class="bi bi-info-circle"></i> <strong>Aveți deja un review pentru acest produs.</strong> Puteți edita review-ul existent din lista de mai sus.
+                        <i class="bi bi-info-circle"></i> <strong>Aveti deja un review pentru acest produs.</strong> Puteti edita review-ul existent din lista de mai sus.
                     </div>
                 }
             }
             else
             {
                 <div class="alert alert-light border shadow-sm">
-                    <i class="bi bi-lock"></i> <a href="/Identity/Account/Login" class="fw-bold text-decoration-none">Autentifică-te</a> pentru a scrie un review.
+                    <i class="bi bi-lock"></i> <a href="/Identity/Account/Login" class="fw-bold text-decoration-none">Autentifica-te</a> pentru a scrie un review.
                 </div>
             }
         </div>

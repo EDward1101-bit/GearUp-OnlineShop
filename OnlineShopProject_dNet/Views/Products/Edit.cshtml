@@ -2,12 +2,12 @@
 @model Product
 
 @{
-    ViewData["Title"] = "Editează Produs";
+    ViewData["Title"] = "Editeaza Produs";
     Product displayProduct = Model ?? ViewBag.Product;
     int selectedCategoryId = displayProduct.CategoryId ?? 0;
 }
 
-<h2 class="text-center mb-4"> Editează Produsul: @displayProduct.Title</h2>
+<h2 class="text-center mb-4"> Editeaza Produsul: @displayProduct.Title</h2>
 <hr />
 
 @* Adaugam enctype  *@
@@ -25,7 +25,7 @@
 
     @* Afisare imagine curenta + Input editare *@
     <div class="mb-3">
-        <label class="form-label">Imagine Curentă</label> <br />
+        <label class="form-label">Imagine Curenta</label> <br />
         @if (!string.IsNullOrEmpty(displayProduct.Image))
         {
             <img src="@displayProduct.Image" style="width: 150px; height: 150px; object-fit: cover; border: 1px solid #ccc;" />
@@ -33,7 +33,7 @@
     </div>
 
     <div class="mb-3">
-        <label for="Image" class="form-label">Schimbă Imaginea (Opțional)</label>
+        <label for="Image" class="form-label">Schimba Imaginea (Optional)</label>
         <input type="file" name="Image" class="form-control" />
         @Html.ValidationMessage("Image", new { @class = "text-danger" })
     </div>
@@ -45,19 +45,19 @@
     </div>
 
     <div class="mb-3">
-        <label for="Price" class="form-label">Preț (RON)</label>
+        <label for="Price" class="form-label">Pret (RON)</label>
         <input type="number" name="Price" id="Price" class="form-control" step="0.01" value="@displayProduct.Price" min="0" />
         @Html.ValidationMessage("Price", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
-        <label for="Stock" class="form-label">Stoc (Bucăți)</label>
+        <label for="Stock" class="form-label">Stoc (Bucati)</label>
         <input type="number" name="Stock" id="Stock" class="form-control" step="1" value="@displayProduct.Stock" min="0" />
         @Html.ValidationMessage("Stock", new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
-        <label for="CategoryId" class="form-label">Selectați Categoria</label>
+        <label for="CategoryId" class="form-label">Selectati Categoria</label>
         <select name="CategoryId" id="CategoryId" class="form-select">
             @foreach (var category in ViewBag.Categories)
             {
@@ -75,5 +75,5 @@
     </div>
 
     <br />
-    <button class="btn btn-success" type="submit">Modifică Produsul</button>
+    <button class="btn btn-success" type="submit">Modifica Produsul</button>
 </form>

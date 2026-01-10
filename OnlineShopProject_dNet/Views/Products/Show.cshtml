@@ -23,13 +23,13 @@ ViewData["Title"] = "Detalii Produs";
 
 @if (Model == null)
 {
-    <div class="alert alert-danger">Produsul nu a fost găsit.</div>
+    <div class="alert alert-danger">Produsul nu a fost gasit.</div>
 }
 else
 {
     <div class="container my-5">
         <div class="row justify-content-center">
-            @* --- CARD UNIC PENTRU PRODUS (Imagine + Detalii + Acțiuni) --- *@
+            @* --- CARD UNIC PENTRU PRODUS (Imagine + Detalii + Actiuni) --- *@
             <div class="col-lg-8">
                 <div class="card shadow-lg border-0">
                     <div class="card-body p-0">
@@ -42,7 +42,7 @@ else
                                 }
                                 else
                                 {
-                                    <img src="/images/default-product.jpeg" alt="Imagine indisponibilă" class="product-img" />
+                                    <img src="/images/default-product.jpeg" alt="Imagine indisponibila" class="product-img" />
                                 }
                             </div>
                         </div>
@@ -69,7 +69,7 @@ else
                                 </div>
                             }
 
-                            @* 3. Preț (prominent) *@
+                            @* 3. Pret (prominent) *@
                             <h2 class="text-danger fw-bold mb-3">
                                 @(Model.Price?.ToString("0.##") ?? "-") <small class="fs-6 text-muted">RON</small>
                             </h2>
@@ -77,7 +77,7 @@ else
                             @* 4. Categorie & Stoc (badges) *@
                             <div class="d-flex gap-2 mb-3 flex-wrap">
                                 <span class="badge bg-info text-dark">
-                                    <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fără Categorie")
+                                    <i class="bi bi-tag-fill"></i> @(Model.Category?.Name ?? "Fara Categorie")
                                 </span>
                                 @if (Model.Stock.GetValueOrDefault() > 0)
                                 {
@@ -91,13 +91,13 @@ else
                                     else if (stockValue <= 10)
                                     {
                                         <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i> În stoc (@stockValue bucăți)
+                                            <i class="bi bi-check-circle"></i> In stoc (@stockValue bucati)
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i> În stoc
+                                            <i class="bi bi-check-circle"></i> In stoc
                                         </span>
                                     }
                                 }
@@ -118,7 +118,7 @@ else
 
                             <hr class="my-3" />
 
-                            @* 6. ACȚIUNI (Cantitate + Add to Cart + Wishlist) *@
+                            @* 6. ACTIUNI (Cantitate + Add to Cart + Wishlist) *@
                             @if (User.Identity?.IsAuthenticated == true)
                             {
                                 <div class="d-flex align-items-end gap-3 mb-4 flex-wrap">
@@ -133,7 +133,7 @@ else
                                             <input type="number" id="qtyInput" class="form-control" value="1" min="1" @(availableStock <= 10 ? $"max=\"{availableStock}\"" : "") style="width: 80px;">
                                         </div>
                                         <button class="btn btn-primary btn-lg fw-bold flex-grow-1" id="addToCartBtn" data-product-id="@Model.Id">
-                                            <i class="bi bi-cart-plus me-2"></i> Adaugă în coș
+                                            <i class="bi bi-cart-plus me-2"></i> Adauga in cos
                                         </button>
                                     }
                                     else
@@ -143,7 +143,7 @@ else
                                         </button>
                                     }
 
-                                    <button class="btn btn-outline-secondary btn-lg px-4 wishlist-btn" id="wishlistBtn" data-product-id="@Model.Id" title="Adaugă la favorite">
+                                    <button class="btn btn-outline-secondary btn-lg px-4 wishlist-btn" id="wishlistBtn" data-product-id="@Model.Id" title="Adauga la favorite">
                                         <i class="bi @heartClass fs-5"></i>
                                     </button>
                                 </div>
@@ -152,7 +152,7 @@ else
                             {
                                 <div class="alert alert-light border border-warning text-center mb-4">
                                     <i class="bi bi-lock"></i>
-                                    <a href="/Identity/Account/Login" class="fw-bold">Autentifică-te</a> pentru a cumpăra acest produs.
+                                    <a href="/Identity/Account/Login" class="fw-bold">Autentifica-te</a> pentru a cumpara acest produs.
                                 </div>
                             }
 
@@ -161,19 +161,19 @@ else
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <a href="/Products/Edit/@Model.Id" class="btn btn-warning btn-sm">
-                                        <i class="bi bi-pencil me-1"></i> Editează
+                                        <i class="bi bi-pencil me-1"></i> Editeaza
                                     </a>
                                     <form method="post" asp-controller="Products" asp-action="Delete" asp-route-id="@Model.Id" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur ștergi produsul?');">
-                                            <i class="bi bi-trash me-1"></i> Șterge
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur stergi produsul?');">
+                                            <i class="bi bi-trash me-1"></i> Sterge
                                         </button>
                                     </form>
                                     @if (Model.Status == "Pending")
                                     {
                                         <button type="button" class="btn btn-success btn-sm" 
                                                 onclick="openFeedbackModal(@Model.Id, '@Model.Title', 'approve')">
-                                            <i class="bi bi-check-circle me-1"></i> Aprobă
+                                            <i class="bi bi-check-circle me-1"></i> Aproba
                                         </button>
                                         <button type="button" class="btn btn-danger btn-sm" 
                                                 onclick="openFeedbackModal(@Model.Id, '@Model.Title', 'reject')">
@@ -184,17 +184,17 @@ else
                                 else if (User.IsInRole("Proposer") && Model.UserId != null && Model.UserId == UserManager.GetUserId(User) && string.Equals(Model.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
                                 {
                                     <a href="/Products/Edit/@Model.Id" class="btn btn-warning btn-sm">
-                                        <i class="bi bi-pencil me-1"></i> Editează
+                                        <i class="bi bi-pencil me-1"></i> Editeaza
                                     </a>
                                     <form method="post" action="/Products/Delete/@Model.Id" class="d-inline">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur ștergi produsul?');">
-                                            <i class="bi bi-trash me-1"></i> Șterge
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sigur stergi produsul?');">
+                                            <i class="bi bi-trash me-1"></i> Sterge
                                         </button>
                                     </form>
                                 }
 
                                 <a href="/Products/Index" class="btn btn-outline-secondary btn-sm ms-auto">
-                                    <i class="bi bi-arrow-left me-1"></i> Înapoi
+                                    <i class="bi bi-arrow-left me-1"></i> Inapoi
                                 </a>
                             </div>
                         </div>
@@ -215,29 +215,29 @@ else
                     </div>
                     <div class="card-body d-flex flex-column">
                         <p class="text-muted small mb-3">
-                            Întreabă-mă orice despre acest produs! Pot răspunde la întrebări despre specificații, utilizare, garanție și multe altele.
+                            Intreaba-ma orice despre acest produs! Pot raspunde la intrebari despre specificatii, utilizare, garantie si multe altele.
                         </p>
 
-                        @* Zona conversație *@
+                        @* Zona conversatie *@
                         <div id="ai-chat-messages" class="flex-grow-1 mb-3" style="max-height: 300px; overflow-y: auto;">
                             <div class="ai-message ai-welcome text-center text-muted py-3">
                                 <i class="bi bi-chat-dots fs-1 mb-2"></i>
-                                <p class="mb-0">Salut! Sunt asistentul tău pentru acest produs. Ce întrebare ai?</p>
+                                <p class="mb-0">Salut! Sunt asistentul tau pentru acest produs. Ce intrebare ai?</p>
                             </div>
                         </div>
 
-                        @* Formular întrebare *@
+                        @* Formular intrebare *@
                         <form id="ai-question-form" class="mt-auto">
                             @Html.AntiForgeryToken()
                             <div class="input-group">
                                 <input type="text" id="ai-question-input" class="form-control"
-                                       placeholder="Ex: Are garanție? Este potrivit pentru copii?" maxlength="500">
+                                       placeholder="Ex: Are garantie? Este potrivit pentru copii?" maxlength="500">
                                 <button class="btn btn-primary" type="submit" id="ai-submit-btn">
                                     <i class="bi bi-send"></i>
                                 </button>
                             </div>
                             <div class="form-text">
-                                <small class="text-muted">Întrebarea va fi trimisă către asistentul AI</small>
+                                <small class="text-muted">Intrebarea va fi trimisa catre asistentul AI</small>
                             </div>
                         </form>
                     </div>
@@ -264,17 +264,17 @@ else
                         <p id="feedbackProductInfo" class="mb-3"></p>
                         <div class="mb-3">
                             <label for="feedbackMessage" class="form-label">
-                                Mesaj de feedback (opțional)
+                                Mesaj de feedback (optional)
                             </label>
                             <textarea class="form-control" id="feedbackMessage" name="feedbackMessage" 
                                       rows="4" maxlength="1000" 
-                                      placeholder="Adaugă un mesaj pentru proposer despre decizia ta..."></textarea>
-                            <div class="form-text">Acest mesaj va fi trimis către proposer împreună cu notificarea.</div>
+                                      placeholder="Adauga un mesaj pentru proposer despre decizia ta..."></textarea>
+                            <div class="form-text">Acest mesaj va fi trimis catre proposer impreuna cu notificarea.</div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
-                        <button type="submit" class="btn btn-primary" id="feedbackSubmitBtn">Confirmă</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuleaza</button>
+                        <button type="submit" class="btn btn-primary" id="feedbackSubmitBtn">Confirma</button>
                     </div>
                 </form>
             </div>
@@ -291,7 +291,7 @@ else
                 
                 if (action === 'approve') {
                     productInfo.innerHTML = `<strong>Aprobare produs:</strong> ${productTitle}`;
-                    submitBtn.textContent = 'Aprobă Produs';
+                    submitBtn.textContent = 'Aproba Produs';
                     submitBtn.className = 'btn btn-success';
                     form.action = '/Products/Approve/' + productId;
                 } else {

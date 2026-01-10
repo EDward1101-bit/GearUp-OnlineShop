@@ -3,12 +3,12 @@ namespace OnlineShopProject_dNet.Services
     public interface IImageValidationService
     {
         /// <summary>
-        /// Valideaz? dac? un fi?ier este o imagine valid? pe baza magic bytes
+        /// Valideaza daca un fisier este o imagine valida pe baza magic bytes
         /// </summary>
         bool IsValidImage(IFormFile file);
 
         /// <summary>
-        /// Valideaz? extensia ?i dimensiunea
+        /// Valideaza extensia si dimensiunea
         /// </summary>
         bool IsValidImageSize(IFormFile file, long maxSizeInBytes = 5 * 1024 * 1024);
     }
@@ -43,17 +43,17 @@ namespace OnlineShopProject_dNet.Services
             {
                 var fileExtension = Path.GetExtension(file.FileName).ToLower();
 
-                // Verific? dac? extensia e permis?
+                // Verifica daca extensia e permisa
                 if (!AllowedMagicBytes.ContainsKey(fileExtension))
                     return false;
 
-                // Cite?te magic bytes
+                // Citeste magic bytes
                 using (var memoryStream = new MemoryStream())
                 {
                     file.CopyTo(memoryStream);
                     var bytes = memoryStream.ToArray();
 
-                    // Verific? magic bytes pentru aceast? extensie
+                    // Verifica magic bytes pentru aceasta extensie
                     var allowedBytes = AllowedMagicBytes[fileExtension];
                     foreach (var magicBytes in allowedBytes)
                     {
