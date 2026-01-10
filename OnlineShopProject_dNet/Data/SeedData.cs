@@ -267,22 +267,22 @@ namespace OnlineShopProject_dNet.Data
                 // Creatina Monohidratata - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
                 ("Creatina Monohidratata Micronizata 500 g", ADMIN_ID, 5, "Se dizolva perfect in apa rece si nu are gust nisipos. Am simtit mai multa energie la seriile grele dupa doua saptamani.", DateTime.UtcNow.AddDays(-20)),
                 ("Creatina Monohidratata Micronizata 500 g", PROPOSER_ID, 4, "Micronizata fin, nu baloneaza. O iau cu suc de portocale si intru mai repede in antrenament.", DateTime.UtcNow.AddDays(-18)),
-                ("Creatina Monohidratata Micronizata 500 g", USER_ID, 5, "Dupa 10 zile am observat recuperare mai buna la picioare. As fi vrut sa includa si o lingurita gradata.", DateTime.UtcNow.AddDays(-15)),
+                ("Creatina Monohidratata Micronizata 500 g", USER_ID, 1, "Produsul a ajuns desfacut", DateTime.UtcNow.AddDays(-15)),
 
                 // Whey Protein Gold - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
                 ("Whey Protein Gold 1 kg", ADMIN_ID, 5, "Gust echilibrat de vanilie, se mixeaza fin in shaker si nu face spuma. 24 g proteina per portie, excelent post-antrenament.", DateTime.UtcNow.AddDays(-19)),
-                ("Whey Protein Gold 1 kg", PROPOSER_ID, 4, "Il pun in terciul de ovaz dimineata. Nu baloneaza si se dizolva repede.", DateTime.UtcNow.AddDays(-16)),
-                ("Whey Protein Gold 1 kg", USER_ID, 5, "Proteina e curata, fara arome artificiale tari. M-a ajutat la recuperare dupa antrenamentele de forta.", DateTime.UtcNow.AddDays(-12)),
+                ("Whey Protein Gold 1 kg", PROPOSER_ID, 2, "Gust mediocru", DateTime.UtcNow.AddDays(-16)),
+                ("Whey Protein Gold 1 kg", USER_ID, 4, "Proteina e curata, fara arome artificiale tari. M-a ajutat la recuperare dupa antrenamentele de forta.", DateTime.UtcNow.AddDays(-12)),
 
                 // Set Gantere Reglabile - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
                 ("Set Gantere Reglabile 20 kg", ADMIN_ID, 5, "Manerele striate prind bine si schimb greutatile rapid. Discurile cauciucate nu zgarie podeaua si nu fac zgomot.", DateTime.UtcNow.AddDays(-22)),
-                ("Set Gantere Reglabile 20 kg", PROPOSER_ID, 4, "Sistemul de prindere e sigur, dar suruburile trebuie stranse periodic. Perfect pentru antrenamente acasa.", DateTime.UtcNow.AddDays(-17)),
+                ("Set Gantere Reglabile 20 kg", PROPOSER_ID, 3, "Sistemul de prindere e sigur, dar suruburile trebuie stranse periodic. Ok pentru antrenamente acasa.", DateTime.UtcNow.AddDays(-17)),
                 ("Set Gantere Reglabile 20 kg", USER_ID, 5, "Compacte, ocupa putin spatiu. Am inlocuit vechile gantere fixe fara sa simt diferenta la grip.", DateTime.UtcNow.AddDays(-11)),
 
                 // Geanta de Sala XL - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
-                ("Geanta de Sala XL - Alba", ADMIN_ID, 5, "Incape tot: pantofi, prosop, centura, shaker. Compartimentul ventilat chiar isi face treaba.", DateTime.UtcNow.AddDays(-19)),
-                ("Geanta de Sala XL - Alba", PROPOSER_ID, 4, "Material gros, fermoare solide. As fi vrut curea de umar mai lata, dar per total e foarte buna.", DateTime.UtcNow.AddDays(-13)),
-                ("Geanta de Sala XL - Alba", USER_ID, 5, "Buzunare bine gandite pentru telefon si chei. Isi pastreaza forma chiar si plina.", DateTime.UtcNow.AddDays(-10)),
+                ("Geanta de Sala XL - Alba", ADMIN_ID, 4, "Incape tot: pantofi, prosop, centura, shaker. Compartimentul ventilat chiar isi face treaba.", DateTime.UtcNow.AddDays(-19)),
+                ("Geanta de Sala XL - Alba", PROPOSER_ID, 5, "Material gros, fermoare solide. As fi vrut curea de umar mai lata, dar per total e foarte buna.", DateTime.UtcNow.AddDays(-13)),
+                ("Geanta de Sala XL - Alba", USER_ID, 4, "Buzunare bine gandite pentru telefon si chei. Isi pastreaza forma chiar si plina.", DateTime.UtcNow.AddDays(-10)),
 
                 // Shaker Proteine - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
                 ("Shaker Proteine din Otel Inoxidabil 750 ml", ADMIN_ID, 5, "Capacul etans nu curge deloc, otelul nu prinde mirosuri. Ideal dupa antrenamentele de seara.", DateTime.UtcNow.AddDays(-21)),
