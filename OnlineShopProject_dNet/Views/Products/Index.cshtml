@@ -487,12 +487,10 @@
                             }
                         }
                         // Update wishlist badge if available
-                        if (data.wishlistCount !== undefined) {
-                            const wb = document.getElementById('wishlist-badge-count');
-                            if (wb) {
-                                wb.textContent = data.wishlistCount;
-                                wb.style.display = data.wishlistCount > 0 ? 'inline-block' : 'none';
-                            }
+                        if (data.wishlistCount !== undefined && typeof updateWishlistBadge === 'function') {
+                            updateWishlistBadge(data.wishlistCount);
+                        } else if (typeof loadWishlistCount === 'function') {
+                            loadWishlistCount();
                         }
                         if (typeof showToast === 'function') {
                             showToast(data.message || (data.action === 'added' ? 'Adaugat la favorite' : 'Eliminat din favorite'), 'success');

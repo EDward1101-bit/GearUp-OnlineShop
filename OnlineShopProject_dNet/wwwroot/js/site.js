@@ -71,6 +71,27 @@ window.showToast = function(message, type) {
     toast.querySelector('.btn-close')?.addEventListener('click', function(){ toast.remove(); });
 };
 
+// Wishlist badge helpers
+window.updateWishlistBadge = function(count) {
+    var badge = document.getElementById('wishlist-badge-count');
+    if (!badge) return;
+    if (typeof count === 'number' && !isNaN(count)) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+};
+
+window.loadWishlistCount = function() {
+    fetch('/Wishlist/Count')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d && typeof d.count === 'number') {
+                updateWishlistBadge(d.count);
+            }
+        })
+        .catch(function(err) { console.debug('Wishlist count fetch failed', err); });
+};
+
 // Add to cart detailed (used on product show page)
 window.addToCartDetailed = function(productId, qty, btn) {
     qty = parseInt(qty) || 1;
@@ -191,22 +212,10 @@ window.toggleWishlistDetailed = function(productId, btn) {
                 showToast('Eliminat din favorite', 'info'); 
             }
             
-            // update wishlist badge if server returns count
             if (d.wishlistCount !== undefined) {
-                var wb = document.getElementById('wishlist-badge-count');
-                if (wb) {
-                    wb.textContent = d.wishlistCount;
-                    wb.style.display = d.wishlistCount > 0 ? 'inline-block' : 'none';
-                }
-            } else {
-                // fallback: toggle increment/decrement
-                var wb = document.getElementById('wishlist-badge-count');
-                if (wb) {
-                    var val = parseInt(wb.textContent || '0');
-                    if (d.action === 'added') val += 1; else val = Math.max(0, val-1);
-                    wb.textContent = val; 
-                    wb.style.display = val>0 ? 'inline-block' : 'none';
-                }
+                updateWishlistBadge(d.wishlistCount);
+            } else if (typeof loadWishlistCount === 'function') {
+                loadWishlistCount();
             }
             if (typeof loadMiniCart === 'function') {
                 loadMiniCart();
@@ -287,7 +296,7 @@ window.renderLocalMiniCart = function (container) {
     var itemsToShow = cart.slice(0,5);
     var moreCount = cart.length - itemsToShow.length;
     itemsToShow.forEach(function (item) {
-        html += '<div class="d-flex align-items-center mb-2">';
+        html += '<div class="d-flex align-items-center mb-2>';
         html += '<div style="width:56px; height:56px; background:#f8f9fa; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:8px;">';
         if (item.image) html += '<img src="'+item.image+'" style="max-width:100%; max-height:100%; object-fit:contain;" />';
         else html += '<i class="bi bi-image text-muted fs-4"></i>';
@@ -296,7 +305,7 @@ window.renderLocalMiniCart = function (container) {
         html += '<div class="fw-semibold text-dark" style="font-size:0.9rem;">'+(item.title||('Produs #'+item.productId))+'</div>';
         html += '<div class="text-muted small">'+(item.quantity||0)+' x '+(item.unitPrice||0)+' RON</div>';
         html += '</div>';
-        html += '<div class="ms-2 text-end small fw-bold">'+((item.quantity||0)*(item.unitPrice||0))+' RON</div>';
+        html += '<div class="ms-2 text-end small fw-bold>'+((item.quantity||0)*(item.unitPrice||0))+' RON</div>';
         html += '</div>';
     });
     if (moreCount > 0) {
@@ -440,6 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try { if (window.isAdmin) { loadPendingCount(); setInterval(loadPendingCount, 30000); } } catch (e) {}
     try { updateLocalBadge(); } catch (e) {}
     try { loadMiniCart(); } catch (e) {}
+    try { loadWishlistCount(); } catch (e) {}
     try { window.updateRelativeTimestamps(); } catch (e) { console.debug('updateRelativeTimestamps failed', e); }
     try {
         // If user just logged in and we have a local cart, merge it server-side
@@ -457,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             method: 'POST',
                             headers: headers,
                             body: JSON.stringify(local.map(i => ({ productId: parseInt(i.productId), quantity: parseInt(i.quantity) })))
-                        }).then(r => r.json()).then(data => {
+                        }).then(function(r) { return r.json(); }).then(function(data) {
                     if (data && data.success) {
                         // clear local only if merged
                         localStorage.removeItem('localCart');
@@ -465,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         loadMiniCart();
                         if (data.merged && data.merged > 0) showToast('Coșul local a fost sincronizat', 'success');
                     }
-                }).catch(err => console.debug('MergeLocalCart failed', err));
+                }).catch(function(err) { console.debug('MergeLocalCart failed', err); });
                     } catch (e) { console.debug('MergeLocalCart token attach failed', e); }
             }
         }

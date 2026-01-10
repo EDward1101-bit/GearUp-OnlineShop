@@ -50,7 +50,8 @@ namespace OnlineShopProject_dNet.Controllers
                 // SCENARIUL A: Produsul exista -> IL STERGEM (Undo)
                 db.Wishlists.Remove(existingItem);
                 await db.SaveChangesAsync();
-                return Json(new { success = true, action = "removed", message = "Produsul a fost scos de la favorite." });
+                var wishlistCount = await db.Wishlists.CountAsync(w => w.UserId == userId);
+                return Json(new { success = true, action = "removed", message = "Produsul a fost scos de la favorite.", wishlistCount });
             }
             else
             {
@@ -58,7 +59,8 @@ namespace OnlineShopProject_dNet.Controllers
                 var newItem = new Wishlist { UserId = userId, ProductId = productId };
                 db.Wishlists.Add(newItem);
                 await db.SaveChangesAsync();
-                return Json(new { success = true, action = "added", message = "Produsul a fost adaugat la favorite!" });
+                var wishlistCount = await db.Wishlists.CountAsync(w => w.UserId == userId);
+                return Json(new { success = true, action = "added", message = "Produsul a fost adaugat la favorite!", wishlistCount });
             }
         }
 
@@ -149,7 +151,16 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // NOTA: Metoda AddProductToCartInternal a fost stearsa complet!
-        // Codul este acum mult mai simplu si foloseste logica centralizata din CartService.
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Count()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Json(new { count = 0 });
+
+            var count = await db.Wishlists.CountAsync(w => w.UserId == userId);
+            return Json(new { count });
+        }
+
     }
 }
