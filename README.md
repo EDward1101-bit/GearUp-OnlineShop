@@ -1,4 +1,4 @@
-# OnlineShopProject_dNet
+# GearUp - Online Gym Gear Shop
 
 <div align="center">
 
