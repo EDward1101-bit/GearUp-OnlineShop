@@ -16,8 +16,5 @@ namespace OnlineShopProject_dNet.Models
         // Legatura cu produsul (optional - FAQ-uri generale)
         public int? ProductId { get; set; }
         public virtual Product? Product { get; set; }
-
-        // Cati utilizatori au gasit aceasta intrebare utila
-        public int HelpfulCount { get; set; } = 0;
     }
 }

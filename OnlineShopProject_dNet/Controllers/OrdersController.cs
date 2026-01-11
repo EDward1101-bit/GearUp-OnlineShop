@@ -41,25 +41,28 @@ namespace OnlineShopProject_dNet.Controllers
                                    .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "InCart");
                 }
 
-                // Calculam totalul folosind pretul salvat (UnitPrice), ignorand modificarile din magazin
-                cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
-
-                // Verificam stocul pentru a afisa avertismente in View
-                bool hasStockIssues = false;
-
-                foreach (var item in cart.OrderDetails)
+                if (cart != null)
                 {
-                    // Daca produsul a fost sters sau cantitatea din cos depaseste stocul actual
-                    if (item.Product != null && item.Quantity > item.Product.Stock.GetValueOrDefault())
+                    // Calculam totalul folosind pretul salvat (UnitPrice), ignorand modificarile din magazin
+                    cart.TotalAmount = cart.OrderDetails.Sum(od => od.Quantity * od.UnitPrice);
+
+                    // Verificam stocul pentru a afisa avertismente in View
+                    bool hasStockIssues = false;
+
+                    foreach (var item in cart.OrderDetails)
                     {
-                        hasStockIssues = true;
+                        // Daca produsul a fost sters sau cantitatea din cos depaseste stocul actual
+                        if (item.Product != null && item.Quantity > item.Product.Stock.GetValueOrDefault())
+                        {
+                            hasStockIssues = true;
+                        }
                     }
-                }
 
-                if (hasStockIssues)
-                {
-                    ViewBag.ErrorMessage = "Unele produse din cos nu mai sunt disponibile in cantitatea selectata. Te rugam sa actualizezi cosul inainte de a comanda.";
-                    ViewBag.HasStockIssues = true;
+                    if (hasStockIssues)
+                    {
+                        ViewBag.ErrorMessage = "Unele produse din cos nu mai sunt disponibile in cantitatea selectata. Te rugam sa actualizezi cosul inainte de a comanda.";
+                        ViewBag.HasStockIssues = true;
+                    }
                 }
             }
             return View(cart);
@@ -295,7 +298,7 @@ namespace OnlineShopProject_dNet.Controllers
             // Include OrderDetails si Product pentru a afisa corect informatiile
             var orders = await db.Orders
                                  .Include(o => o.OrderDetails)
-                                 .ThenInclude(od => od.Product)
+                                 .ThenInclude(od => od.Product!)
                                  .ThenInclude(p => p.Category)
                                  .Where(o => o.UserId == userId && o.Status != "InCart")
                                  .OrderByDescending(o => o.Date) // Cele mai recente primele
@@ -314,7 +317,7 @@ namespace OnlineShopProject_dNet.Controllers
             // Verificam si UserId pentru securitate (sa nu vezi comenzile altuia)
             var order = await db.Orders
                                 .Include(o => o.OrderDetails)
-                                .ThenInclude(od => od.Product)
+                                .ThenInclude(od => od.Product!)
                                 .ThenInclude(p => p.Category)
                                 .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 

@@ -20,7 +20,7 @@ namespace OnlineShopProject_dNet.Models
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             // validationContext ne permite sa cerem servicii configurate in Program.cs
-            var _context = (ApplicationDbContext)validationContext.GetService(typeof(ApplicationDbContext));
+            var _context = validationContext.GetService(typeof(ApplicationDbContext)) as ApplicationDbContext;
 
             if (_context != null)
             {

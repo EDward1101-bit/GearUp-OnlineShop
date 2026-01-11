@@ -41,22 +41,5 @@ namespace OnlineShopProject_dNet.Controllers
                 return Json(new { success = false, message = "A aparut o eroare. Va rugam sa incercati din nou." });
             }
         }
-
-        /// <summary>
-        /// Marcheaza un raspuns FAQ ca fiind util
-        /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> MarkHelpful(int faqId)
-        {
-            try
-            {
-                await _aiService.MarkFAQHelpful(faqId);
-                return Json(new { success = true });
-            }
-            catch
-            {
-                return Json(new { success = false });
-            }
-        }
     }
 }

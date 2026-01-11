@@ -294,8 +294,11 @@ namespace OnlineShopProject_dNet.Controllers
                     return;
                 }
 
-                // Verificam daca exista deja o intrebare similara semantic pentru acelasi produs
-                var productFaqs = existingFaqs.Where(f => f.ProductId == productId).ToList();
+                // IMPORTANT: Verificam DIRECT in baza de date pentru a evita duplicate (race conditions)
+                var productFaqs = await db.FAQs
+                    .Where(f => f.ProductId == productId)
+                    .ToListAsync();
+                
                 _logger.LogDebug("Checking against {Count} existing FAQs for product {ProductId}", productFaqs.Count, productId);
                 
                 foreach (var faq in productFaqs)
@@ -313,8 +316,7 @@ namespace OnlineShopProject_dNet.Controllers
                 {
                     ProductId = productId,
                     Question = question.Trim(),
-                    Answer = answer.Trim(),
-                    HelpfulCount = 0
+                    Answer = answer.Trim()
                 };
 
                 db.FAQs.Add(newFaq);
@@ -503,7 +505,7 @@ namespace OnlineShopProject_dNet.Controllers
                     await db.SaveChangesAsync();
 
                     if (product.Status == "Pending")
-                        TempData["message"] = "Produsul a fost trimis spre aprobare!";
+                        TempData["message"] = "Produsul a fost trimis spre aprobat!";
                     else
                         TempData["message"] = "Produsul a fost adaugat!";
 
@@ -685,7 +687,6 @@ namespace OnlineShopProject_dNet.Controllers
                 if (System.IO.File.Exists(imagePath)) System.IO.File.Delete(imagePath);
             }
 
-            // Curatam cosurile in lucru (InCart) care contin produsul
             var cartsWithProduct = db.OrderDetails
                 .Include(od => od.Order)
                 .Where(od => od.ProductId == id && od.Order != null && od.Order.Status == "InCart")
@@ -702,7 +703,7 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // 6. APPROVE - Doar Admin poate aproba produse
+        // 6. APPROVE
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Approve(int id, string? feedbackMessage)
@@ -713,13 +714,12 @@ namespace OnlineShopProject_dNet.Controllers
             product.Status = "Approved";
             db.SaveChanges();
 
-            // Trimite notificare catre proposer
             if (!string.IsNullOrEmpty(product.UserId))
             {
                 var message = $"Produsul tau '{product.Title}' a fost aprobat!";
                 await _notificationService.AddNotificationAsync(
-                    product.UserId, 
-                    message, 
+                    product.UserId,
+                    message,
                     "product_approved",
                     product.Id,
                     feedbackMessage);
@@ -729,7 +729,7 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // 7. REJECT - Doar Admin poate respinge produse
+        // 7. REJECT
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Reject(int id, string? feedbackMessage)
@@ -740,13 +740,12 @@ namespace OnlineShopProject_dNet.Controllers
             product.Status = "Rejected";
             db.SaveChanges();
 
-            // Trimite notificare catre proposer
             if (!string.IsNullOrEmpty(product.UserId))
             {
                 var message = $"Produsul tau '{product.Title}' a fost respins.";
                 await _notificationService.AddNotificationAsync(
-                    product.UserId, 
-                    message, 
+                    product.UserId,
+                    message,
                     "product_rejected",
                     product.Id,
                     feedbackMessage);
@@ -756,7 +755,7 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // 8. GETPENDINGCOUNT - Returneaza numarul de produse Pending (pentru badge in navbar)
+        // 8. GETPENDINGCOUNT
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetPendingCount()
