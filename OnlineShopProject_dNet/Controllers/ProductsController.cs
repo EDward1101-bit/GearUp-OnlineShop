@@ -77,8 +77,8 @@ namespace OnlineShopProject_dNet.Controllers
 
             var totalCount = query.Count();
             var products = query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                // .Skip((page - 1) * pageSize)
+                // .Take(pageSize)
                 .ToList();
 
             ViewBag.Products = products;
@@ -207,8 +207,11 @@ namespace OnlineShopProject_dNet.Controllers
             {
                 var answer = await _productAiService.AskProductAssistantAsync(product, faqs, question);
                 
-                // Salvare FAQ daca intrebarea este noua si are sens
-                await SaveQuestionToFaqIfNewAsync(productId, question, answer, faqs);
+                // Salvare FAQ daca intrebarea este noua, are sens si raspunsul nu e fallback
+                if (!IsFallbackAnswer(answer))
+                {
+                    await SaveQuestionToFaqIfNewAsync(productId, question, answer, faqs);
+                }
                 
                 return Json(new { answer });
             }
@@ -220,24 +223,62 @@ namespace OnlineShopProject_dNet.Controllers
         }
 
         /// <summary>
+        /// Verifica daca raspunsul este un fallback (nu contine informatii utile)
+        /// </summary>
+        private bool IsFallbackAnswer(string answer)
+        {
+            if (string.IsNullOrWhiteSpace(answer))
+                return true;
+
+            var lowerAnswer = answer.ToLowerInvariant();
+
+            // Verificam daca raspunsul contine fraze de fallback
+            var fallbackPhrases = new[]
+            {
+                "nu avem detalii",
+                "nu am informatii",
+                "nu pot raspunde",
+                "contacteaza",
+                AiFallbackAnswer.ToLowerInvariant()
+            };
+
+            return fallbackPhrases.Any(phrase => lowerAnswer.Contains(phrase));
+        }
+
+        /// <summary>
         /// Salveaza intrebarea in FAQ daca nu exista deja una similara semantic
         /// </summary>
         private async Task SaveQuestionToFaqIfNewAsync(int productId, string question, string answer, List<FAQ> existingFaqs)
         {
             try
             {
+                // Validare: intrebarea trebuie sa aiba minim 10 caractere
+                if (string.IsNullOrWhiteSpace(question) || question.Trim().Length < 10)
+                {
+                    _logger.LogDebug("Question rejected - too short (min 10 chars): {Question}", question);
+                    return;
+                }
+
+                // Validare: raspunsul trebuie sa aiba minim 20 caractere
+                if (string.IsNullOrWhiteSpace(answer) || answer.Trim().Length < 20)
+                {
+                    _logger.LogDebug("Answer rejected - too short (min 20 chars): {Answer}", answer);
+                    return;
+                }
+
                 // Normalizam intrebarea pentru comparatie
                 var normalizedQuestion = NormalizeQuestion(question);
                 
-                // Verificam daca intrebarea are sens (minim 3 cuvinte, nu e spam)
+                // Verificam daca intrebarea are sens (minim 1 cuvant, nu e spam)
                 if (!IsValidQuestion(normalizedQuestion))
                 {
                     _logger.LogDebug("Question rejected as invalid: {Question}", question);
                     return;
                 }
 
-                // Verificam daca exista deja o intrebare similara semantic
-                foreach (var faq in existingFaqs)
+                // Verificam daca exista deja o intrebare similara semantic pentru acelasi produs
+                var productFaqs = existingFaqs.Where(f => f.ProductId == productId).ToList();
+                foreach (var faq in productFaqs)
                 {
                     if (AreQuestionsSemanticallySimlar(normalizedQuestion, NormalizeQuestion(faq.Question)))
                     {
@@ -305,8 +346,8 @@ namespace OnlineShopProject_dNet.Controllers
 
             var words = normalizedQuestion.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             
-            // Minim 2 cuvinte semnificative
-            if (words.Length < 2)
+            // Minim 1 cuvant semnificativ
+            if (words.Length < 1)
                 return false;
 
             // Maxim 50 cuvinte (evitam spam)
