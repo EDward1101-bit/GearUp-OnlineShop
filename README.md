@@ -1,4 +1,4 @@
-<div align="center"># GearUp - Online Gym Gear Shop</div>
+<div align="center">GearUp - Online Gym Gear Shop</div>
 
 <div align="center">
 
