@@ -230,19 +230,33 @@ namespace OnlineShopProject_dNet.Controllers
             if (string.IsNullOrWhiteSpace(answer))
                 return true;
 
-            var lowerAnswer = answer.ToLowerInvariant();
+            var lowerAnswer = answer.ToLowerInvariant().Trim();
 
-            // Verificam daca raspunsul contine fraze de fallback
-            var fallbackPhrases = new[]
+            // Verificam daca raspunsul este EXACT fallback-ul nostru sau foarte scurt
+            if (lowerAnswer == AiFallbackAnswer.ToLowerInvariant())
+                return true;
+
+            // Raspuns prea scurt = probabil fallback
+            if (lowerAnswer.Length < 20)
+                return true;
+
+            // Verificam daca raspunsul INCEPE cu fraze de fallback (nu doar contine)
+            var fallbackStartPhrases = new[]
             {
-                "nu avem detalii",
+                "momentan nu avem",
                 "nu am informatii",
                 "nu pot raspunde",
-                "contacteaza",
-                AiFallbackAnswer.ToLowerInvariant()
+                "din pacate, nu",
+                "nu dispunem de"
             };
 
-            return fallbackPhrases.Any(phrase => lowerAnswer.Contains(phrase));
+            if (fallbackStartPhrases.Any(phrase => lowerAnswer.StartsWith(phrase)))
+            {
+                _logger.LogDebug("Answer detected as fallback (starts with fallback phrase): {Answer}", answer);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -252,37 +266,44 @@ namespace OnlineShopProject_dNet.Controllers
         {
             try
             {
+                _logger.LogDebug("Attempting to save FAQ for product {ProductId}. Question length: {QLen}, Answer length: {ALen}", 
+                    productId, question?.Length ?? 0, answer?.Length ?? 0);
+
                 // Validare: intrebarea trebuie sa aiba minim 10 caractere
                 if (string.IsNullOrWhiteSpace(question) || question.Trim().Length < 10)
                 {
-                    _logger.LogDebug("Question rejected - too short (min 10 chars): {Question}", question);
+                    _logger.LogDebug("FAQ not saved - question too short (min 10 chars): '{Question}'", question);
                     return;
                 }
 
                 // Validare: raspunsul trebuie sa aiba minim 20 caractere
                 if (string.IsNullOrWhiteSpace(answer) || answer.Trim().Length < 20)
                 {
-                    _logger.LogDebug("Answer rejected - too short (min 20 chars): {Answer}", answer);
+                    _logger.LogDebug("FAQ not saved - answer too short (min 20 chars): '{Answer}'", answer);
                     return;
                 }
 
                 // Normalizam intrebarea pentru comparatie
                 var normalizedQuestion = NormalizeQuestion(question);
+                _logger.LogDebug("Normalized question: '{NormalizedQuestion}'", normalizedQuestion);
                 
                 // Verificam daca intrebarea are sens (minim 1 cuvant, nu e spam)
                 if (!IsValidQuestion(normalizedQuestion))
                 {
-                    _logger.LogDebug("Question rejected as invalid: {Question}", question);
+                    _logger.LogDebug("FAQ not saved - question invalid after normalization: '{Question}'", question);
                     return;
                 }
 
                 // Verificam daca exista deja o intrebare similara semantic pentru acelasi produs
                 var productFaqs = existingFaqs.Where(f => f.ProductId == productId).ToList();
+                _logger.LogDebug("Checking against {Count} existing FAQs for product {ProductId}", productFaqs.Count, productId);
+                
                 foreach (var faq in productFaqs)
                 {
                     if (AreQuestionsSemanticallySimlar(normalizedQuestion, NormalizeQuestion(faq.Question)))
                     {
-                        _logger.LogDebug("Similar FAQ already exists for question: {Question}", question);
+                        _logger.LogDebug("FAQ not saved - similar FAQ already exists. New: '{New}', Existing: '{Existing}'", 
+                            question, faq.Question);
                         return; // Nu salvam duplicat
                     }
                 }
@@ -292,17 +313,17 @@ namespace OnlineShopProject_dNet.Controllers
                 {
                     ProductId = productId,
                     Question = question.Trim(),
-                    Answer = answer,
+                    Answer = answer.Trim(),
                     HelpfulCount = 0
                 };
 
                 db.FAQs.Add(newFaq);
                 await db.SaveChangesAsync();
-                _logger.LogInformation("New FAQ saved for product {ProductId}: {Question}", productId, question);
+                _logger.LogInformation("New FAQ saved successfully for product {ProductId}: '{Question}'", productId, question);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to save FAQ for product {ProductId}", productId);
+                _logger.LogWarning(ex, "Failed to save FAQ for product {ProductId}: {Message}", productId, ex.Message);
                 // Nu aruncam exceptia - salvarea FAQ nu e critica
             }
         }

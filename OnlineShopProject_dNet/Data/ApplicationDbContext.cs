@@ -46,6 +46,13 @@ namespace OnlineShopProject_dNet.Data
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // 4. Cand stergem un Produs, FAQ-urile asociate devin generale (ProductId = null)
+            modelBuilder.Entity<FAQ>()
+                .HasOne(f => f.Product)
+                .WithMany()
+                .HasForeignKey(f => f.ProductId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // 1. ORDER_DETAIL (Cheie simplă + snapshot produs)
             modelBuilder.Entity<OrderDetail>()
                 .HasKey(od => od.Id);
