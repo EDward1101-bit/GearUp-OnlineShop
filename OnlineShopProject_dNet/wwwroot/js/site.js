@@ -44,6 +44,61 @@ window.getLocalCart = function () {
     try { return JSON.parse(localStorage.getItem('localCart') || '[]'); } catch (e) { return []; }
 };
 
+// Local wishlist helpers
+window.getLocalWishlist = function() {
+    try { return JSON.parse(localStorage.getItem('localWishlist') || '[]'); } catch (e) { return []; }
+};
+
+window.saveLocalWishlist = function(wishlist) {
+    localStorage.setItem('localWishlist', JSON.stringify(wishlist));
+};
+
+window.addToLocalWishlist = function(productId, productData) {
+    var wishlist = window.getLocalWishlist();
+    var id = productId.toString();
+    var exists = wishlist.find(function(item) { return item.productId == id; });
+    if (!exists) {
+        wishlist.push({ 
+            productId: id, 
+            title: productData?.title || '', 
+            image: productData?.image || '',
+            addedAt: new Date().toISOString()
+        });
+        window.saveLocalWishlist(wishlist);
+        return true; // Added
+    }
+    return false; // Already exists
+};
+
+window.removeFromLocalWishlist = function(productId) {
+    var wishlist = window.getLocalWishlist();
+    var id = productId.toString();
+    var filtered = wishlist.filter(function(item) { return item.productId != id; });
+    if (filtered.length !== wishlist.length) {
+        window.saveLocalWishlist(filtered);
+        return true; // Removed
+    }
+    return false; // Not found
+};
+
+window.isInLocalWishlist = function(productId) {
+    var wishlist = window.getLocalWishlist();
+    return wishlist.some(function(item) { return item.productId == productId.toString(); });
+};
+
+window.updateLocalWishlistBadge = function() {
+    var wishlist = window.getLocalWishlist();
+    var badge = document.getElementById('wishlist-badge-count');
+    if (badge) {
+        if (wishlist.length > 0) {
+            badge.textContent = wishlist.length;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+};
+
 // Toast helper (Bootstrap 5)
 window.showToast = function(message, type) {
     // type: 'success','info','warning','danger'
@@ -71,6 +126,15 @@ window.showToast = function(message, type) {
     toast.querySelector('.btn-close')?.addEventListener('click', function(){ toast.remove(); });
 };
 
+// Redirect to login with message for unauthenticated users
+window.redirectToLoginWithMessage = function(message) {
+    // Store the message to show after redirect
+    sessionStorage.setItem('authRedirectMessage', message || 'Pentru a continua, autentifică-te sau creează un cont');
+    // Get current URL to return after login
+    var returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.href = '/Identity/Account/Login?ReturnUrl=' + returnUrl;
+};
+
 // Wishlist badge helpers
 window.updateWishlistBadge = function(count) {
     var badge = document.getElementById('wishlist-badge-count');
@@ -82,14 +146,19 @@ window.updateWishlistBadge = function(count) {
 };
 
 window.loadWishlistCount = function() {
-    fetch('/Wishlist/Count')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-            if (d && typeof d.count === 'number') {
-                updateWishlistBadge(d.count);
-            }
-        })
-        .catch(function(err) { console.debug('Wishlist count fetch failed', err); });
+    if (window.isAuthenticated) {
+        fetch('/Wishlist/Count')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d && typeof d.count === 'number') {
+                    updateWishlistBadge(d.count);
+                }
+            })
+            .catch(function(err) { console.debug('Wishlist count fetch failed', err); });
+    } else {
+        // For unauthenticated users, show local wishlist count
+        window.updateLocalWishlistBadge();
+    }
 };
 
 // Add to cart detailed (used on product show page)
@@ -135,6 +204,12 @@ window.addToCartDetailed = function(productId, qty, btn) {
                     loadMiniCart(); 
                 }
                 showToast('Produs adăugat în coș', 'success'); 
+            } else if (d.requiresAuth) {
+                // User not authenticated - add to local cart and redirect
+                if (typeof addToLocalCart === 'function') {
+                    addToLocalCart(productId, qty, btn);
+                }
+                window.redirectToLoginWithMessage(d.message);
             } else {
                 showToast(d.message || 'Eroare la adăugare', 'danger');
             }
@@ -152,19 +227,39 @@ window.addToCartDetailed = function(productId, qty, btn) {
             showToast('Eroare la adăugarea produsului.', 'danger');
         }
     } else {
-        console.log('[CartDebug] User not authenticated, using localStorage');
+        console.log('[CartDebug] User not authenticated, using localStorage and redirecting');
         if (typeof addToLocalCart === 'function') {
-            addToLocalCart(productId, qty, btn || document.querySelector('[onclick*="addToCartDetailed"]'));
-            showToast('Produs adăugat în coș (local)', 'success');
-        } else {
-            showToast('Te rugăm să te autentifici pentru a adăuga produse în coș.', 'warning');
+            addToLocalCart(productId, qty, btn);
         }
+        window.redirectToLoginWithMessage('Pentru a continua, autentifică-te sau creează un cont');
     }
 };
 
-// Wishlist toggle detailed
+// Wishlist toggle detailed - handles both authenticated and unauthenticated users
 window.toggleWishlistDetailed = function(productId, btn) {
-    console.log('[WishlistDebug] Toggling product:', productId);
+    console.log('[WishlistDebug] Toggling product:', productId, 'Authenticated:', window.isAuthenticated);
+    
+    if (!window.isAuthenticated) {
+        // Unauthenticated user - add to local wishlist and redirect
+        console.log('[WishlistDebug] User not authenticated, using localStorage');
+        
+        // Get product data from the button context if available
+        var productData = {};
+        try {
+            if (btn) {
+                var card = btn.closest('.card') || btn.closest('.product-card') || document.body;
+                var titleEl = card.querySelector('.card-title a') || card.querySelector('.card-title') || card.querySelector('h5') || card.querySelector('h1');
+                if (titleEl) productData.title = titleEl.innerText.trim();
+                var imgEl = card.querySelector('img');
+                if (imgEl) productData.image = imgEl.src;
+            }
+        } catch (e) { console.debug('Failed to get product data', e); }
+        
+        window.addToLocalWishlist(productId, productData);
+        window.updateLocalWishlistBadge();
+        window.redirectToLoginWithMessage('Pentru a continua, autentifică-te sau creează un cont');
+        return;
+    }
     
     try {
         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -220,6 +315,9 @@ window.toggleWishlistDetailed = function(productId, btn) {
             if (typeof loadMiniCart === 'function') {
                 loadMiniCart();
             }
+        } else if (d.requiresAuth) {
+            // User not authenticated - should not happen if isAuthenticated is true, but handle it
+            window.redirectToLoginWithMessage(d.message);
         } else {
             showToast(d.message || 'Eroare', 'danger');
         }
@@ -394,6 +492,36 @@ window.loadPendingCount = function() {
         .catch(function(error) { console.log('Info: Pending count check skipped or failed.'); });
 };
 
+// Merge local wishlist into server wishlist after login
+window.mergeLocalWishlist = function() {
+    var local = window.getLocalWishlist();
+    if (!local || local.length === 0) return Promise.resolve({ success: true, merged: 0 });
+
+    return fetch('/Wishlist/MergeLocalWishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(local.map(function(item) { return { productId: parseInt(item.productId) }; }))
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data && data.success) {
+            // Clear local wishlist only if merged successfully
+            localStorage.removeItem('localWishlist');
+            if (data.merged && data.merged > 0) {
+                showToast('Favoritele locale au fost sincronizate', 'success');
+            }
+            if (data.wishlistCount !== undefined) {
+                updateWishlistBadge(data.wishlistCount);
+            }
+        }
+        return data;
+    })
+    .catch(function(err) {
+        console.debug('MergeLocalWishlist failed', err);
+        return { success: false };
+    });
+};
+
 // Smart navbar: hides when scrolling DOWN, shows when scrolling UP (follows user position)
 (function() {
     var lastScroll = 0;
@@ -443,6 +571,18 @@ window.loadPendingCount = function() {
     });
 })();
 
+// Show auth redirect message if present
+window.showAuthRedirectMessage = function() {
+    var message = sessionStorage.getItem('authRedirectMessage');
+    if (message) {
+        sessionStorage.removeItem('authRedirectMessage');
+        // Small delay to ensure page is loaded
+        setTimeout(function() {
+            showToast(message, 'warning');
+        }, 300);
+    }
+};
+
 // Initialize on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
     try { if (typeof window.loadCategoriesDropdown === 'function') loadCategoriesDropdown(); } catch (e) {}
@@ -451,11 +591,13 @@ document.addEventListener('DOMContentLoaded', function() {
     try { loadMiniCart(); } catch (e) {}
     try { loadWishlistCount(); } catch (e) {}
     try { window.updateRelativeTimestamps(); } catch (e) { console.debug('updateRelativeTimestamps failed', e); }
+    try { window.showAuthRedirectMessage(); } catch (e) {}
     try {
-        // If user just logged in and we have a local cart, merge it server-side
+        // If user just logged in and we have local data, merge it server-side
         if (window.isAuthenticated) {
-            var local = window.getLocalCart();
-            if (local && local.length > 0) {
+            // Merge local cart
+            var localCart = window.getLocalCart();
+            if (localCart && localCart.length > 0) {
                     try {
                         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
                         const token = tokenInput ? tokenInput.value : '';
@@ -466,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         fetch('/OrdersAjax/MergeLocalCart', {
                             method: 'POST',
                             headers: headers,
-                            body: JSON.stringify(local.map(i => ({ productId: parseInt(i.productId), quantity: parseInt(i.quantity) })))
+                            body: JSON.stringify(localCart.map(i => ({ productId: parseInt(i.productId), quantity: parseInt(i.quantity) })))
                         }).then(function(r) { return r.json(); }).then(function(data) {
                     if (data && data.success) {
                         // clear local only if merged
@@ -478,6 +620,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).catch(function(err) { console.debug('MergeLocalCart failed', err); });
                     } catch (e) { console.debug('MergeLocalCart token attach failed', e); }
             }
+
+            // Merge local wishlist
+            try {
+                window.mergeLocalWishlist().then(function() {
+                    loadWishlistCount();
+                });
+            } catch (e) { console.debug('MergeLocalWishlist failed', e); }
         }
     } catch (e) { console.debug(e); }
 });

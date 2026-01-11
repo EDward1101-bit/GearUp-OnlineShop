@@ -118,43 +118,33 @@ else
 
                             <hr class="my-3" />
 
-                            @* 6. ACTIUNI (Cantitate + Add to Cart + Wishlist) *@
-                            @if (User.Identity?.IsAuthenticated == true)
-                            {
-                                <div class="d-flex align-items-end gap-3 mb-4 flex-wrap">
-                                    @{
-                                        var availableStock = Model.Stock.GetValueOrDefault();
-                                    }
+                            @* 6. ACTIUNI (Cantitate + Add to Cart + Wishlist) - Shown to ALL users *@
+                            <div class="d-flex align-items-end gap-3 mb-4 flex-wrap">
+                                @{
+                                    var availableStock = Model.Stock.GetValueOrDefault();
+                                }
 
-                                    @if (availableStock > 0)
-                                    {
-                                        <div>
-                                            <label class="form-label small fw-bold d-block mb-2">Cantitate</label>
-                                            <input type="number" id="qtyInput" class="form-control" value="1" min="1" @(availableStock <= 10 ? $"max=\"{availableStock}\"" : "") style="width: 80px;">
-                                        </div>
-                                        <button class="btn btn-primary btn-lg fw-bold flex-grow-1" id="addToCartBtn" data-product-id="@Model.Id">
-                                            <i class="bi bi-cart-plus me-2"></i> Adauga in cos
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-secondary btn-lg flex-grow-1" disabled>
-                                            <i class="bi bi-exclamation-circle me-2"></i> Stoc epuizat
-                                        </button>
-                                    }
-
-                                    <button class="btn btn-outline-secondary btn-lg px-4 wishlist-btn" id="wishlistBtn" data-product-id="@Model.Id" title="Adauga la favorite">
-                                        <i class="bi @heartClass fs-5"></i>
+                                @if (availableStock > 0)
+                                {
+                                    <div>
+                                        <label class="form-label small fw-bold d-block mb-2">Cantitate</label>
+                                        <input type="number" id="qtyInput" class="form-control" value="1" min="1" @(availableStock <= 10 ? $"max=\"{availableStock}\"" : "") style="width: 80px;">
+                                    </div>
+                                    <button class="btn btn-primary btn-lg fw-bold flex-grow-1" id="addToCartBtn" data-product-id="@Model.Id">
+                                        <i class="bi bi-cart-plus me-2"></i> Adauga in cos
                                     </button>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-light border border-warning text-center mb-4">
-                                    <i class="bi bi-lock"></i>
-                                    <a href="/Identity/Account/Login" class="fw-bold">Autentifica-te</a> pentru a cumpara acest produs.
-                                </div>
-                            }
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary btn-lg flex-grow-1" disabled>
+                                        <i class="bi bi-exclamation-circle me-2"></i> Stoc epuizat
+                                    </button>
+                                }
+
+                                <button class="btn btn-outline-secondary btn-lg px-4 wishlist-btn" id="wishlistBtn" data-product-id="@Model.Id" title="Adauga la favorite">
+                                    <i class="bi @heartClass fs-5"></i>
+                                </button>
+                            </div>
 
                             @* 7. ADMIN / PROPOSER ACTIONS *@
                             <div class="d-flex gap-2 flex-wrap pt-3 border-top">
@@ -314,14 +304,26 @@ else
                         const qtyInput = document.getElementById('qtyInput');
                         const qty = qtyInput ? qtyInput.value : 1;
                         const productId = this.getAttribute('data-product-id');
-                        window.addToCartDetailed(productId, qty, this);
+                        
+                        // Use the centralized function from site.js
+                        if (typeof window.addToCartDetailed === 'function') {
+                            window.addToCartDetailed(productId, qty, this);
+                        } else {
+                            console.error('addToCartDetailed not found');
+                        }
                     });
                 }
 
                 if (wishlistBtn) {
                     wishlistBtn.addEventListener('click', function(e) {
                         const productId = this.getAttribute('data-product-id');
-                        window.toggleWishlistDetailed(productId, this);
+                        
+                        // Use the centralized function from site.js
+                        if (typeof window.toggleWishlistDetailed === 'function') {
+                            window.toggleWishlistDetailed(productId, this);
+                        } else {
+                            console.error('toggleWishlistDetailed not found');
+                        }
                     });
                 }
 

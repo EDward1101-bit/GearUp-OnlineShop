@@ -7,18 +7,22 @@
     <div class="user-header px-3 pb-3 border-bottom">
         <div class="d-flex align-items-center gap-2 mb-3">
             <div class="avatar-circle bg-primary text-white" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                @if (!string.IsNullOrEmpty(Model.FirstName))
+                @if (!string.IsNullOrEmpty(Model?.FirstName))
                 {
                     @Model.FirstName[0]
                 }
-                else
+                else if (!string.IsNullOrEmpty(Model?.UserName))
                 {
                     @Model.UserName[0]
                 }
+                else
+                {
+                    <text>?</text>
+                }
             </div>
             <div class="flex-grow-1">
-                <div class="fw-bold text-dark">@(string.IsNullOrEmpty(Model.FirstName) ? Model.UserName : $"{Model.FirstName} {Model.LastName}")</div>
-                <small class="text-muted">@Model.Email</small>
+                <div class="fw-bold text-dark">@(string.IsNullOrEmpty(Model?.FirstName) ? Model?.UserName : $"{Model?.FirstName} {Model?.LastName}")</div>
+                <small class="text-muted">@Model?.Email</small>
             </div>
         </div>
     </div>
@@ -43,7 +47,7 @@
     </div>
 
     @* ADMIN SECTION *@
-    @if (Model.IsAdmin)
+    @if (Model?.IsAdmin == true)
     {
         <div class="admin-section border-top mt-3 pt-3">
             <div class="px-3 mb-2">

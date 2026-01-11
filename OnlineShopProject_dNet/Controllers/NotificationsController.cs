@@ -36,7 +36,10 @@ namespace OnlineShopProject_dNet.Controllers
         public async Task<IActionResult> MarkRead(int id)
         {
             var userId = _userManager.GetUserId(User);
-            await _notificationService.MarkAsReadAsync(userId, id);
+            if (userId != null)
+            {
+                await _notificationService.MarkAsReadAsync(userId, id);
+            }
             return RedirectToAction("Index");
         }
 
@@ -44,7 +47,10 @@ namespace OnlineShopProject_dNet.Controllers
         public async Task<IActionResult> MarkAll()
         {
             var userId = _userManager.GetUserId(User);
-            await _notificationService.MarkAllAsReadAsync(userId);
+            if (userId != null)
+            {
+                await _notificationService.MarkAllAsReadAsync(userId);
+            }
             return RedirectToAction("Index");
         }
     }

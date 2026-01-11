@@ -58,6 +58,8 @@ builder.Services.AddScoped<OnlineShopProject_dNet.Services.NotificationService>(
 builder.Services.AddScoped<IProductAiService, GoogleProductAiService>();
 // HTML sanitization service (prevent XSS / clean inputs)
 builder.Services.AddScoped<IHtmlSanitizationService, HtmlSanitizationService>();
+// Image validation service (magic bytes check)
+builder.Services.AddScoped<IImageValidationService, ImageValidationService>();
 
 var app = builder.Build();
 

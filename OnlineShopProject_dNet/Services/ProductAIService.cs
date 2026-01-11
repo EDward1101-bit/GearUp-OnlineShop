@@ -145,25 +145,11 @@ namespace OnlineShopProject_dNet.Services
             {
                 ProductId = productId,
                 Question = question,
-                Answer = answer,
-                HelpfulCount = 0
+                Answer = answer
             };
 
             _context.FAQs.Add(faq);
             await _context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Marcheaza o intrebare ca fiind utila
-        /// </summary>
-        public async Task MarkFAQHelpful(int faqId)
-        {
-            var faq = await _context.FAQs.FindAsync(faqId);
-            if (faq != null)
-            {
-                faq.HelpfulCount++;
-                await _context.SaveChangesAsync();
-            }
         }
     }
 }

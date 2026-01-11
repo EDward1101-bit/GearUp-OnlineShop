@@ -13,27 +13,35 @@
                 <div class="d-flex align-items-center text-white">
                     <div class="avatar-circle bg-white text-primary me-3" 
                          style="width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        @if (!string.IsNullOrEmpty(Model.Input.FirstName))
+                        @if (!string.IsNullOrEmpty(Model.Input?.FirstName))
                         {
                             @Model.Input.FirstName[0]
                         }
-                        else
+                        else if (!string.IsNullOrEmpty(User.Identity?.Name))
                         {
                             @User.Identity.Name[0]
+                        }
+                        else
+                        {
+                            <text>?</text>
                         }
                     </div>
                     <div>
                         <h2 class="mb-1 fw-bold">
-                            @if (!string.IsNullOrEmpty(Model.Input.FirstName) && !string.IsNullOrEmpty(Model.Input.LastName))
+                            @if (!string.IsNullOrEmpty(Model.Input?.FirstName) && !string.IsNullOrEmpty(Model.Input?.LastName))
                             {
                                 @Model.Input.FirstName @Model.Input.LastName
                             }
-                            else
+                            else if (!string.IsNullOrEmpty(User.Identity?.Name))
                             {
                                 @User.Identity.Name
                             }
+                            else
+                            {
+                                <text>Utilizator</text>
+                            }
                         </h2>
-                        <p class="mb-0 opacity-75">@Model.Input.Email</p>
+                        <p class="mb-0 opacity-75">@Model.Input?.Email</p>
                     </div>
                 </div>
             </div>

@@ -16,7 +16,8 @@ namespace OnlineShopProject_dNet.Controllers
         TextProcessingService textProcessor,
         ILogger<ProductsController> logger,
         IProductAiService productAiService,
-        NotificationService notificationService) : Controller
+        NotificationService notificationService,
+        IImageValidationService imageValidationService) : Controller
     {
         private const string AiFallbackAnswer = "Momentan nu avem detalii despre acest aspect.";
         private readonly ApplicationDbContext db = context;
@@ -26,6 +27,7 @@ namespace OnlineShopProject_dNet.Controllers
         private readonly ILogger<ProductsController> _logger = logger;
         private readonly IProductAiService _productAiService = productAiService;
         private readonly NotificationService _notificationService = notificationService;
+        private readonly IImageValidationService _imageValidationService = imageValidationService;
 
         // 1. INDEX - Vizitatorii vad doar produsele APROBATE cu cautare, filtrare si sortare
         [HttpGet]
@@ -75,8 +77,8 @@ namespace OnlineShopProject_dNet.Controllers
 
             var totalCount = query.Count();
             var products = query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                // .Skip((page - 1) * pageSize)
+                // .Take(pageSize)
                 .ToList();
 
             ViewBag.Products = products;
@@ -204,6 +206,13 @@ namespace OnlineShopProject_dNet.Controllers
             try
             {
                 var answer = await _productAiService.AskProductAssistantAsync(product, faqs, question);
+                
+                // Salvare FAQ daca intrebarea este noua, are sens si raspunsul nu e fallback
+                if (!IsFallbackAnswer(answer))
+                {
+                    await SaveQuestionToFaqIfNewAsync(productId, question, answer, faqs);
+                }
+                
                 return Json(new { answer });
             }
             catch (Exception ex)
@@ -211,6 +220,188 @@ namespace OnlineShopProject_dNet.Controllers
                 _logger.LogError(ex, "AI assistant failed for product {ProductId}", productId);
                 return Json(new { answer = AiFallbackAnswer });
             }
+        }
+
+        /// <summary>
+        /// Verifica daca raspunsul este un fallback (nu contine informatii utile)
+        /// </summary>
+        private bool IsFallbackAnswer(string answer)
+        {
+            if (string.IsNullOrWhiteSpace(answer))
+                return true;
+
+            var lowerAnswer = answer.ToLowerInvariant().Trim();
+
+            // Verificam daca raspunsul este EXACT fallback-ul nostru sau foarte scurt
+            if (lowerAnswer == AiFallbackAnswer.ToLowerInvariant())
+                return true;
+
+            // Raspuns prea scurt = probabil fallback
+            if (lowerAnswer.Length < 20)
+                return true;
+
+            // Verificam daca raspunsul INCEPE cu fraze de fallback (nu doar contine)
+            var fallbackStartPhrases = new[]
+            {
+                "momentan nu avem",
+                "nu am informatii",
+                "nu pot raspunde",
+                "din pacate, nu",
+                "nu dispunem de"
+            };
+
+            if (fallbackStartPhrases.Any(phrase => lowerAnswer.StartsWith(phrase)))
+            {
+                _logger.LogDebug("Answer detected as fallback (starts with fallback phrase): {Answer}", answer);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Salveaza intrebarea in FAQ daca nu exista deja una similara semantic
+        /// </summary>
+        private async Task SaveQuestionToFaqIfNewAsync(int productId, string question, string answer, List<FAQ> existingFaqs)
+        {
+            try
+            {
+                _logger.LogDebug("Attempting to save FAQ for product {ProductId}. Question length: {QLen}, Answer length: {ALen}", 
+                    productId, question?.Length ?? 0, answer?.Length ?? 0);
+
+                // Validare: intrebarea trebuie sa aiba minim 10 caractere
+                if (string.IsNullOrWhiteSpace(question) || question.Trim().Length < 10)
+                {
+                    _logger.LogDebug("FAQ not saved - question too short (min 10 chars): '{Question}'", question);
+                    return;
+                }
+
+                // Validare: raspunsul trebuie sa aiba minim 20 caractere
+                if (string.IsNullOrWhiteSpace(answer) || answer.Trim().Length < 20)
+                {
+                    _logger.LogDebug("FAQ not saved - answer too short (min 20 chars): '{Answer}'", answer);
+                    return;
+                }
+
+                // Normalizam intrebarea pentru comparatie
+                var normalizedQuestion = NormalizeQuestion(question);
+                _logger.LogDebug("Normalized question: '{NormalizedQuestion}'", normalizedQuestion);
+                
+                // Verificam daca intrebarea are sens (minim 1 cuvant, nu e spam)
+                if (!IsValidQuestion(normalizedQuestion))
+                {
+                    _logger.LogDebug("FAQ not saved - question invalid after normalization: '{Question}'", question);
+                    return;
+                }
+
+                // IMPORTANT: Verificam DIRECT in baza de date pentru a evita duplicate (race conditions)
+                var productFaqs = await db.FAQs
+                    .Where(f => f.ProductId == productId)
+                    .ToListAsync();
+                
+                _logger.LogDebug("Checking against {Count} existing FAQs for product {ProductId}", productFaqs.Count, productId);
+                
+                foreach (var faq in productFaqs)
+                {
+                    if (AreQuestionsSemanticallySimlar(normalizedQuestion, NormalizeQuestion(faq.Question)))
+                    {
+                        _logger.LogDebug("FAQ not saved - similar FAQ already exists. New: '{New}', Existing: '{Existing}'", 
+                            question, faq.Question);
+                        return; // Nu salvam duplicat
+                    }
+                }
+
+                // Salvam noua intrebare
+                var newFaq = new FAQ
+                {
+                    ProductId = productId,
+                    Question = question.Trim(),
+                    Answer = answer.Trim()
+                };
+
+                db.FAQs.Add(newFaq);
+                await db.SaveChangesAsync();
+                _logger.LogInformation("New FAQ saved successfully for product {ProductId}: '{Question}'", productId, question);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to save FAQ for product {ProductId}: {Message}", productId, ex.Message);
+                // Nu aruncam exceptia - salvarea FAQ nu e critica
+            }
+        }
+
+        /// <summary>
+        /// Normalizeaza intrebarea pentru comparatie (lowercase, fara punctuatie, cuvinte sortate)
+        /// </summary>
+        private static string NormalizeQuestion(string question)
+        {
+            if (string.IsNullOrWhiteSpace(question))
+                return string.Empty;
+
+            // Lowercase si eliminare punctuatie
+            var normalized = new string(question.ToLowerInvariant()
+                .Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c))
+                .ToArray());
+
+            // Eliminare cuvinte comune (stop words) romanesti si englezesti
+            var stopWords = new HashSet<string> 
+            { 
+                "este", "sunt", "care", "pentru", "acest", "aceasta", "cum", "ce", "de", "la", "in", "pe", "cu", "si", "sau", "nu", "da",
+                "is", "are", "the", "a", "an", "this", "that", "how", "what", "for", "to", "in", "on", "with", "and", "or", "not", "yes",
+                "poate", "pot", "ai", "am", "as", "ati", "au", "avea", "avem", "aveti"
+            };
+
+            var words = normalized.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(w => w.Length > 2 && !stopWords.Contains(w))
+                .OrderBy(w => w)
+                .ToList();
+
+            return string.Join(" ", words);
+        }
+
+        /// <summary>
+        /// Verifica daca intrebarea este valida (nu e spam, are continut)
+        /// </summary>
+        private static bool IsValidQuestion(string normalizedQuestion)
+        {
+            if (string.IsNullOrWhiteSpace(normalizedQuestion))
+                return false;
+
+            var words = normalizedQuestion.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            
+            // Minim 1 cuvant semnificativ
+            if (words.Length < 1)
+                return false;
+
+            // Maxim 50 cuvinte (evitam spam)
+            if (words.Length > 50)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Verifica daca doua intrebari sunt similare semantic (overlap de cuvinte cheie > 60%)
+        /// </summary>
+        private static bool AreQuestionsSemanticallySimlar(string q1, string q2)
+        {
+            if (string.IsNullOrWhiteSpace(q1) || string.IsNullOrWhiteSpace(q2))
+                return false;
+
+            var words1 = q1.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+            var words2 = q2.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
+
+            if (words1.Count == 0 || words2.Count == 0)
+                return false;
+
+            // Calculam overlap (Jaccard similarity)
+            var intersection = words1.Intersect(words2).Count();
+            var union = words1.Union(words2).Count();
+
+            var similarity = (double)intersection / union;
+
+            // Similaritate > 60% = consideram duplicat
+            return similarity > 0.6;
         }
 
         // 3. NEW - Adaugare (Doar Admin si Proposer)
@@ -240,26 +431,37 @@ namespace OnlineShopProject_dNet.Controllers
 
             _logger.LogInformation("User {UserId} is creating a new product: {ProductTitle}", userId, product.Title);
 
-            // --- Logica Imagine ---
+            // --- Logica Imagine cu validare magic bytes si redimensionare ---
             if (Image != null && Image.Length > 0)
             {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var fileExtension = Path.GetExtension(Image.FileName).ToLower();
-
-                if (!allowedExtensions.Contains(fileExtension) || Image.Length > 5 * 1024 * 1024)
+                // Verificare dimensiune (max 5MB)
+                if (!_imageValidationService.IsValidImageSize(Image, 5 * 1024 * 1024))
                 {
-                    ModelState.AddModelError("Image", "Fisier invalid. Doar JPG, PNG, GIF, max 5MB.");
+                    ModelState.AddModelError("Image", "Fisier prea mare sau extensie invalida. Doar JPG, PNG, GIF, max 5MB.");
                     ViewBag.Categories = db.Categories;
                     return View(product);
                 }
 
-                var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
-                var databaseFileName = "/images/" + Image.FileName;
-                using (var fileStream = new FileStream(storagePath, FileMode.Create))
+                // Verificare magic bytes (continut real al fisierului)
+                if (!_imageValidationService.IsValidImage(Image))
                 {
-                    await Image.CopyToAsync(fileStream);
+                    ModelState.AddModelError("Image", "Fisierul nu este o imagine valida. Continutul nu corespunde extensiei.");
+                    ViewBag.Categories = db.Categories;
+                    return View(product);
                 }
-                product.Image = databaseFileName;
+
+                try
+                {
+                    // Resize and save the image to standard 800x800
+                    product.Image = await _imageValidationService.ResizeAndSaveImageAsync(Image, _env.WebRootPath, 800, 800);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error resizing image for product");
+                    ModelState.AddModelError("Image", "Eroare la procesarea imaginii. Incercati cu o alta imagine.");
+                    ViewBag.Categories = db.Categories;
+                    return View(product);
+                }
             }
             else
             {
@@ -303,7 +505,7 @@ namespace OnlineShopProject_dNet.Controllers
                     await db.SaveChangesAsync();
 
                     if (product.Status == "Pending")
-                        TempData["message"] = "Produsul a fost trimis spre aprobare!";
+                        TempData["message"] = "Produsul a fost trimis spre aprobat!";
                     else
                         TempData["message"] = "Produsul a fost adaugat!";
 
@@ -403,21 +605,44 @@ namespace OnlineShopProject_dNet.Controllers
                 product.Status = "Approved";
             }
 
-            // --- Logica Imagine ---
+            // --- Logica Imagine cu validare magic bytes si redimensionare ---
             if (Image != null && Image.Length > 0)
             {
+                // Verificare dimensiune (max 5MB)
+                if (!_imageValidationService.IsValidImageSize(Image, 5 * 1024 * 1024))
+                {
+                    ModelState.AddModelError("Image", "Fisier prea mare sau extensie invalida. Doar JPG, PNG, GIF, max 5MB.");
+                    ViewBag.Categories = db.Categories;
+                    return View(requestProduct);
+                }
+
+                // Verificare magic bytes (continut real al fisierului)
+                if (!_imageValidationService.IsValidImage(Image))
+                {
+                    ModelState.AddModelError("Image", "Fisierul nu este o imagine valida. Continutul nu corespunde extensiei.");
+                    ViewBag.Categories = db.Categories;
+                    return View(requestProduct);
+                }
+
+                // Delete old image if exists
                 if (!string.IsNullOrEmpty(product.Image) && product.Image != "/images/default-product.jpeg")
                 {
                     var oldPath = Path.Combine(_env.WebRootPath, product.Image.TrimStart('/'));
                     if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
                 }
 
-                var storagePath = Path.Combine(_env.WebRootPath, "images", Image.FileName);
-                using (var fileStream = new FileStream(storagePath, FileMode.Create))
+                try
                 {
-                    await Image.CopyToAsync(fileStream);
+                    // Resize and save the image to standard 800x800
+                    product.Image = await _imageValidationService.ResizeAndSaveImageAsync(Image, _env.WebRootPath, 800, 800);
                 }
-                product.Image = "/images/" + Image.FileName;
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error resizing image for product edit");
+                    ModelState.AddModelError("Image", "Eroare la procesarea imaginii. Incercati cu o alta imagine.");
+                    ViewBag.Categories = db.Categories;
+                    return View(requestProduct);
+                }
             }
 
             if (TryValidateModel(product))
@@ -462,7 +687,6 @@ namespace OnlineShopProject_dNet.Controllers
                 if (System.IO.File.Exists(imagePath)) System.IO.File.Delete(imagePath);
             }
 
-            // Curatam cosurile in lucru (InCart) care contin produsul
             var cartsWithProduct = db.OrderDetails
                 .Include(od => od.Order)
                 .Where(od => od.ProductId == id && od.Order != null && od.Order.Status == "InCart")
@@ -479,7 +703,7 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // 6. APPROVE - Doar Admin poate aproba produse
+        // 6. APPROVE
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Approve(int id, string? feedbackMessage)
@@ -490,13 +714,12 @@ namespace OnlineShopProject_dNet.Controllers
             product.Status = "Approved";
             db.SaveChanges();
 
-            // Trimite notificare catre proposer
             if (!string.IsNullOrEmpty(product.UserId))
             {
                 var message = $"Produsul tau '{product.Title}' a fost aprobat!";
                 await _notificationService.AddNotificationAsync(
-                    product.UserId, 
-                    message, 
+                    product.UserId,
+                    message,
                     "product_approved",
                     product.Id,
                     feedbackMessage);
@@ -506,7 +729,7 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // 7. REJECT - Doar Admin poate respinge produse
+        // 7. REJECT
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Reject(int id, string? feedbackMessage)
@@ -517,13 +740,12 @@ namespace OnlineShopProject_dNet.Controllers
             product.Status = "Rejected";
             db.SaveChanges();
 
-            // Trimite notificare catre proposer
             if (!string.IsNullOrEmpty(product.UserId))
             {
                 var message = $"Produsul tau '{product.Title}' a fost respins.";
                 await _notificationService.AddNotificationAsync(
-                    product.UserId, 
-                    message, 
+                    product.UserId,
+                    message,
                     "product_rejected",
                     product.Id,
                     feedbackMessage);
@@ -533,7 +755,7 @@ namespace OnlineShopProject_dNet.Controllers
             return RedirectToAction("Index");
         }
 
-        // 8. GETPENDINGCOUNT - Returneaza numarul de produse Pending (pentru badge in navbar)
+        // 8. GETPENDINGCOUNT
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetPendingCount()

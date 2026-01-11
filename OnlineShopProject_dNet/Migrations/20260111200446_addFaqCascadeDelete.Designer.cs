@@ -12,8 +12,8 @@ using OnlineShopProject_dNet.Data;
 namespace OnlineShopProject_dNet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251230123519_init")]
-    partial class Init
+    [Migration("20260111200446_addFaqCascadeDelete")]
+    partial class addFaqCascadeDelete
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -279,6 +279,47 @@ namespace OnlineShopProject_dNet.Migrations
                     b.ToTable("FAQs");
                 });
 
+            modelBuilder.Entity("OnlineShopProject_dNet.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FeedbackMessage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("OnlineShopProject_dNet.Models.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -312,11 +353,26 @@ namespace OnlineShopProject_dNet.Migrations
 
             modelBuilder.Entity("OnlineShopProject_dNet.Models.OrderDetail", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
+                    b.Property<string>("ProductCategorySnapshot")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProductImageSnapshot")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProductTitleSnapshot")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -324,7 +380,9 @@ namespace OnlineShopProject_dNet.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.HasKey("OrderId", "ProductId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
 
@@ -480,9 +538,21 @@ namespace OnlineShopProject_dNet.Migrations
                 {
                     b.HasOne("OnlineShopProject_dNet.Models.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("OnlineShopProject_dNet.Models.Notification", b =>
+                {
+                    b.HasOne("OnlineShopProject_dNet.Models.ApplicationUser", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OnlineShopProject_dNet.Models.Order", b =>
@@ -505,8 +575,7 @@ namespace OnlineShopProject_dNet.Migrations
                     b.HasOne("OnlineShopProject_dNet.Models.Product", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Order");
 
@@ -568,6 +637,8 @@ namespace OnlineShopProject_dNet.Migrations
 
             modelBuilder.Entity("OnlineShopProject_dNet.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("Notifications");
+
                     b.Navigation("Orders");
 
                     b.Navigation("Products");

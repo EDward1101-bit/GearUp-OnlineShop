@@ -263,31 +263,28 @@
                                 }
                             </div>
 
-                            @* 3. BUTOANE ACTIUNE  *@
-                            @if (User.Identity?.IsAuthenticated == true)
-                            {
-                                <div class="position-absolute top-0 end-0 mt-4 me-3 d-flex flex-column gap-2" style="z-index: 10;">
+                            @* 3. BUTOANE ACTIUNE - Shown to ALL users (authenticated or not) *@
+                            <div class="position-absolute top-0 end-0 mt-4 me-3 d-flex flex-column gap-2" style="z-index: 10;">
 
-                                    @* Buton Wishlist *@
-                                    <button class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                                @* Buton Wishlist *@
+                                <button class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                                        style="width: 38px; height: 38px;"
+                                        onclick="toggleWishlist(@product.Id, this)"
+                                        title="Favorite">
+                                    <i class="bi @heartClass fs-5"></i>
+                                </button>
+
+                                @* Buton Cos (Doar daca e stoc) *@
+                                @if (product.Stock.GetValueOrDefault() > 0)
+                                {
+                                    <button class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
                                             style="width: 38px; height: 38px;"
-                                            onclick="toggleWishlist(@product.Id, this)"
-                                            title="Favorite">
-                                        <i class="bi @heartClass fs-5"></i>
+                                            onclick="addToCart(@product.Id)"
+                                            title="Adauga in cos">
+                                        <i class="bi bi-cart-plus fs-5"></i>
                                     </button>
-
-                                    @* Buton Cos (Doar daca e stoc) *@
-                                    @if (product.Stock.GetValueOrDefault() > 0)
-                                    {
-                                        <button class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
-                                                style="width: 38px; height: 38px;"
-                                                onclick="addToCart(@product.Id)"
-                                                title="Adauga in cos">
-                                            <i class="bi bi-cart-plus fs-5"></i>
-                                        </button>
-                                    }
-                                </div>
-                            }
+                                }
+                            </div>
                         </div>
 
                         <div class="card-body d-flex flex-column">
@@ -454,76 +451,20 @@
                 modal.show();
             }
 
-            // Functie AJAX pentru Wishlist
+            // Functie AJAX pentru Wishlist - now uses toggleWishlistDetailed from site.js
             function toggleWishlist(productId, btn) {
-                try {
-                    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-                    const token = tokenInput ? tokenInput.value : '';
-                    if (!token) {
-                        console.error('Anti-forgery token not found');
-                        alert('Eroare de securitate. Te rugam sa reincarci pagina.');
-                        return;
-                    }
-                    const bodyStr = `productId=${productId}&__RequestVerificationToken=${encodeURIComponent(token)}`;
-                    fetch('/Wishlist/Toggle', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: bodyStr
-                    })
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        const icon = btn.querySelector('i');
-                        if (icon) {
-                            if (data.action === 'added') {
-                                icon.className = 'bi bi-heart-fill fs-5 text-danger';
-                            } else {
-                                icon.className = 'bi bi-heart fs-5 text-dark';
-                            }
-                        }
-                        // Update wishlist badge if available
-                        if (data.wishlistCount !== undefined && typeof updateWishlistBadge === 'function') {
-                            updateWishlistBadge(data.wishlistCount);
-                        } else if (typeof loadWishlistCount === 'function') {
-                            loadWishlistCount();
-                        }
-                        if (typeof showToast === 'function') {
-                            showToast(data.message || (data.action === 'added' ? 'Adaugat la favorite' : 'Eliminat din favorite'), 'success');
-                        }
-                        // Reincarcare rapida pentru a actualiza badge-ul din Navbar
-                        if (typeof loadMiniCart === 'function') {
-                            loadMiniCart();
-                        }
-                    } else {
-                        if (typeof showToast === 'function') {
-                            showToast(data.message || 'Eroare', 'danger');
-                        } else {
-                            alert(data.message || 'Eroare');
-                        }
-                    }
-                })
-                .catch(err => {
-                    console.error('Wishlist toggle error:', err);
-                    if (typeof showToast === 'function') {
-                        showToast('Eroare retea. Te rugam sa incerci din nou.', 'danger');
-                    } else {
-                        alert('Eroare retea. Te rugam sa incerci din nou.');
-                    }
-                });
-            } catch (e) {
-                console.error('Wishlist toggle failed', e);
-                alert('Eroare la actualizarea favorite.');
-            }
+                if (typeof window.toggleWishlistDetailed === 'function') {
+                    window.toggleWishlistDetailed(productId, btn);
+                } else {
+                    console.error('toggleWishlistDetailed not found');
+                }
             }
 
-            // Functie AJAX pentru Cos
+            // Functie AJAX pentru Cos - now uses addToCartDetailed from site.js
             function addToCart(productId) {
-                if (window.isAuthenticated) {
+                if (typeof window.addToCartDetailed === 'function') {
+                    window.addToCartDetailed(productId, 1, null);
+                } else if (window.isAuthenticated) {
                     try {
                         const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
                         const token = tokenInput ? tokenInput.value : '';
@@ -546,7 +487,6 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            // update server mini-cart
                             if (typeof loadMiniCart === 'function') {
                                 loadMiniCart();
                             }
@@ -555,6 +495,12 @@
                             } else {
                                 alert('Produs adaugat in cos!');
                             }
+                        } else if (data.requiresAuth) {
+                            // Store in local cart and redirect
+                            if (typeof addToLocalCart === 'function') {
+                                addToLocalCart(productId, 1, null);
+                            }
+                            window.redirectToLoginWithMessage(data.message);
                         } else {
                             if (typeof showToast === 'function') {
                                 showToast(data.message || 'Eroare la adaugare', 'danger');
@@ -576,11 +522,14 @@
                         alert('Eroare la adaugarea produsului.');
                     }
                 } else {
-                    // fallback to localStorage
+                    // Not authenticated - store locally and redirect
                     if (typeof addToLocalCart === 'function') {
                         addToLocalCart(productId, 1, null);
+                    }
+                    if (typeof window.redirectToLoginWithMessage === 'function') {
+                        window.redirectToLoginWithMessage('Pentru a continua, autentific?-te sau creeaz? un cont');
                     } else {
-                        alert('Te rugam sa te autentifici pentru a adauga produse in cos.');
+                        window.location.href = '/Identity/Account/Login?ReturnUrl=' + encodeURIComponent(window.location.pathname);
                     }
                 }
             }

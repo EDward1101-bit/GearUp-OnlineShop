@@ -34,10 +34,18 @@ namespace OnlineShopProject_dNet.Controllers
 
         // 2. TOGGLE - Inimioara Inteligenta (AJAX)
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Toggle(int productId)
         {
             var userId = _userManager.GetUserId(User);
-            if (userId == null) return Json(new { success = false, message = "Trebuie sa fii autentificat." });
+            if (userId == null) 
+            {
+                return Json(new { 
+                    success = false, 
+                    requiresAuth = true,
+                    message = "Pentru a continua, autentifică-te sau creează un cont" 
+                });
+            }
 
             var productExists = await db.Products.AnyAsync(p => p.Id == productId);
             if (!productExists) return Json(new { success = false, message = "Produs invalid" });
@@ -162,5 +170,46 @@ namespace OnlineShopProject_dNet.Controllers
             return Json(new { count });
         }
 
+        // 6. MERGE LOCAL WISHLIST - Merge localStorage wishlist into user's server-side wishlist after login
+        [HttpPost]
+        [IgnoreAntiforgeryToken] // JSON requests with [FromBody] don't need form tokens
+        public async Task<IActionResult> MergeLocalWishlist([FromBody] List<LocalWishlistItem>? items)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null) return Unauthorized();
+
+            if (items == null || items.Count == 0) return Json(new { success = true, merged = 0 });
+
+            int merged = 0;
+            foreach (var item in items)
+            {
+                if (item == null || item.productId <= 0) continue;
+                
+                // Check if product exists
+                var productExists = await db.Products.AnyAsync(p => p.Id == item.productId && p.Status == "Approved");
+                if (!productExists) continue;
+
+                // Check if already in wishlist
+                var exists = await db.Wishlists.AnyAsync(w => w.UserId == userId && w.ProductId == item.productId);
+                if (exists) continue;
+
+                // Add to wishlist
+                db.Wishlists.Add(new Wishlist { UserId = userId, ProductId = item.productId });
+                merged++;
+            }
+
+            if (merged > 0)
+            {
+                await db.SaveChangesAsync();
+            }
+
+            var totalCount = await db.Wishlists.CountAsync(w => w.UserId == userId);
+            return Json(new { success = true, merged, wishlistCount = totalCount });
+        }
+
+        public class LocalWishlistItem
+        {
+            public int productId { get; set; }
+        }
     }
 }
