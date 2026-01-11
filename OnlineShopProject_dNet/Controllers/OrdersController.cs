@@ -68,6 +68,7 @@ namespace OnlineShopProject_dNet.Controllers
 
         // 2. ADD TO CART - REFACTORIZAT
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> AddToCart(int productId, int quantity)
         {
             if (quantity < 1) quantity = 1;
@@ -75,7 +76,11 @@ namespace OnlineShopProject_dNet.Controllers
 
             if (userId == null)
             {
-                return Json(new { success = false, message = "Eroare: Utilizator neautentificat." });
+                return Json(new { 
+                    success = false, 
+                    requiresAuth = true,
+                    message = "Pentru a continua, autentific?-te sau creeaz? un cont" 
+                });
             }
 
             // delegam munca catre serviciu

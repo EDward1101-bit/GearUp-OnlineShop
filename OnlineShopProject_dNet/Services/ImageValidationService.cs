@@ -1,3 +1,8 @@
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+
 namespace OnlineShopProject_dNet.Services
 {
     public interface IImageValidationService
@@ -11,6 +16,12 @@ namespace OnlineShopProject_dNet.Services
         /// Valideaza extensia si dimensiunea
         /// </summary>
         bool IsValidImageSize(IFormFile file, long maxSizeInBytes = 5 * 1024 * 1024);
+
+        /// <summary>
+        /// Redimensioneaza imaginea la dimensiuni standard (800x800), pastreaza aspect ratio si adauga padding daca e nevoie.
+        /// Returneaza calea fisierului salvat relativa la wwwroot.
+        /// </summary>
+        Task<string> ResizeAndSaveImageAsync(IFormFile file, string webRootPath, int targetWidth = 800, int targetHeight = 800);
     }
 
     public class ImageValidationService : IImageValidationService
@@ -94,6 +105,61 @@ namespace OnlineShopProject_dNet.Services
             var fileExtension = Path.GetExtension(file.FileName).ToLower();
 
             return allowedExtensions.Contains(fileExtension);
+        }
+
+        public async Task<string> ResizeAndSaveImageAsync(IFormFile file, string webRootPath, int targetWidth = 800, int targetHeight = 800)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("Invalid file", nameof(file));
+
+            // Generate unique filename to avoid collisions
+            var originalExtension = Path.GetExtension(file.FileName).ToLower();
+            var uniqueFileName = $"{Guid.NewGuid()}{originalExtension}";
+            var imagesFolder = Path.Combine(webRootPath, "images");
+            
+            // Ensure images directory exists
+            if (!Directory.Exists(imagesFolder))
+            {
+                Directory.CreateDirectory(imagesFolder);
+            }
+
+            var outputPath = Path.Combine(imagesFolder, uniqueFileName);
+            var databasePath = "/images/" + uniqueFileName;
+
+            using (var inputStream = file.OpenReadStream())
+            {
+                using var image = await Image.LoadAsync(inputStream);
+                
+                // Calculate new dimensions preserving aspect ratio
+                var ratioX = (double)targetWidth / image.Width;
+                var ratioY = (double)targetHeight / image.Height;
+                var ratio = Math.Min(ratioX, ratioY);
+                
+                var newWidth = (int)(image.Width * ratio);
+                var newHeight = (int)(image.Height * ratio);
+                
+                // Resize the image with padding to fit target dimensions
+                image.Mutate(x => x
+                    .Resize(new ResizeOptions
+                    {
+                        Size = new Size(newWidth, newHeight),
+                        Mode = ResizeMode.Max
+                    })
+                    .Pad(targetWidth, targetHeight, Color.White));
+
+                // Save based on original extension
+                if (originalExtension == ".png")
+                {
+                    await image.SaveAsync(outputPath, new PngEncoder());
+                }
+                else
+                {
+                    // Default to JPEG for jpg, jpeg, gif (gif animation is lost)
+                    await image.SaveAsync(outputPath, new JpegEncoder { Quality = 90 });
+                }
+            }
+
+            return databasePath;
         }
     }
 }
