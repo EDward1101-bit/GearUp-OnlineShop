@@ -291,23 +291,9 @@ namespace OnlineShopProject_dNet.Data
                 }
             }
 
-            var purchases = new List<(string UserId, string ProductTitle, int Quantity)>
-            {
-                (ADMIN_ID, "Creatina Monohidratata Micronizata 500 g", 1),
-                (ADMIN_ID, "Set Gantere Reglabile 20 kg", 1),
-                (ADMIN_ID, "Geanta de Sala XL - Alba", 1),
-                (ADMIN_ID, "Shaker Proteine din Otel Inoxidabil 750 ml", 1),
-
-                (PROPOSER_ID, "Whey Protein Gold 1 kg", 1),
-                (PROPOSER_ID, "Set Gantere Reglabile 20 kg", 1),
-                (PROPOSER_ID, "Geanta de Sala XL - Alba", 1),
-                (PROPOSER_ID, "Shaker Proteine din Otel Inoxidabil 750 ml", 1),
-
-                (USER_ID, "Creatina Monohidratata Micronizata 500 g", 1),
-                (USER_ID, "Whey Protein Gold 1 kg", 1),
-                (USER_ID, "Geanta de Sala XL - Alba", 1),
-                (USER_ID, "Shaker Proteine din Otel Inoxidabil 750 ml", 1)
-            };
+            var purchases = orderMetaByUser.Keys
+                .SelectMany(userId => productDefinitions.Select(pd => (UserId: userId, ProductTitle: pd.Title, Quantity: 1)))
+                .ToList();
 
             foreach (var purchase in purchases)
             {
@@ -392,14 +378,29 @@ namespace OnlineShopProject_dNet.Data
                 ("Pantaloni Scurti 2-in-1 Berserk Sacrifice", USER_ID, 5, "Impecabili pentru antrenamentele de vara, materialul ventilat chiar ajuta. Nu se strang la talie.", DateTime.UtcNow.AddDays(-10)),
 
                 // Tricou Oversized Baki Hanma Acid Wash - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
-                ("Tricou-Oversized-Baki-Hanma Acid Wash", ADMIN_ID, 5, "Un tricou care atrage priviri, materialul e moale si placut pe corp. Croiala oversized e perfecta.", DateTime.UtcNow.AddDays(-18)),
-                ("Tricou-Oversized-Baki-Hanma Acid Wash", PROPOSER_ID, 4, "Imi place designul, dar as fi vrut sa fie si pe culori mai inchise. 100% bumbac e un plus.", DateTime.UtcNow.AddDays(-14)),
-                ("Tricou-Oversized-Baki-Hanma Acid Wash", USER_ID, 5, "Tricoul preferat pentru sala, permite o gamă larga de mișcări. Aspectul acid wash e foarte reusit.", DateTime.UtcNow.AddDays(-8)),
+                ("Tricou Oversized Baki Hanma Acid Wash", ADMIN_ID, 5, "Un tricou care atrage priviri, materialul e moale si placut pe corp. Croiala oversized e perfecta.", DateTime.UtcNow.AddDays(-18)),
+                ("Tricou Oversized Baki Hanma Acid Wash", PROPOSER_ID, 4, "Imi place designul, dar as fi vrut sa fie si pe culori mai inchise. 100% bumbac e un plus.", DateTime.UtcNow.AddDays(-14)),
+                ("Tricou Oversized Baki Hanma Acid Wash", USER_ID, 5, "Tricoul preferat pentru sala, permite o gamă larga de mișcări. Aspectul acid wash e foarte reusit.", DateTime.UtcNow.AddDays(-8)),
 
                 // Colanti Seamless Mauve High Waist - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
-                ("Colanti-Seamless-Mauve High Waist", ADMIN_ID, 5, "Colantii perfecti pentru antrenamentele intense, nu se degradeaza la spalare. Efectul tummy control functioneaza.", DateTime.UtcNow.AddDays(-17)),
-                ("Colanti-Seamless-Mauve High Waist", PROPOSER_ID, 4, "Materialul e un pic mai gros decat ma asteptam, dar ofera suport bun. Modelul fara cusaturi e confortabil.", DateTime.UtcNow.AddDays(-13)),
-                ("Colanti-Seamless-Mauve High Waist", USER_ID, 5, "Foarte multumita de achizitie, sunt grozavi pentru yoga si pilates. Culoarea mauve e eleganta si moderna.", DateTime.UtcNow.AddDays(-7))
+                ("Colanti Seamless Mauve High Waist", ADMIN_ID, 5, "Colantii perfecti pentru antrenamentele intense, nu se degradeaza la spalare. Efectul tummy control functioneaza.", DateTime.UtcNow.AddDays(-17)),
+                ("Colanti Seamless Mauve High Waist", PROPOSER_ID, 4, "Materialul e un pic mai gros decat ma asteptam, dar ofera suport bun. Modelul fara cusaturi e confortabil.", DateTime.UtcNow.AddDays(-13)),
+                ("Colanti Seamless Mauve High Waist", USER_ID, 5, "Foarte multumita de achizitie, sunt grozavi pentru yoga si pilates. Culoarea mauve e eleganta si moderna.", DateTime.UtcNow.AddDays(-7)),
+
+                // Pantaloni Scurti Compresie Baki Face - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
+                ("Pantaloni Scurti Compresie Baki Face", ADMIN_ID, 5, "Foarte comozi si nu se ridica pe coapse in timpul antrenamentelor. Designul e aparte.", DateTime.UtcNow.AddDays(-19)),
+                ("Pantaloni Scurti Compresie Baki Face", PROPOSER_ID, 4, "Material elastic, ofera suport bun la genuflexiuni. Imprimeul e fain.", DateTime.UtcNow.AddDays(-15)),
+                ("Pantaloni Scurti Compresie Baki Face", USER_ID, 5, "Ii folosesc la HIIT, se aerisesc bine si stau fixati. Recomand.", DateTime.UtcNow.AddDays(-10)),
+
+                // Optimum Nutrition Gold Standard BCAA - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
+                ("Optimum Nutrition Gold Standard BCAA", ADMIN_ID, 5, "Gust placut, fara zahar. M-a ajutat la sesiuni lungi, fara crampe.", DateTime.UtcNow.AddDays(-18)),
+                ("Optimum Nutrition Gold Standard BCAA", PROPOSER_ID, 4, "Se dizolva rapid, aroma e fresh. Bun intre mese pentru refacere.", DateTime.UtcNow.AddDays(-14)),
+                ("Optimum Nutrition Gold Standard BCAA", USER_ID, 5, "Il iau in timpul antrenamentului, simt mai putina oboseala musculara.", DateTime.UtcNow.AddDays(-9)),
+
+                // ABE Ultimate Pre-Workout Slush Puppie Edition - 3 review-uri (ADMIN, PROPOSER, USER - cate unul)
+                ("ABE Ultimate Pre-Workout Slush Puppie Edition", ADMIN_ID, 5, "Energie si pompare vizibile, fara crash. Aroma e chiar buna.", DateTime.UtcNow.AddDays(-17)),
+                ("ABE Ultimate Pre-Workout Slush Puppie Edition", PROPOSER_ID, 4, "Trece testul de focus, usor furnicaturi de la beta-alanina. Flavor interesant.", DateTime.UtcNow.AddDays(-13)),
+                ("ABE Ultimate Pre-Workout Slush Puppie Edition", USER_ID, 5, "Ridica intensitatea la antrenament, ma ajuta la seriile grele. Il iau cu apa rece.", DateTime.UtcNow.AddDays(-8)),
             };
 
             foreach (var reviewSeed in reviewSeeds)
