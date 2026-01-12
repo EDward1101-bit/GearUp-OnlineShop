@@ -77,8 +77,8 @@ namespace OnlineShopProject_dNet.Controllers
 
             var totalCount = query.Count();
             var products = query
-                // .Skip((page - 1) * pageSize)
-                // .Take(pageSize)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
 
             ViewBag.Products = products;
